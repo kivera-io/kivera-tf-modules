@@ -9,7 +9,7 @@ data "aws_ami" "latest" {
 }
 
 resource "aws_iam_role" "instance_role" {
-  name = "${var.name_prefix}-instance-role"
+  name_prefix = "${var.name_prefix}-instance-"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -33,12 +33,12 @@ resource "aws_iam_role" "instance_role" {
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = "${var.name_prefix}-instance-profile"
-  role = aws_iam_role.instance_role.name
+  name_prefix = "${var.name_prefix}-instance-"
+  role        = aws_iam_role.instance_role.name
 }
 
 resource "aws_security_group" "load_balancer_sg" {
-  name        = "${var.name_prefix}-lb-sg"
+  name_prefix = "${var.name_prefix}-lb-"
   vpc_id      = var.vpc_id
   description = "Access to the load balancer"
 }
@@ -74,7 +74,7 @@ resource "aws_vpc_security_group_egress_rule" "load_balancer_egress_rule" {
 }
 
 resource "aws_security_group" "instance_sg" {
-  name        = "${var.name_prefix}-instance-sg"
+  name_prefix = "${var.name_prefix}-instance-"
   vpc_id      = var.vpc_id
   description = "Access to the proxy instances"
 }
@@ -110,7 +110,7 @@ resource "aws_vpc_security_group_egress_rule" "instance_egress_rule" {
 }
 
 resource "aws_launch_template" "launch_template" {
-  name          = "${var.name_prefix}-launch-template"
+  name_prefix   = "${var.name_prefix}-instance-"
   image_id      = data.aws_ami.latest.id
   instance_type = var.proxy_instance_type
   iam_instance_profile {
@@ -260,7 +260,7 @@ EOT
 }
 
 resource "aws_autoscaling_group" "auto_scaling_group" {
-  name = "${var.name_prefix}-asg"
+  name_prefix = "${var.name_prefix}-"
   launch_template {
     id      = aws_launch_template.launch_template.id
     version = aws_launch_template.launch_template.latest_version
@@ -282,7 +282,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
 }
 
 resource "aws_lb_target_group" "traffic_target_group" {
-  name = "${var.name_prefix}-traffic-target-group"
+  name = "${var.name_prefix}-traffic"
   health_check {
     enabled             = true
     interval            = 10
@@ -307,7 +307,7 @@ resource "aws_lb_listener" "traffic_listener" {
 }
 
 resource "aws_lb_target_group" "management_target_group" {
-  name = "${var.name_prefix}-mgmt-target-group"
+  name = "${var.name_prefix}-mgmt"
   health_check {
     enabled             = true
     interval            = 10
@@ -332,7 +332,7 @@ resource "aws_lb_listener" "management_listener" {
 }
 
 resource "aws_lb" "load_balancer" {
-  name               = "${var.name_prefix}-lb"
+  name               = "${var.name_prefix}-load-balancer"
   internal           = var.load_balancer_internal
   subnets            = var.subnet_ids
   load_balancer_type = "network"
@@ -346,7 +346,7 @@ resource "aws_autoscaling_policy" "scale_up_policy" {
   name                   = "${var.name_prefix}-scale-up"
   scaling_adjustment     = 3
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 30
+  cooldown               = 120
   autoscaling_group_name = aws_autoscaling_group.auto_scaling_group.name
 }
 
