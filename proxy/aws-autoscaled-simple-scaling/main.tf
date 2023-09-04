@@ -288,6 +288,7 @@ resource "aws_lb_target_group" "traffic_target_group" {
     interval            = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
+    protocol            = "TCP"
   }
   port                 = 8080
   protocol             = "TCP"
@@ -313,6 +314,7 @@ resource "aws_lb_target_group" "management_target_group" {
     interval            = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
+    protocol            = "TCP"
   }
   port                 = 8090
   protocol             = "TCP"
