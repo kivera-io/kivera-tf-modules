@@ -11,15 +11,29 @@ variable "proxy_version" {
 }
 
 variable "proxy_credentials" {
-  description = "The proxy credentials as a json string"
+  description = "The proxy credentials as a json string (required if proxy_credentials_secret_arn is not provided)"
   type        = string
   sensitive   = true
+  default     = ""
+}
+
+variable "proxy_credentials_secret_arn" {
+  description = "The ARN of the proxy credentials secret (required if proxy_credentials is not provided)"
+  type        = string
+  default     = ""
 }
 
 variable "proxy_private_key" {
-  description = "The private key to be used by the proxy"
+  description = "The private key to be used by the proxy (required if proxy_private_key_secret_arn is not provided)"
   type        = string
   sensitive   = true
+  default     = ""
+}
+
+variable "proxy_private_key_secret_arn" {
+  description = "The ARN of the proxy private key secret (required if proxy_private_key is not provided)"
+  type        = string
+  default     = ""
 }
 
 variable "proxy_public_cert" {

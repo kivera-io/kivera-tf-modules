@@ -8,6 +8,33 @@ data "aws_ami" "latest" {
   }
 }
 
+locals {
+  proxy_credentials_secret_arn = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
+  proxy_private_key_secret_arn = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
+}
+
+resource "aws_secretsmanager_secret" "proxy_credentials" {
+  count       = var.proxy_credentials != "" ? 1 : 0
+  name_prefix = "${var.name_prefix}-credentials-"
+}
+
+resource "aws_secretsmanager_secret_version" "proxy_credentials_version" {
+  count         = var.proxy_credentials != "" ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.proxy_credentials[0].id
+  secret_string = var.proxy_credentials
+}
+
+resource "aws_secretsmanager_secret" "proxy_private_key" {
+  count       = var.proxy_private_key != "" ?  1 : 0
+  name_prefix = "${var.name_prefix}-private-key-"
+}
+
+resource "aws_secretsmanager_secret_version" "proxy_private_key_version" {
+  count         = var.proxy_private_key != "" ?  1 : 0
+  secret_id     = aws_secretsmanager_secret.proxy_private_key[0].id
+  secret_string = var.proxy_private_key
+}
+
 resource "aws_iam_role" "instance_role" {
   name_prefix = "${var.name_prefix}-instance-"
   assume_role_policy = jsonencode({
@@ -30,6 +57,22 @@ resource "aws_iam_role" "instance_role" {
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ]
+  inline_policy {
+    name = "${var.name_prefix}-get-secrets"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = "secretsmanager:GetSecretValue"
+          Effect = "Allow"
+          Resource = [
+            local.proxy_credentials_secret_arn,
+            local.proxy_private_key_secret_arn
+          ]
+        },
+      ]
+    })
+  }
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
@@ -119,144 +162,19 @@ resource "aws_launch_template" "launch_template" {
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
   ]
-  key_name = var.key_pair_name
-  user_data = base64encode(
-    <<EOT
-#!/bin/bash -ex
-STATE=0
-
-export KIVERA_BIN_PATH=/opt/kivera/bin
-export KIVERA_CREDENTIALS=/opt/kivera/etc/credentials.json
-export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
-export KIVERA_CA=/opt/kivera/etc/ca.pem
-export KIVERA_CERT_TYPE=${var.proxy_cert_type}
-export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
-
-mkdir -p $KIVERA_BIN_PATH /opt/kivera/etc/ /opt/kivera/var/log/
-
-echo '${var.proxy_credentials}' > $KIVERA_CREDENTIALS
-echo '${var.proxy_public_cert}' > $KIVERA_CA_CERT
-echo '${var.proxy_private_key}' > $KIVERA_CA
-
-groupadd -r kivera
-useradd -mrg kivera kivera
-useradd -g kivera td-agent
-
-wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${var.proxy_version}.tar.gz -O proxy.tar.gz
-tar -xvzf proxy.tar.gz -C /opt/kivera
-cp $KIVERA_BIN_PATH/linux/amd64/kivera $KIVERA_BIN_PATH/kivera
-chmod 0755 $KIVERA_BIN_PATH/kivera
-chown -R kivera:kivera /opt/kivera
-
-yum install amazon-cloudwatch-agent -y
-
-curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
-td-agent-gem install -N fluent-plugin-out-kivera
-
-cat << EOF | tee /etc/systemd/system/kivera.service
-[Unit]
-Description=Kivera Proxy
-
-[Service]
-User=kivera
-WorkingDirectory=$KIVERA_BIN_PATH
-ExecStart=/usr/bin/sh -c "$KIVERA_BIN_PATH/kivera | tee -a $KIVERA_LOGS_FILE"
-Restart=always
-Environment=KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
-Environment=KIVERA_CA_CERT=$KIVERA_CA_CERT
-Environment=KIVERA_CA=$KIVERA_CA
-Environment=KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-mkdir -p /etc/systemd/system/td-agent.service.d/
-
-cat << EOF | tee /etc/systemd/system/td-agent.service.d/override.conf
-[Service]
-Group=kivera
-EOF
-
-cat << EOF | tee /etc/td-agent/td-agent.conf
-<source>
-  @type tail
-  tag kivera
-  path $KIVERA_LOGS_FILE
-  <parse>
-    @type json
-  </parse>
-</source>
-<match kivera>
-  @type kivera
-  config_file $KIVERA_CREDENTIALS
-  bulk_request
-  <buffer>
-    flush_interval 1
-    chunk_limit_size 1m
-    flush_thread_interval 0.1
-    flush_thread_burst_interval 0.01
-    flush_thread_count 15
-  </buffer>
-</match>
-EOF
-
-cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
-{
-  "agent": {
-    "metrics_collection_interval": 1,
-    "run_as_user": "cwagent"
-  },
-  "metrics": {
-    "namespace": "kivera",
-    "aggregation_dimensions": [
-      ["InstanceId"],
-      ["AutoScalingGroupName"]
-    ],
-    "append_dimensions": {
-      "AutoScalingGroupName": "\$${aws:AutoScalingGroupName}",
-      "ImageId": "\$${aws:ImageId}",
-      "InstanceId": "\$${aws:InstanceId}",
-      "InstanceType": "\$${aws:InstanceType}"
-    },
-    "metrics_collected": {
-      "cpu": {
-        "measurement": [
-          "cpu_usage_active"
-        ]
-      }
-    }
-  }
+  key_name  = var.key_pair_name
+  user_data = base64encode(data.template_file.proxy_user_data.rendered)
 }
-EOF
 
-systemctl enable amazon-cloudwatch-agent.service
-systemctl start amazon-cloudwatch-agent.service
-systemctl enable td-agent.service
-systemctl start td-agent.service
-systemctl enable kivera.service
-systemctl start kivera.service
-
-sleep 10
-
-KIVERA_PROCESS=$(systemctl is-active kivera.service)
-FLUENTD_PROCESS=$(systemctl is-active td-agent.service)
-CLOUDWATCH_PROCESS=$(systemctl is-active amazon-cloudwatch-agent.service)
-
-KIVERA_CONNECTIONS=$(lsof -i -P -n | grep kivera)
-[[ $KIVERA_PROCESS -eq "active" && $KIVERA_CONNECTIONS == *"(ESTABLISHED)"* && $KIVERA_CONNECTIONS == *"(LISTEN)"* ]] \
-  && echo "The Kivera service and connections appears to be healthy." \
-  || (echo "The Kivera service and connections appear unhealthy." && STATE=1)
-
-[[ $FLUENTD_PROCESS -eq "active" ]] \
-  && echo "Fluentd service is running" \
-  || (echo "Fluentd service is not running" && STATE=1)
-
-[[ $CLOUDWATCH_PROCESS -eq "active" ]] \
-  && echo "CloudWatch agent service is running" \
-  || (echo "CloudWatch agent service is not running" && STATE=1)
-EOT
-  )
+data "template_file" "proxy_user_data" {
+  template = file("${path.module}/data/user-data.sh.tpl")
+  vars = {
+    proxy_version                = var.proxy_version
+    proxy_cert_type              = var.proxy_cert_type
+    proxy_public_cert            = var.proxy_public_cert
+    proxy_credentials_secret_arn = local.proxy_credentials_secret_arn
+    proxy_private_key_secret_arn = local.proxy_private_key_secret_arn
+  }
 }
 
 resource "aws_autoscaling_group" "auto_scaling_group" {
@@ -268,12 +186,20 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   min_size                  = var.proxy_min_asg_size
   max_size                  = var.proxy_max_asg_size
   health_check_type         = "ELB"
-  health_check_grace_period = 300
+  health_check_grace_period = 180
   vpc_zone_identifier       = var.subnet_ids
   target_group_arns = [
     aws_lb_target_group.traffic_target_group.arn,
     aws_lb_target_group.management_target_group.arn
   ]
+  instance_refresh {
+    strategy = "Rolling"
+    triggers = ["tag"]
+    preferences {
+      auto_rollback = true
+      min_healthy_percentage = 100
+    }
+  }
   tag {
     key                 = "Name"
     value               = "${var.name_prefix}-proxy"
@@ -314,7 +240,10 @@ resource "aws_lb_target_group" "management_target_group" {
     interval            = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
-    protocol            = "TCP"
+    port                = 8090
+    protocol            = "HTTP"
+    path                = "/version"
+    matcher             = 200
   }
   port                 = 8090
   protocol             = "TCP"
