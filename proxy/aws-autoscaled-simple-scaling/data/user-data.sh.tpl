@@ -7,6 +7,7 @@ export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
 export KIVERA_CA=/opt/kivera/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
 export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
+export KIVERA_REDIS_ADDR=${redis_connection_string}
 
 mkdir -p $KIVERA_BIN_PATH /opt/kivera/etc/ /opt/kivera/var/log/
 
@@ -46,6 +47,8 @@ Environment=KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
 Environment=KIVERA_CA_CERT=$KIVERA_CA_CERT
 Environment=KIVERA_CA=$KIVERA_CA
 Environment=KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
+Environment=KIVERA_KV_STORE_CONNECT=$KIVERA_REDIS_ADDR
+Environment=KIVERA_KV_STORE_CLUSTER_MODE=true
 
 [Install]
 WantedBy=multi-user.target
@@ -86,6 +89,20 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
   "agent": {
     "metrics_collection_interval": 1,
     "run_as_user": "cwagent"
+  },
+  "logs": {
+    "log_stream_name": "{instance_id}",
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "$KIVERA_LOGS_FILE",
+            "log_group_name": "${log_group_name}",
+            "retention_in_days": ${log_group_retention_in_days}
+          }
+        ]
+      }
+    }
   },
   "metrics": {
     "namespace": "kivera",

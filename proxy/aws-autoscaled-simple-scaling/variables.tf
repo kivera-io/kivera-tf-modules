@@ -63,7 +63,12 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "subnet_ids" {
+variable "load_balancer_subnet_ids" {
+  description = "Which Subnets to deploy the load balancer into"
+  type        = list(string)
+}
+
+variable "proxy_subnet_ids" {
   description = "Which Subnets to deploy the proxy into"
   type        = list(string)
 }
@@ -96,4 +101,40 @@ variable "proxy_max_asg_size" {
   description = "Maximum number of instances in the autoscaling group"
   type        = number
   default     = 12
+}
+
+variable "proxy_log_group_retention" {
+  description = "The number of days to retain proxy logs in CloudWatch Logs"
+  type        = number
+  default     = 14
+}
+
+variable "redis_cache_enabled" {
+  description = "Whether to deploy and use a Redis cache"
+  type        = bool
+  default     = true
+}
+
+variable "redis_subnet_ids" {
+  description = "Which Subnets to deploy the Redis cluster into"
+  type        = list(string)
+  default     = []
+}
+
+variable "redis_instance_type" {
+  description = "The ElastiCache Instance Type of the Redis nodes"
+  type        = string
+  default     = "cache.t3.medium"
+}
+
+variable "redis_num_node_groups" {
+  description = "The number of node groups in the Redis cluster"
+  type        = number
+  default     = 1
+}
+
+variable "redis_replicas_per_node_group" {
+  description = "The number of replicas for each node groups in the Redis cluster"
+  type        = number
+  default     = 2
 }
