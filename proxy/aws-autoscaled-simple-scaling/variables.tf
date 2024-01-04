@@ -1,7 +1,7 @@
 variable "name_prefix" {
   description = "Prefix for resource names"
   type        = string
-  default     = "kivera"
+  default     = "kivera-perf-test"
 }
 
 variable "proxy_version" {
@@ -96,4 +96,49 @@ variable "proxy_max_asg_size" {
   description = "Maximum number of instances in the autoscaling group"
   type        = number
   default     = 12
+}
+
+variable "proxy_local_path" {
+    description = "Path to a local proxy binary (takes precedence over proxy_version)"
+    type        = string
+    default     = ""
+}
+
+variable "ddog_secret_arn" {
+    description = "The arn for the Data Dog API key secret"
+    type        = string
+    sensitive   = true
+}
+
+variable "ddog_trace_sampling_rate" {
+    description = "The samping rate DataDog uses for tracing"
+    type        = number
+    default     = 0.2
+}
+
+variable "enable_datadog_tracing" {
+    description = "Enable trace metrics to be sent to datadog"
+    type        = bool
+    default     = true
+}
+
+variable "enable_datadog_profiling" {
+    description = "Enable profile metrics to be sent to datatog"
+    type        = bool
+    default     = true
+}
+
+variable "enable_redis_cache" {
+    description = "Deploy and use a redis cache in the test"
+    type        = bool
+    default     = true
+}
+
+variable "deployment_name" {
+    description = "Deployment name"
+    default = "load-test"
+}
+
+variable "private_subnet_id" {
+    description = "Private Subnet ID"
 }

@@ -1,5 +1,11 @@
-#!/bin/bash -ex
+#!/bin/bash -x
 STATE=0
+
+## tune box
+echo "* hard nofile 100000" >> /etc/security/limits.conf
+echo "* soft nofile 100000" >> /etc/security/limits.conf
+echo "net.core.somaxconn=4096" >> /etc/sysctl.conf
+sysctl -p
 
 export KIVERA_BIN_PATH=/opt/kivera/bin
 export KIVERA_CREDENTIALS=/opt/kivera/etc/credentials.json
@@ -22,13 +28,28 @@ groupadd -r kivera
 useradd -mrg kivera kivera
 useradd -g kivera td-agent
 
-wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${proxy_version}.tar.gz -O proxy.tar.gz
-tar -xvzf proxy.tar.gz -C /opt/kivera
-cp $KIVERA_BIN_PATH/linux/amd64/kivera $KIVERA_BIN_PATH/kivera
+if [[ "${proxy_local_path}" != "" ]]; then
+    aws s3 cp s3://kivera-perf-test-bucket/locust-tests/${deployment_id}/proxy.zip ./proxy.zip
+    unzip ./proxy.zip -d $KIVERA_BIN_PATH
+else
+    wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${proxy_version}.tar.gz -O proxy.tar.gz
+    tar -xvzf proxy.tar.gz -C /opt/kivera
+    cp $KIVERA_BIN_PATH/linux/amd64/kivera $KIVERA_BIN_PATH/kivera
+fi
 chmod 0755 $KIVERA_BIN_PATH/kivera
 chown -R kivera:kivera /opt/kivera
 
+if [[ "${proxy_redis_cache_addr}" != "" ]]; then
+    export KIVERA_KV_STORE_CONNECT="redis://${proxy_redis_cache_addr}:6379"
+    wget http://download.redis.io/redis-stable.tar.gz && tar xvzf redis-stable.tar.gz && \
+        cd redis-stable && make redis-cli && cp src/redis-cli /usr/local/bin/ && cd -
+fi
+
 yum install amazon-cloudwatch-agent -y
+
+DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${ddog_secret_arn}`
+export DD_API_KEY
+DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
 curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera
@@ -46,6 +67,10 @@ Environment=KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
 Environment=KIVERA_CA_CERT=$KIVERA_CA_CERT
 Environment=KIVERA_CA=$KIVERA_CA
 Environment=KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
+Environment=KIVERA_KV_STORE_CONNECT=$KIVERA_KV_STORE_CONNECT
+Environment=KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
+Environment=KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
+Environment=DD_TRACE_SAMPLE_RATE=${ddog_trace_sampling_rate}
 
 [Install]
 WantedBy=multi-user.target
@@ -110,6 +135,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
 }
 EOF
 
+systemctl start datadog-agent
 systemctl enable amazon-cloudwatch-agent.service
 systemctl start amazon-cloudwatch-agent.service
 systemctl enable td-agent.service
