@@ -186,7 +186,6 @@ data "template_file" "proxy_user_data" {
     enable_datadog_profiling     = var.enable_datadog_profiling
     ddog_secret_arn              = var.ddog_secret_arn
     ddog_trace_sampling_rate     = var.ddog_trace_sampling_rate
-    deployment_id                = local.deployment_id
     proxy_local_path             = var.proxy_local_path
     proxy_version                = var.proxy_version
     proxy_cert_type              = var.proxy_cert_type
@@ -345,10 +344,8 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
   comparison_operator = "LessThanThreshold"
 }
 
-# =================== LOCAL PROXY ====================
-
 resource "aws_s3_bucket" "bucket" {
-  bucket = "kivera-perf-test-bucket"
+  bucket = "${var.name_prefix}-bucket"
 }
 
 data "archive_file" "proxy_binary" {
@@ -362,19 +359,14 @@ resource "aws_s3_object" "proxy_binary" {
   count      = var.proxy_local_path != "" ? 1 : 0
   depends_on = [data.archive_file.proxy_binary]
   bucket     = aws_s3_bucket.bucket.id
-  key        = "locust-tests/${local.deployment_id}/proxy.zip"
+  key        = "locust-tests/proxies/proxy.zip"
   source     = "${path.module}/temp/proxy.zip"
   etag       = data.archive_file.proxy_binary[count.index].output_md5
 }
 
-# ===================== REDIS =========================
-
 locals {
-  # account_id = data.aws_caller_identity.current.account_id
-  # aws_region = data.aws_region.current.name
-  deployment_id           = formatdate("YYYYMMDDhhmmss", timestamp())
-  redis_instance_name     = "${var.deployment_name}-redis-${local.deployment_id}"
-  redis_subnet_group_name = "${var.deployment_name}-subnets-${local.deployment_id}"
+  redis_instance_name     = "${var.name_prefix}-redis"
+  redis_subnet_group_name = "${var.name_prefix}-subnets"
   redis_cache_addr        = var.enable_redis_cache ? aws_elasticache_cluster.redis[0].cache_nodes[0].address : ""
 }
 
@@ -402,7 +394,7 @@ resource "aws_elasticache_subnet_group" "redis" {
 resource "aws_security_group" "redis" {
   count = var.enable_redis_cache ? 1 : 0
 
-  name        = "${var.deployment_name}-redis-sg-${local.deployment_id}"
+  name        = "${var.name_prefix}-redis-sg"
   description = "Security Group for redis instance"
   vpc_id      = var.vpc_id
 

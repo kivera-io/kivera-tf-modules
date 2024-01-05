@@ -29,7 +29,7 @@ useradd -mrg kivera kivera
 useradd -g kivera td-agent
 
 if [[ "${proxy_local_path}" != "" ]]; then
-    aws s3 cp s3://kivera-perf-test-bucket/locust-tests/${deployment_id}/proxy.zip ./proxy.zip
+    aws s3 cp s3://kivera-perf-test-bucket/locust-tests/proxies/proxy.zip ./proxy.zip
     unzip ./proxy.zip -d $KIVERA_BIN_PATH
 else
     wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${proxy_version}.tar.gz -O proxy.tar.gz

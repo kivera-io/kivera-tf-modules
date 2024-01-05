@@ -89,13 +89,13 @@ variable "proxy_allowed_ssh_range" {
 variable "proxy_min_asg_size" {
   description = "Minimum instances in the Autoscaling Group"
   type        = number
-  default     = 3
+  default     = 5
 }
 
 variable "proxy_max_asg_size" {
   description = "Maximum number of instances in the autoscaling group"
   type        = number
-  default     = 12
+  default     = 5
 }
 
 variable "proxy_local_path" {
@@ -132,11 +132,6 @@ variable "enable_redis_cache" {
     description = "Deploy and use a redis cache in the test"
     type        = bool
     default     = true
-}
-
-variable "deployment_name" {
-    description = "Deployment name"
-    default = "load-test"
 }
 
 variable "private_subnet_id" {
