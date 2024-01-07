@@ -172,6 +172,12 @@ resource "aws_launch_template" "launch_template" {
   iam_instance_profile {
     arn = aws_iam_instance_profile.instance_profile.arn
   }
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = 50
+    }
+  }
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
   ]

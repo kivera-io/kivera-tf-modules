@@ -5,6 +5,8 @@ STATE=0
 echo "* hard nofile 100000" >> /etc/security/limits.conf
 echo "* soft nofile 100000" >> /etc/security/limits.conf
 echo "net.core.somaxconn=4096" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
+echo "net.core.netdev_max_backlog=5000" >> /etc/sysctl.conf
 sysctl -p
 
 export KIVERA_BIN_PATH=/opt/kivera/bin
@@ -13,6 +15,30 @@ export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
 export KIVERA_CA=/opt/kivera/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
 export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
+
+# log file
+cat << EOF | tee /etc/cron.hourly/kivera-logrotate
+#!/bin/sh
+
+/usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
+EXITVALUE=\$?
+if [ \$EXITVALUE != 0 ]; then
+    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
+fi
+exit 0
+EOF
+
+cat << EOF | tee /etc/klogrotate.conf
+$KIVERA_LOGS_FILE {
+    maxsize 500M
+    hourly
+    missingok
+    rotate 8
+    compress
+    notifempty
+    copytruncate
+}
+EOF
 
 mkdir -p $KIVERA_BIN_PATH /opt/kivera/etc/ /opt/kivera/var/log/
 
