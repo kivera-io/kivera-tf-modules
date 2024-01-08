@@ -23,17 +23,20 @@ groupadd -r kivera
 useradd -mrg kivera kivera
 useradd -g kivera td-agent
 
+# Download proxy binary
 wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${proxy_version}.tar.gz -O proxy.tar.gz
 tar -xvzf proxy.tar.gz -C /opt/kivera
 cp $KIVERA_BIN_PATH/linux/amd64/kivera $KIVERA_BIN_PATH/kivera
 chmod 0755 $KIVERA_BIN_PATH/kivera
 chown -R kivera:kivera /opt/kivera
 
+# Install dependencies
 yum install amazon-cloudwatch-agent -y
 
 curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera
 
+# Configure Kivera service
 cat << EOF | tee /etc/systemd/system/kivera.service
 [Unit]
 Description=Kivera Proxy
@@ -54,6 +57,7 @@ Environment=KIVERA_KV_STORE_CLUSTER_MODE=true
 WantedBy=multi-user.target
 EOF
 
+# Configure remote logging
 mkdir -p /etc/systemd/system/td-agent.service.d/
 
 cat << EOF | tee /etc/systemd/system/td-agent.service.d/override.conf
@@ -66,6 +70,7 @@ cat << EOF | tee /etc/td-agent/td-agent.conf
   @type tail
   tag kivera
   path $KIVERA_LOGS_FILE
+  pos_file /var/log/td-agent/kivera.log.pos
   <parse>
     @type json
   </parse>
@@ -84,6 +89,30 @@ cat << EOF | tee /etc/td-agent/td-agent.conf
 </match>
 EOF
 
+# Configure log file rotation
+cat << EOF | tee /etc/cron.hourly/kivera-logrotate
+#!/bin/sh
+/usr/sbin/logrotate -s /var/lib/logrotate/kivera.status /etc/kivera-logrotate.conf
+EXITVALUE=\$?
+if [ \$EXITVALUE != 0 ]; then
+    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
+fi
+exit 0
+EOF
+
+cat << EOF | tee /etc/kivera-logrotate.conf
+$KIVERA_LOGS_FILE {
+    maxsize 500M
+    hourly
+    missingok
+    rotate 8
+    compress
+    notifempty
+    copytruncate
+}
+EOF
+
+# Enable CloudWatch logging/metrics
 cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 {
   "agent": {
@@ -127,6 +156,15 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
 }
 EOF
 
+# Tune system parameters
+echo "* hard nofile 100000" >> /etc/security/limits.conf
+echo "* soft nofile 100000" >> /etc/security/limits.conf
+echo "net.core.somaxconn=4096" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
+echo "net.core.netdev_max_backlog=5000" >> /etc/sysctl.conf
+sysctl -p
+
+# Enable services
 systemctl enable amazon-cloudwatch-agent.service
 systemctl start amazon-cloudwatch-agent.service
 systemctl enable td-agent.service
