@@ -302,7 +302,7 @@ resource "aws_autoscaling_policy" "scale_up_policy" {
   name                   = "${var.name_prefix}-scale-up"
   scaling_adjustment     = 3
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 120
+  cooldown               = 180
   autoscaling_group_name = aws_autoscaling_group.auto_scaling_group.name
 }
 
