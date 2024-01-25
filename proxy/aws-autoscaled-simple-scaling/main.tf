@@ -14,7 +14,7 @@ resource "random_string" "suffix" {
 }
 
 locals {
-  suffix = random_string.suffix.result
+  suffix                       = random_string.suffix.result
   proxy_credentials_secret_arn = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
   redis_connection_string      = var.redis_cache_enabled ? "rediss://${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379" : ""
@@ -187,6 +187,8 @@ data "template_file" "proxy_user_data" {
     proxy_public_cert            = var.proxy_public_cert
     proxy_credentials_secret_arn = local.proxy_credentials_secret_arn
     proxy_private_key_secret_arn = local.proxy_private_key_secret_arn
+    proxy_log_to_kivera          = var.proxy_log_to_kivera
+    proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
     redis_connection_string      = local.redis_connection_string
     log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention

@@ -53,6 +53,18 @@ variable "proxy_instance_type" {
   default     = "t3.medium"
 }
 
+variable "proxy_log_to_kivera" {
+  description = "Enable to send all logs to Kivera"
+  type        = bool
+  default     = true
+}
+
+variable "proxy_log_to_cloudwatch" {
+  description = "Enable to send logs to Cloudwatch"
+  type        = bool
+  default     = true
+}
+
 variable "key_pair_name" {
   description = "Name of an existing EC2 KeyPair to enable SSH access to the instances"
   type        = string

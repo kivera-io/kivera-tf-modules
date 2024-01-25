@@ -119,7 +119,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
     "metrics_collection_interval": 1,
     "run_as_user": "cwagent"
   },
-  "logs": {
+  $([[ $proxy_log_to_cloudwatch -eq "true" ]] && echo '"logs": {
     "log_stream_name": "{instance_id}",
     "logs_collected": {
       "files": {
@@ -132,7 +132,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
         ]
       }
     }
-  },
+  },' | envsubst)
   "metrics": {
     "namespace": "kivera",
     "aggregation_dimensions": [
@@ -165,28 +165,32 @@ echo "net.core.netdev_max_backlog=5000" >> /etc/sysctl.conf
 sysctl -p
 
 # Enable services
+if [[ ${proxy_log_to_kivera} == true ]]; then
+  systemctl enable td-agent.service
+  systemctl start td-agent.service
+fi
 systemctl enable amazon-cloudwatch-agent.service
 systemctl start amazon-cloudwatch-agent.service
-systemctl enable td-agent.service
-systemctl start td-agent.service
 systemctl enable kivera.service
 systemctl start kivera.service
 
 sleep 10
 
-KIVERA_PROCESS=$(systemctl is-active kivera.service)
+if [[ ${proxy_log_to_kivera} == true ]]; then
 FLUENTD_PROCESS=$(systemctl is-active td-agent.service)
-CLOUDWATCH_PROCESS=$(systemctl is-active amazon-cloudwatch-agent.service)
+  [[ $FLUENTD_PROCESS -eq "active" ]] \
+    && echo "Fluentd service is running" \
+    || (echo "Fluentd service is not running" && STATE=1)
+fi
 
+CLOUDWATCH_PROCESS=$(systemctl is-active amazon-cloudwatch-agent.service)
+  [[ $CLOUDWATCH_PROCESS -eq "active" ]] \
+    && echo "CloudWatch agent service is running" \
+    || (echo "CloudWatch agent service is not running" && STATE=1)
+
+KIVERA_PROCESS=$(systemctl is-active kivera.service)
 KIVERA_CONNECTIONS=$(lsof -i -P -n | grep kivera)
 [[ $KIVERA_PROCESS -eq "active" && $KIVERA_CONNECTIONS == *"(ESTABLISHED)"* && $KIVERA_CONNECTIONS == *"(LISTEN)"* ]] \
   && echo "The Kivera service and connections appears to be healthy." \
   || (echo "The Kivera service and connections appear unhealthy." && STATE=1)
 
-[[ $FLUENTD_PROCESS -eq "active" ]] \
-  && echo "Fluentd service is running" \
-  || (echo "Fluentd service is not running" && STATE=1)
-
-[[ $CLOUDWATCH_PROCESS -eq "active" ]] \
-  && echo "CloudWatch agent service is running" \
-  || (echo "CloudWatch agent service is not running" && STATE=1)
