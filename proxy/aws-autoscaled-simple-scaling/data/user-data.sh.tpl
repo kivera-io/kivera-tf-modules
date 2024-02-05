@@ -119,7 +119,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
     "metrics_collection_interval": 1,
     "run_as_user": "cwagent"
   },
-  $([[ $proxy_log_to_cloudwatch -eq "true" ]] && echo '"logs": {
+  $([[ ${proxy_log_to_cloudwatch} == true ]] && echo '"logs": {
     "log_stream_name": "{instance_id}",
     "logs_collected": {
       "files": {
