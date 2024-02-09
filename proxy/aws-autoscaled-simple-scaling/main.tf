@@ -170,18 +170,7 @@ resource "aws_launch_template" "launch_template" {
     aws_security_group.instance_sg.id
   ]
   key_name  = var.key_pair_name
-  user_data = base64encode(data.template_file.proxy_user_data.rendered)
-  block_device_mappings {
-    device_name = "/dev/xvda"
-    ebs {
-      volume_size = 50
-    }
-  }
-}
-
-data "template_file" "proxy_user_data" {
-  template = file("${path.module}/data/user-data.sh.tpl")
-  vars = {
+  user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
     proxy_version                = var.proxy_version
     proxy_cert_type              = var.proxy_cert_type
     proxy_public_cert            = var.proxy_public_cert
@@ -190,6 +179,12 @@ data "template_file" "proxy_user_data" {
     redis_connection_string      = local.redis_connection_string
     log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
+  }))
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = 50
+    }
   }
 }
 
