@@ -1,6 +1,6 @@
 variable "name_prefix" {
   description = "Prefix for resource names"
-  type        = string
+  type        = string(7)
   default     = "kivera"
 }
 
@@ -118,7 +118,6 @@ variable "redis_cache_enabled" {
 variable "redis_subnet_ids" {
   description = "Which Subnets to deploy the Redis cluster into"
   type        = list(string)
-  default     = []
 }
 
 variable "redis_instance_type" {

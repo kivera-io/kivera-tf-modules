@@ -366,7 +366,7 @@ resource "aws_elasticache_subnet_group" "redis" {
   count = var.redis_cache_enabled ? 1 : 0
 
   name       = "${var.name_prefix}-subnet-group-${local.suffix}"
-  subnet_ids = var.redis_subnet_ids
+  subnet_ids = length(var.redis_subnet_ids) > 0 ? var.redis_subnet_ids : var.proxy_subnet_ids
 }
 
 resource "aws_elasticache_replication_group" "redis" {
