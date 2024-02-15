@@ -14,7 +14,7 @@ resource "random_string" "suffix" {
 }
 
 locals {
-  suffix = random_string.suffix.result
+  suffix                       = random_string.suffix.result
   proxy_credentials_secret_arn = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
   redis_connection_string      = var.redis_cache_enabled ? "rediss://${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379" : ""
@@ -169,7 +169,7 @@ resource "aws_launch_template" "launch_template" {
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
   ]
-  key_name  = var.key_pair_name
+  key_name = var.key_pair_name
   user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
     proxy_version                = var.proxy_version
     proxy_cert_type              = var.proxy_cert_type
@@ -274,7 +274,7 @@ resource "aws_lb_listener" "management_listener" {
 }
 
 resource "aws_lb" "load_balancer" {
-  name               = "${var.name_prefix}-load-balancer-${local.suffix}"
+  name               = "${var.name_prefix}-lb-${local.suffix}"
   internal           = var.load_balancer_internal
   subnets            = var.load_balancer_subnet_ids
   load_balancer_type = "network"
@@ -366,7 +366,14 @@ resource "aws_elasticache_subnet_group" "redis" {
   count = var.redis_cache_enabled ? 1 : 0
 
   name       = "${var.name_prefix}-subnet-group-${local.suffix}"
-  subnet_ids = length(var.redis_subnet_ids) > 0 ? var.redis_subnet_ids : var.proxy_subnet_ids
+  subnet_ids = var.redis_subnet_ids
+
+  lifecycle {
+    precondition {
+      condition     = var.redis_cache_enabled == true && length(var.redis_subnet_ids) > 0
+      error_message = "The redis subnet ids must be provided if redis is enabled"
+    }
+  }
 }
 
 resource "aws_elasticache_replication_group" "redis" {

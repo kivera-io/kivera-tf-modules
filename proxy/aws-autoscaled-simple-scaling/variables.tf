@@ -1,7 +1,12 @@
 variable "name_prefix" {
   description = "Prefix for resource names"
-  type        = string(7)
+  type        = string
   default     = "kivera"
+
+  validation {
+    condition     = length(var.name_prefix) <= 10
+    error_message = "The prefix name cannot exceed 10 characters"
+  }
 }
 
 variable "proxy_version" {
@@ -118,6 +123,7 @@ variable "redis_cache_enabled" {
 variable "redis_subnet_ids" {
   description = "Which Subnets to deploy the Redis cluster into"
   type        = list(string)
+  default     = []
 }
 
 variable "redis_instance_type" {
