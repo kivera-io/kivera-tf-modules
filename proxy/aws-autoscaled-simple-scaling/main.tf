@@ -370,7 +370,7 @@ resource "aws_elasticache_subnet_group" "redis" {
 
   lifecycle {
     precondition {
-      condition     = var.redis_cache_enabled == true && length(var.redis_subnet_ids) > 0
+      condition     = length(var.redis_subnet_ids) > 0
       error_message = "The redis subnet ids must be provided if redis is enabled"
     }
   }
