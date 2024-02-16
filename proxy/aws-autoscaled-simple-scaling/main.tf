@@ -169,19 +169,8 @@ resource "aws_launch_template" "launch_template" {
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
   ]
-  key_name  = var.key_pair_name
-  user_data = base64encode(data.template_file.proxy_user_data.rendered)
-  block_device_mappings {
-    device_name = "/dev/xvda"
-    ebs {
-      volume_size = 50
-    }
-  }
-}
-
-data "template_file" "proxy_user_data" {
-  template = file("${path.module}/data/user-data.sh.tpl")
-  vars = {
+  key_name = var.key_pair_name
+  user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
     proxy_version                = var.proxy_version
     proxy_cert_type              = var.proxy_cert_type
     proxy_public_cert            = var.proxy_public_cert
@@ -192,6 +181,12 @@ data "template_file" "proxy_user_data" {
     redis_connection_string      = local.redis_connection_string
     log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
+  }))
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = 50
+    }
   }
 }
 
@@ -281,7 +276,7 @@ resource "aws_lb_listener" "management_listener" {
 }
 
 resource "aws_lb" "load_balancer" {
-  name               = "${var.name_prefix}-load-balancer-${local.suffix}"
+  name               = "${var.name_prefix}-lb-${local.suffix}"
   internal           = var.load_balancer_internal
   subnets            = var.load_balancer_subnet_ids
   load_balancer_type = "network"
@@ -374,6 +369,13 @@ resource "aws_elasticache_subnet_group" "redis" {
 
   name       = "${var.name_prefix}-subnet-group-${local.suffix}"
   subnet_ids = var.redis_subnet_ids
+
+  lifecycle {
+    precondition {
+      condition     = length(var.redis_subnet_ids) > 0
+      error_message = "redis_subnet_ids must be provided if redis_cache_enabled is true"
+    }
+  }
 }
 
 resource "aws_elasticache_replication_group" "redis" {
