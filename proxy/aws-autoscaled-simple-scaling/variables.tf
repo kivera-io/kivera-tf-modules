@@ -2,6 +2,11 @@ variable "name_prefix" {
   description = "Prefix for resource names"
   type        = string
   default     = "kivera"
+
+  validation {
+    condition     = length(var.name_prefix) <= 10
+    error_message = "The prefix name cannot exceed 10 characters"
+  }
 }
 
 variable "proxy_version" {
