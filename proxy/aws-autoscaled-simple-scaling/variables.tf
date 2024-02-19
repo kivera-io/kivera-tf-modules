@@ -52,6 +52,12 @@ variable "proxy_cert_type" {
   default     = "ecdsa"
 }
 
+variable "proxy_transparent_enabled" {
+  description = "Enabled to run proxy in transparent mode"
+  type        = bool
+  default     = false
+}
+
 variable "proxy_instance_type" {
   description = "The EC2 Instance Type of the proxy"
   type        = string

@@ -176,6 +176,7 @@ resource "aws_launch_template" "launch_template" {
     proxy_public_cert            = var.proxy_public_cert
     proxy_credentials_secret_arn = local.proxy_credentials_secret_arn
     proxy_private_key_secret_arn = local.proxy_private_key_secret_arn
+    proxy_transparent_enabled    = var.proxy_transparent_enabled
     redis_connection_string      = local.redis_connection_string
     log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
