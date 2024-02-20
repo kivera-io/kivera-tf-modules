@@ -17,7 +17,8 @@ locals {
   suffix                       = random_string.suffix.result
   proxy_credentials_secret_arn = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
-  redis_connection_string      = var.redis_cache_enabled ? "rediss://${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379" : ""
+  redis_enabled                = var.cache_enabled && var.cache_type == "redis" ? true : false
+  redis_connection_string      = local.redis_enabled ? "rediss://${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379" : ""
 }
 
 resource "aws_secretsmanager_secret" "proxy_credentials" {
@@ -177,6 +178,8 @@ resource "aws_launch_template" "launch_template" {
     proxy_credentials_secret_arn = local.proxy_credentials_secret_arn
     proxy_private_key_secret_arn = local.proxy_private_key_secret_arn
     proxy_transparent_enabled    = var.proxy_transparent_enabled
+    proxy_log_to_kivera          = var.proxy_log_to_kivera
+    proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
     redis_connection_string      = local.redis_connection_string
     log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
@@ -338,7 +341,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
 }
 
 resource "aws_security_group" "redis_sg" {
-  count = var.redis_cache_enabled ? 1 : 0
+  count = local.redis_enabled ? 1 : 0
 
   name_prefix = "${var.name_prefix}-redis-"
   vpc_id      = var.vpc_id
@@ -346,7 +349,7 @@ resource "aws_security_group" "redis_sg" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "redis_ingress_rule" {
-  count = var.redis_cache_enabled ? 1 : 0
+  count = local.redis_enabled ? 1 : 0
 
   security_group_id            = aws_security_group.redis_sg[0].id
   referenced_security_group_id = aws_security_group.instance_sg.id
@@ -356,7 +359,7 @@ resource "aws_vpc_security_group_ingress_rule" "redis_ingress_rule" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "redis_egress_rule" {
-  count = var.redis_cache_enabled ? 1 : 0
+  count = local.redis_enabled ? 1 : 0
 
   security_group_id = aws_security_group.redis_sg[0].id
   cidr_ipv4         = "0.0.0.0/0"
@@ -364,26 +367,26 @@ resource "aws_vpc_security_group_egress_rule" "redis_egress_rule" {
 }
 
 resource "aws_elasticache_subnet_group" "redis" {
-  count = var.redis_cache_enabled ? 1 : 0
+  count = local.redis_enabled ? 1 : 0
 
   name       = "${var.name_prefix}-subnet-group-${local.suffix}"
-  subnet_ids = var.redis_subnet_ids
+  subnet_ids = var.cache_subnet_ids
 
   lifecycle {
     precondition {
-      condition     = length(var.redis_subnet_ids) > 0
+      condition     = length(var.cache_subnet_ids) > 0
       error_message = "redis_subnet_ids must be provided if redis_cache_enabled is true"
     }
   }
 }
 
 resource "aws_elasticache_replication_group" "redis" {
-  count = var.redis_cache_enabled ? 1 : 0
+  count = local.redis_enabled ? 1 : 0
 
   replication_group_id = "${var.name_prefix}-redis-${local.suffix}"
   description          = "Redis Cache for Kivera proxy"
 
-  node_type            = var.redis_instance_type
+  node_type            = var.cache_instance_type
   engine_version       = 7.1
   parameter_group_name = "default.redis7.cluster.on"
 
