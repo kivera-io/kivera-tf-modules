@@ -126,20 +126,31 @@ variable "proxy_log_group_retention" {
   default     = 14
 }
 
-variable "redis_cache_enabled" {
-  description = "Whether to deploy and use a Redis cache"
+variable "cache_enabled" {
+  description = "Whether to deploy and use a cache"
   type        = bool
   default     = true
 }
 
-variable "redis_subnet_ids" {
-  description = "Which Subnets to deploy the Redis cluster into"
+variable "cache_type" {
+  description = "What type of cache to deploy"
+  type        = string
+  default     = "redis"
+
+  validation {
+    condition     = contains(["redis"], var.cache_type)
+    error_message = "Allowed value(s) for cache_type: \"redis\"."
+  }
+}
+
+variable "cache_subnet_ids" {
+  description = "Which Subnets to deploy the cache into"
   type        = list(string)
   default     = []
 }
 
-variable "redis_instance_type" {
-  description = "The ElastiCache Instance Type of the Redis nodes"
+variable "cache_instance_type" {
+  description = "The instance type of the cache"
   type        = string
   default     = "cache.t3.medium"
 }
