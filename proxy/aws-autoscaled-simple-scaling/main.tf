@@ -18,7 +18,7 @@ locals {
   proxy_credentials_secret_arn = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
   redis_enabled                = var.cache_enabled && var.cache_type == "redis" ? true : false
-  redis_connection_string      = local.redis_enabled ? "rediss://${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379" : ""
+  redis_connection_string      = local.redis_enabled ? "rediss://${var.cache_kivera_username}:${var.cache_kivera_password}@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379" : ""
 }
 
 resource "aws_secretsmanager_secret" "proxy_credentials" {
@@ -41,6 +41,28 @@ resource "aws_secretsmanager_secret_version" "proxy_private_key_version" {
   count         = var.proxy_private_key != "" ? 1 : 0
   secret_id     = aws_secretsmanager_secret.proxy_private_key[0].id
   secret_string = var.proxy_private_key
+}
+
+resource "aws_secretsmanager_secret" "cache_default_password" {
+  count       = var.cache_enabled ? 1 : 0
+  name_prefix = "${var.name_prefix}-cache-default-password-"
+}
+
+resource "aws_secretsmanager_secret_version" "cache_default_password_version" {
+  count         = var.cache_enabled ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.cache_default_password[0].id
+  secret_string = var.cache_default_password
+}
+
+resource "aws_secretsmanager_secret" "cache_kivera_password" {
+  count       = var.cache_enabled ? 1 : 0
+  name_prefix = "${var.name_prefix}-cache-kivera-password-"
+}
+
+resource "aws_secretsmanager_secret_version" "cache_kivera_password_version" {
+  count         = var.cache_enabled ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.cache_kivera_password[0].id
+  secret_string = var.cache_kivera_password
 }
 
 resource "aws_iam_role" "instance_role" {
@@ -399,6 +421,54 @@ resource "aws_elasticache_replication_group" "redis" {
   automatic_failover_enabled = true
   at_rest_encryption_enabled = true
   transit_encryption_enabled = true
+  user_group_ids             = [aws_elasticache_user_group.redis_kivera_user_group[0].user_group_id]
 
   apply_immediately = true
+}
+
+resource "aws_elasticache_user" "redis_kivera_default" {
+  count = local.redis_enabled ? 1 : 0
+
+  user_id       = "new-default-user"
+  user_name     = "default"
+  access_string = "on -@all +ping"
+  engine        = "REDIS"
+  passwords     = [var.cache_default_password]
+
+  lifecycle {
+    precondition {
+      condition     = length(var.cache_default_password) >= 16 && length(var.cache_default_password) <= 128
+      error_message = "cache_default_password must provided and be between 16 and 128 characters long if cache_enabled is true"
+    }
+  }
+}
+
+resource "aws_elasticache_user" "redis_kivera_user" {
+  count = local.redis_enabled ? 1 : 0
+
+  user_id       = var.cache_kivera_username
+  user_name     = var.cache_kivera_username
+  access_string = "on -@all +ping +mget +get +set +mset +command ~kivera*"
+  engine        = "REDIS"
+  passwords     = [var.cache_kivera_password]
+
+  lifecycle {
+    precondition {
+      condition     = length(var.cache_kivera_username) > 0
+      error_message = "cache_kivera_username must be provided if cache_enabled is true"
+    }
+
+    precondition {
+      condition     = length(var.cache_kivera_password) >= 16 && length(var.cache_kivera_password) <= 128
+      error_message = "cache_kivera_password must provided and be between 16 and 128 characters long if cache_enabled is true"
+    }
+  }
+}
+
+resource "aws_elasticache_user_group" "redis_kivera_user_group" {
+  count = local.redis_enabled ? 1 : 0
+
+  engine        = "REDIS"
+  user_group_id = "kivera"
+  user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id]
 }

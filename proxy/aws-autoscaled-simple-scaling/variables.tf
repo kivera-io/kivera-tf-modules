@@ -132,6 +132,25 @@ variable "cache_enabled" {
   default     = true
 }
 
+variable "cache_default_password" {
+  description = "The password used to connect to the cache as default user"
+  type        = string
+  default     = ""
+}
+
+variable "cache_kivera_username" {
+  description = "The username used to connect to the cache as kivera user"
+  type        = string
+  default     = "kivera"
+}
+
+variable "cache_kivera_password" {
+  description = "The password used to connect to the cache as kivera user"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "cache_type" {
   description = "What type of cache to deploy"
   type        = string
