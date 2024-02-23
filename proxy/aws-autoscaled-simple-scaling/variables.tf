@@ -132,6 +132,30 @@ variable "proxy_log_group_retention" {
   default     = 14
 }
 
+variable "ddog_secret_arn" {
+    description = "The arn for the Data Dog API key secret"
+    type        = string
+    sensitive   = true
+}
+
+variable "ddog_trace_sampling_rate" {
+    description = "The samping rate DataDog uses for tracing"
+    type        = number
+    default     = 0.2
+}
+
+variable "enable_datadog_tracing" {
+    description = "Enable trace metrics to be sent to datadog"
+    type        = bool
+    default     = true
+}
+
+variable "enable_datadog_profiling" {
+    description = "Enable profile metrics to be sent to datatog"
+    type        = bool
+    default     = true
+}
+
 variable "cache_enabled" {
   description = "Whether to deploy and use a cache"
   type        = bool
