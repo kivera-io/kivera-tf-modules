@@ -15,6 +15,7 @@ export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
 export KIVERA_CA=/opt/kivera/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
 export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
+export KIVERA_REDIS_ADDR=${redis_connection_string}
 
 # log file
 cat << EOF | tee /etc/cron.hourly/kivera-logrotate
@@ -54,8 +55,8 @@ groupadd -r kivera
 useradd -mrg kivera kivera
 useradd -g kivera td-agent
 
-if [[ "${proxy_local_path}" != "" ]]; then
-    aws s3 cp s3://kivera-perf-test-bucket/locust-tests/proxies/proxy.zip ./proxy.zip
+if [[ "${proxy_s3_path}" != "" ]]; then
+    aws s3 cp ${proxy_s3_path} ./proxy.zip
     unzip ./proxy.zip -d $KIVERA_BIN_PATH
 else
     wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${proxy_version}.tar.gz -O proxy.tar.gz
@@ -65,21 +66,12 @@ fi
 chmod 0755 $KIVERA_BIN_PATH/kivera
 chown -R kivera:kivera /opt/kivera
 
-if [[ "${proxy_redis_cache_addr}" != "" ]]; then
-    export KIVERA_KV_STORE_CONNECT="redis://${proxy_redis_cache_addr}:6379"
-    wget http://download.redis.io/redis-stable.tar.gz && tar xvzf redis-stable.tar.gz && \
-        cd redis-stable && make redis-cli && cp src/redis-cli /usr/local/bin/ && cd -
-fi
-
 yum install amazon-cloudwatch-agent -y
-
-DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${ddog_secret_arn}`
-export DD_API_KEY
-DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
 curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera
 
+# Configure Kivera service
 cat << EOF | tee /etc/systemd/system/kivera.service
 [Unit]
 Description=Kivera Proxy
@@ -93,15 +85,14 @@ Environment=KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
 Environment=KIVERA_CA_CERT=$KIVERA_CA_CERT
 Environment=KIVERA_CA=$KIVERA_CA
 Environment=KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
-Environment=KIVERA_KV_STORE_CONNECT=$KIVERA_KV_STORE_CONNECT
-Environment=KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
-Environment=KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
-Environment=DD_TRACE_SAMPLE_RATE=${ddog_trace_sampling_rate}
+Environment=KIVERA_KV_STORE_CONNECT=$KIVERA_REDIS_ADDR
+Environment=KIVERA_KV_STORE_CLUSTER_MODE=true
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
+# Configure remote logging
 mkdir -p /etc/systemd/system/td-agent.service.d/
 
 cat << EOF | tee /etc/systemd/system/td-agent.service.d/override.conf
@@ -114,6 +105,7 @@ cat << EOF | tee /etc/td-agent/td-agent.conf
   @type tail
   tag kivera
   path $KIVERA_LOGS_FILE
+  pos_file /var/log/td-agent/kivera.log.pos
   <parse>
     @type json
   </parse>
@@ -132,12 +124,50 @@ cat << EOF | tee /etc/td-agent/td-agent.conf
 </match>
 EOF
 
+# Configure log file rotation
+cat << EOF | tee /etc/cron.hourly/kivera-logrotate
+#!/bin/sh
+/usr/sbin/logrotate -s /var/lib/logrotate/kivera.status /etc/kivera-logrotate.conf
+EXITVALUE=\$?
+if [ \$EXITVALUE != 0 ]; then
+    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
+fi
+exit 0
+EOF
+
+cat << EOF | tee /etc/kivera-logrotate.conf
+$KIVERA_LOGS_FILE {
+    maxsize 500M
+    hourly
+    missingok
+    rotate 8
+    compress
+    notifempty
+    copytruncate
+}
+EOF
+
+# Enable CloudWatch logging/metrics
 cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 {
   "agent": {
     "metrics_collection_interval": 1,
     "run_as_user": "cwagent"
   },
+  $([[ ${proxy_log_to_cloudwatch} == true ]] && echo '"logs": {
+    "log_stream_name": "{instance_id}",
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "$KIVERA_LOGS_FILE",
+            "log_group_name": "${log_group_name}",
+            "retention_in_days": ${log_group_retention_in_days}
+          }
+        ]
+      }
+    }
+  },' | envsubst)
   "metrics": {
     "namespace": "kivera",
     "aggregation_dimensions": [
@@ -161,29 +191,41 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
 }
 EOF
 
-systemctl start datadog-agent
+# Tune system parameters
+echo "* hard nofile 100000" >> /etc/security/limits.conf
+echo "* soft nofile 100000" >> /etc/security/limits.conf
+echo "net.core.somaxconn=4096" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
+echo "net.core.netdev_max_backlog=5000" >> /etc/sysctl.conf
+sysctl -p
+
+# Enable services
+if [[ ${proxy_log_to_kivera} == true ]]; then
+  systemctl enable td-agent.service
+  systemctl start td-agent.service
+fi
 systemctl enable amazon-cloudwatch-agent.service
 systemctl start amazon-cloudwatch-agent.service
-systemctl enable td-agent.service
-systemctl start td-agent.service
 systemctl enable kivera.service
 systemctl start kivera.service
 
 sleep 10
 
-KIVERA_PROCESS=$(systemctl is-active kivera.service)
+if [[ ${proxy_log_to_kivera} == true ]]; then
 FLUENTD_PROCESS=$(systemctl is-active td-agent.service)
-CLOUDWATCH_PROCESS=$(systemctl is-active amazon-cloudwatch-agent.service)
+  [[ $FLUENTD_PROCESS -eq "active" ]] \
+    && echo "Fluentd service is running" \
+    || (echo "Fluentd service is not running" && STATE=1)
+fi
 
+CLOUDWATCH_PROCESS=$(systemctl is-active amazon-cloudwatch-agent.service)
+  [[ $CLOUDWATCH_PROCESS -eq "active" ]] \
+    && echo "CloudWatch agent service is running" \
+    || (echo "CloudWatch agent service is not running" && STATE=1)
+
+KIVERA_PROCESS=$(systemctl is-active kivera.service)
 KIVERA_CONNECTIONS=$(lsof -i -P -n | grep kivera)
 [[ $KIVERA_PROCESS -eq "active" && $KIVERA_CONNECTIONS == *"(ESTABLISHED)"* && $KIVERA_CONNECTIONS == *"(LISTEN)"* ]] \
   && echo "The Kivera service and connections appears to be healthy." \
   || (echo "The Kivera service and connections appear unhealthy." && STATE=1)
 
-[[ $FLUENTD_PROCESS -eq "active" ]] \
-  && echo "Fluentd service is running" \
-  || (echo "Fluentd service is not running" && STATE=1)
-
-[[ $CLOUDWATCH_PROCESS -eq "active" ]] \
-  && echo "CloudWatch agent service is running" \
-  || (echo "CloudWatch agent service is not running" && STATE=1)

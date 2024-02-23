@@ -1,7 +1,12 @@
 variable "name_prefix" {
   description = "Prefix for resource names"
   type        = string
-  default     = "kivera-perf-test"
+  default     = "kivera"
+
+  validation {
+    condition     = length(var.name_prefix) <= 10
+    error_message = "The prefix name cannot exceed 10 characters"
+  }
 }
 
 variable "proxy_version" {
@@ -53,6 +58,18 @@ variable "proxy_instance_type" {
   default     = "t3.medium"
 }
 
+variable "proxy_log_to_kivera" {
+  description = "Enable to send all logs to Kivera"
+  type        = bool
+  default     = true
+}
+
+variable "proxy_log_to_cloudwatch" {
+  description = "Enable to send logs to Cloudwatch"
+  type        = bool
+  default     = true
+}
+
 variable "key_pair_name" {
   description = "Name of an existing EC2 KeyPair to enable SSH access to the instances"
   type        = string
@@ -63,7 +80,12 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "subnet_ids" {
+variable "load_balancer_subnet_ids" {
+  description = "Which Subnets to deploy the load balancer into"
+  type        = list(string)
+}
+
+variable "proxy_subnet_ids" {
   description = "Which Subnets to deploy the proxy into"
   type        = list(string)
 }
@@ -99,41 +121,63 @@ variable "proxy_max_asg_size" {
 }
 
 variable "proxy_local_path" {
-    description = "Path to a local proxy binary (takes precedence over proxy_version)"
-    type        = string
-    default     = ""
+  description = "Path to a local proxy binary (takes precedence over proxy_version)"
+  type        = string
+  default     = ""
 }
 
-variable "ddog_secret_arn" {
-    description = "The arn for the Data Dog API key secret"
-    type        = string
-    sensitive   = true
+variable "proxy_log_group_retention" {
+  description = "The number of days to retain proxy logs in CloudWatch Logs"
+  type        = number
+  default     = 14
 }
 
-variable "ddog_trace_sampling_rate" {
-    description = "The samping rate DataDog uses for tracing"
-    type        = number
-    default     = 0.2
+variable "cache_enabled" {
+  description = "Whether to deploy and use a cache"
+  type        = bool
+  default     = true
 }
 
-variable "enable_datadog_tracing" {
-    description = "Enable trace metrics to be sent to datadog"
-    type        = bool
-    default     = true
+variable "cache_type" {
+  description = "What type of cache to deploy"
+  type        = string
+  default     = "redis"
+
+  validation {
+    condition     = contains(["redis"], var.cache_type)
+    error_message = "Allowed value(s) for cache_type: \"redis\"."
+  }
 }
 
-variable "enable_datadog_profiling" {
-    description = "Enable profile metrics to be sent to datatog"
-    type        = bool
-    default     = true
+variable "cache_subnet_ids" {
+  description = "Which Subnets to deploy the cache into"
+  type        = list(string)
+  default     = []
 }
 
-variable "enable_redis_cache" {
-    description = "Deploy and use a redis cache in the test"
-    type        = bool
-    default     = true
+variable "cache_instance_type" {
+  description = "The instance type of the cache"
+  type        = string
+  default     = "cache.t3.medium"
 }
 
-variable "private_subnet_id" {
-    description = "Private Subnet ID"
+variable "redis_num_node_groups" {
+  description = "The number of node groups in the Redis cluster"
+  type        = number
+  default     = 1
+}
+
+variable "redis_replicas_per_node_group" {
+  description = "The number of replicas for each node groups in the Redis cluster"
+  type        = number
+  default     = 2
+}
+
+variable "s3_bucket" {
+  description = "The name of the bucket used to upload the tests/files"
+}
+
+variable "s3_bucket_key" {
+  description = "The key/path to be used to upload the tests/files"
+  default     = "/kivera/proxy"
 }

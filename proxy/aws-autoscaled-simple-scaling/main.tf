@@ -8,9 +8,18 @@ data "aws_ami" "latest" {
   }
 }
 
+resource "random_string" "suffix" {
+  length  = 10
+  special = false
+}
+
 locals {
+  suffix                       = random_string.suffix.result
+  proxy_s3_path                = var.proxy_local_path != "" ? "s3://${var.s3_bucket}${var.s3_bucket_key}/proxy.zip" : ""
   proxy_credentials_secret_arn = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
+  redis_enabled                = var.cache_enabled && var.cache_type == "redis" ? true : false
+  redis_connection_string      = local.redis_enabled ? "rediss://${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379" : ""
 }
 
 resource "aws_secretsmanager_secret" "proxy_credentials" {
@@ -69,7 +78,6 @@ resource "aws_iam_role" "instance_role" {
           Resource = [
             local.proxy_credentials_secret_arn,
             local.proxy_private_key_secret_arn,
-            var.ddog_secret_arn
           ]
         },
         {
@@ -80,7 +88,7 @@ resource "aws_iam_role" "instance_role" {
           ]
           Effect = "Allow"
           Resource = [
-            "arn:aws:s3:::kivera-perf-test-bucket/*"
+            "arn:aws:s3:::${var.s3_bucket}/*"
           ]
         },
       ]
@@ -181,24 +189,25 @@ resource "aws_launch_template" "launch_template" {
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
   ]
-  key_name  = var.key_pair_name
-  user_data = base64encode(data.template_file.proxy_user_data.rendered)
-}
-
-data "template_file" "proxy_user_data" {
-  template = file("${path.module}/data/user-data.sh.tpl")
-  vars = {
-    enable_datadog_tracing       = var.enable_datadog_tracing
-    enable_datadog_profiling     = var.enable_datadog_profiling
-    ddog_secret_arn              = var.ddog_secret_arn
-    ddog_trace_sampling_rate     = var.ddog_trace_sampling_rate
-    proxy_local_path             = var.proxy_local_path
+  key_name = var.key_pair_name
+  user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
     proxy_version                = var.proxy_version
+    proxy_s3_path                = local.proxy_s3_path
     proxy_cert_type              = var.proxy_cert_type
     proxy_public_cert            = var.proxy_public_cert
-    proxy_redis_cache_addr       = local.redis_cache_addr
     proxy_credentials_secret_arn = local.proxy_credentials_secret_arn
     proxy_private_key_secret_arn = local.proxy_private_key_secret_arn
+    proxy_log_to_kivera          = var.proxy_log_to_kivera
+    proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
+    redis_connection_string      = local.redis_connection_string
+    log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
+    log_group_retention_in_days  = var.proxy_log_group_retention
+  }))
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = 50
+    }
   }
 }
 
@@ -212,7 +221,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   max_size                  = var.proxy_max_asg_size
   health_check_type         = "ELB"
   health_check_grace_period = 180
-  vpc_zone_identifier       = var.subnet_ids
+  vpc_zone_identifier       = var.proxy_subnet_ids
   target_group_arns = [
     aws_lb_target_group.traffic_target_group.arn,
     aws_lb_target_group.management_target_group.arn
@@ -233,7 +242,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
 }
 
 resource "aws_lb_target_group" "traffic_target_group" {
-  name = "${var.name_prefix}-traffic"
+  name = "${var.name_prefix}-traffic-${local.suffix}"
   health_check {
     enabled             = true
     interval            = 10
@@ -259,7 +268,7 @@ resource "aws_lb_listener" "traffic_listener" {
 }
 
 resource "aws_lb_target_group" "management_target_group" {
-  name = "${var.name_prefix}-mgmt"
+  name = "${var.name_prefix}-mgmt-${local.suffix}"
   health_check {
     enabled             = true
     interval            = 10
@@ -288,9 +297,9 @@ resource "aws_lb_listener" "management_listener" {
 }
 
 resource "aws_lb" "load_balancer" {
-  name               = "${var.name_prefix}-load-balancer"
+  name               = "${var.name_prefix}-lb-${local.suffix}"
   internal           = var.load_balancer_internal
-  subnets            = var.subnet_ids
+  subnets            = var.load_balancer_subnet_ids
   load_balancer_type = "network"
   security_groups = [
     aws_security_group.load_balancer_sg.id
@@ -350,75 +359,88 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
   comparison_operator = "LessThanThreshold"
 }
 
-resource "aws_s3_bucket" "bucket" {
-  bucket = "${var.name_prefix}-bucket"
+data "aws_s3_bucket" "bucket" {
+  bucket = var.s3_bucket
 }
 
 data "archive_file" "proxy_binary" {
-  count       = var.proxy_local_path != "" ? 1 : 0
+  count = var.proxy_local_path != "" ? 1 : 0
+
   type        = "zip"
-  source_file = var.proxy_local_path
+  source_file  = var.proxy_local_path
   output_path = "${path.module}/temp/proxy.zip"
 }
 
 resource "aws_s3_object" "proxy_binary" {
-  count      = var.proxy_local_path != "" ? 1 : 0
+  count = var.proxy_local_path != "" ? 1 : 0
+
   depends_on = [data.archive_file.proxy_binary]
-  bucket     = aws_s3_bucket.bucket.id
-  key        = "locust-tests/proxies/proxy.zip"
+  bucket     = data.aws_s3_bucket.bucket.id
+  key        = "${var.s3_bucket_key}/proxy.zip"
   source     = "${path.module}/temp/proxy.zip"
   etag       = data.archive_file.proxy_binary[count.index].output_md5
 }
 
-locals {
-  redis_instance_name     = "${var.name_prefix}-redis"
-  redis_subnet_group_name = "${var.name_prefix}-subnets"
-  redis_cache_addr        = var.enable_redis_cache ? aws_elasticache_cluster.redis[0].cache_nodes[0].address : ""
+resource "aws_security_group" "redis_sg" {
+  count = local.redis_enabled ? 1 : 0
+
+  name_prefix = "${var.name_prefix}-redis-"
+  vpc_id      = var.vpc_id
+  description = "Access to the Redis cache"
 }
 
-resource "aws_elasticache_cluster" "redis" {
-  count = var.enable_redis_cache ? 1 : 0
+resource "aws_vpc_security_group_ingress_rule" "redis_ingress_rule" {
+  count = local.redis_enabled ? 1 : 0
 
-  cluster_id           = local.redis_instance_name
-  engine               = "redis"
-  engine_version       = 7.1
-  node_type            = "cache.t3.medium"
-  parameter_group_name = "default.redis7"
-  num_cache_nodes      = 1
+  security_group_id            = aws_security_group.redis_sg[0].id
+  referenced_security_group_id = aws_security_group.instance_sg.id
+  ip_protocol                  = "tcp"
+  from_port                    = 6379
+  to_port                      = 6379
+}
 
-  subnet_group_name  = aws_elasticache_subnet_group.redis[count.index].name
-  security_group_ids = [aws_security_group.redis[count.index].id]
+resource "aws_vpc_security_group_egress_rule" "redis_egress_rule" {
+  count = local.redis_enabled ? 1 : 0
+
+  security_group_id = aws_security_group.redis_sg[0].id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = -1
 }
 
 resource "aws_elasticache_subnet_group" "redis" {
-  count = var.enable_redis_cache ? 1 : 0
+  count = local.redis_enabled ? 1 : 0
 
-  name       = local.redis_subnet_group_name
-  subnet_ids = [var.private_subnet_id]
-}
-
-resource "aws_security_group" "redis" {
-  count = var.enable_redis_cache ? 1 : 0
-
-  name        = "${var.name_prefix}-redis-sg"
-  description = "Security Group for redis instance"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    from_port       = 6379
-    to_port         = 6379
-    protocol        = "tcp"
-    security_groups = [aws_security_group.instance_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  name       = "${var.name_prefix}-subnet-group-${local.suffix}"
+  subnet_ids = var.cache_subnet_ids
 
   lifecycle {
-    create_before_destroy = true
+    precondition {
+      condition     = length(var.cache_subnet_ids) > 0
+      error_message = "cache_subnet_ids must be provided if cache_enabled is true"
+    }
   }
+}
+
+resource "aws_elasticache_replication_group" "redis" {
+  count = local.redis_enabled ? 1 : 0
+
+  replication_group_id = "${var.name_prefix}-redis-${local.suffix}"
+  description          = "Redis Cache for Kivera proxy"
+
+  node_type            = var.cache_instance_type
+  engine_version       = 7.1
+  parameter_group_name = "default.redis7.cluster.on"
+
+  port               = 6379
+  subnet_group_name  = aws_elasticache_subnet_group.redis[0].name
+  security_group_ids = [aws_security_group.redis_sg[0].id]
+
+  multi_az_enabled           = true
+  num_node_groups            = var.redis_num_node_groups
+  replicas_per_node_group    = var.redis_replicas_per_node_group
+  automatic_failover_enabled = true
+  at_rest_encryption_enabled = true
+  transit_encryption_enabled = true
+
+  apply_immediately = true
 }
