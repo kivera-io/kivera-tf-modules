@@ -135,6 +135,7 @@ variable "cache_enabled" {
 variable "cache_default_password" {
   description = "The password used to connect to the cache as default user"
   type        = string
+  sensitive   = true
   default     = ""
 }
 

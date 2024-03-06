@@ -14,6 +14,8 @@ echo '${proxy_public_cert}' > $KIVERA_CA_CERT
 
 export KIVERA_CA_SECRET_REGION=$(echo ${proxy_private_key_secret_arn} | cut -d':' -f4)
 export KIVERA_CREDENTIALS_SECRET_REGION=$(echo ${proxy_credentials_secret_arn} | cut -d':' -f4)
+export REDIS_CONNECTION_STRING_SECRET_REGION=$(echo ${redis_connection_string_arn} | cut -d':' -f4)
+export KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
 
 aws secretsmanager get-secret-value --secret-id '${proxy_private_key_secret_arn}' --region $KIVERA_CA_SECRET_REGION --query SecretString --output text > $KIVERA_CA
 aws secretsmanager get-secret-value --secret-id '${proxy_credentials_secret_arn}' --region $KIVERA_CREDENTIALS_SECRET_REGION --query SecretString --output text > $KIVERA_CREDENTIALS
@@ -23,7 +25,7 @@ KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
 KIVERA_CA_CERT=$KIVERA_CA_CERT
 KIVERA_CA=$KIVERA_CA
 KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
-KIVERA_KV_STORE_CONNECT=${redis_connection_string}
+KIVERA_KV_STORE_CONNECT=$KIVERA_KV_STORE_CONNECT
 KIVERA_KV_STORE_CLUSTER_MODE=true
 EOF
 
