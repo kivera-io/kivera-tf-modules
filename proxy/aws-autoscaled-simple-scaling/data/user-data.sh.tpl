@@ -198,14 +198,6 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
 }
 EOF
 
-# Tune system parameters
-echo "* hard nofile 100000" >> /etc/security/limits.conf
-echo "* soft nofile 100000" >> /etc/security/limits.conf
-echo "net.core.somaxconn=4096" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
-echo "net.core.netdev_max_backlog=5000" >> /etc/sysctl.conf
-sysctl -p
-
 # Enable services
 if [[ ${proxy_log_to_kivera} == true ]]; then
   systemctl enable td-agent.service

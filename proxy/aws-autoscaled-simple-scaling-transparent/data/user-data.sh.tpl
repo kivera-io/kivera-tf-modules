@@ -46,6 +46,7 @@ systemctl status gwlbtun.service
 # log file
 cat << EOF | tee /etc/cron.hourly/kivera-logrotate
 #!/bin/sh
+
 /usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
 EXITVALUE=\$?
 if [ \$EXITVALUE != 0 ]; then
