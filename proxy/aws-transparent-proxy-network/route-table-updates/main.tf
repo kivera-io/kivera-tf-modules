@@ -1,19 +1,7 @@
-resource "aws_route_table" "private_subnet_route_table" {
-  vpc_id = var.vpc_id
-
-  route {
-    cidr_block      = "0.0.0.0/0"
-    vpc_endpoint_id = var.vpc_endpoint_id
-  }
-
-  tags = {
-    Name = "${local.stack_name}-private-subnet-rt"
-  }
-}
-
-resource "aws_route_table_association" "private_subnet_route_table_association" {
-  subnet_id      = var.private_subnet_id
-  route_table_id = aws_route_table.private_subnet_route_table.id
+resource "aws_route" "route_vpc_endpoint" {
+  route_table_id         = var.private_subnet_rt_id
+  destination_cidr_block = "0.0.0.0/0"
+  vpc_endpoint_id        = var.vpc_endpoint_id
 }
 
 data "aws_ami" "latest" {
@@ -27,9 +15,12 @@ data "aws_ami" "latest" {
 }
 
 resource "aws_instance" "bastion_instance" {
-  ami           = data.aws_ami.latest.id
-  instance_type = "t2.micro"
-  subnet_id     = var.public_subnet_id
+  ami                    = data.aws_ami.latest.id
+  instance_type          = "t2.micro"
+  subnet_id              = var.public_subnet_id
+  key_name               = var.instance_key_pair
+  iam_instance_profile   = "AmazonSSMRoleForInstancesQuickSetup"
+  vpc_security_group_ids = [aws_security_group.instance_sg.id]
 
   tags = {
     Name = "${local.stack_name}-bastion-instance"
@@ -37,10 +28,13 @@ resource "aws_instance" "bastion_instance" {
 }
 
 resource "aws_instance" "client_instance" {
-  ami           = data.aws_ami.latest.id
-  instance_type = "t2.micro"
-  subnet_id     = var.private_subnet_id
-  user_data = <<EOF
+  ami                    = data.aws_ami.latest.id
+  instance_type          = "t2.micro"
+  subnet_id              = var.private_subnet_id
+  key_name               = var.instance_key_pair
+  iam_instance_profile   = "AmazonSSMRoleForInstancesQuickSetup"
+  vpc_security_group_ids = [aws_security_group.instance_sg.id]
+  user_data              = <<EOF
 #!/bin/bash
 curl -s http://localhost:8090/pub.cert > ~/kivera/ca-cert.pem
 
@@ -56,5 +50,29 @@ EOF
 
   tags = {
     Name = "${local.stack_name}-client-instance"
+  }
+}
+
+resource "aws_security_group" "instance_sg" {
+  name        = "allow_ssh"
+  description = "Allow ssh traffic to the instance"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow_ssh"
   }
 }

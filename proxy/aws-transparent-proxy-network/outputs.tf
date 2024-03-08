@@ -22,3 +22,8 @@ output "private_subnet_id" {
   description = "VPC Private Subnet ID"
   value       = aws_subnet.private_subnet.id
 }
+
+output "private_subnet_rt_id" {
+  description = "VPC Private Subnet Route Table ID"
+  value       = aws_route_table.private_subnet_route_table.id
+}

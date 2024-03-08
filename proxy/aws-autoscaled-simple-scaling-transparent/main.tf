@@ -193,7 +193,6 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   health_check_grace_period = 180
   vpc_zone_identifier       = var.proxy_subnet_ids
   target_group_arns         = [aws_lb_target_group.glb_target_group.arn]
-  # suspended_processes       = ["Terminate"]
   instance_refresh {
     strategy = "Rolling"
     triggers = ["tag"]

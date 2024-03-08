@@ -21,3 +21,14 @@ variable "vpc_endpoint_id" {
   description = "Endpoint ID for VPC"
   type        = string
 }
+
+variable "private_subnet_rt_id" {
+  description = "Endpoint ID for VPC"
+  type        = string
+}
+
+variable "instance_key_pair" {
+  description = "Name of ec2 key pair"
+  type        = string
+  default     = ""
+}

@@ -1,5 +1,5 @@
 output "vpc_service_endpoint_id" {
-  description = "VPC Service Endpoint"
+  description = "VPC service endpoint id"
   value = aws_vpc_endpoint.glb_endpoint.id
 }
 

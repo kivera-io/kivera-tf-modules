@@ -103,6 +103,19 @@ resource "aws_route_table_association" "proxy_subnet_route_table_association" {
   route_table_id = aws_route_table.proxy_subnet_route_table.id
 }
 
+resource "aws_route_table" "private_subnet_route_table" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${local.stack_name}-private-subnet-rt"
+  }
+}
+
+resource "aws_route_table_association" "private_subnet_route_table_association" {
+  subnet_id      = aws_subnet.private_subnet.id
+  route_table_id = aws_route_table.private_subnet_route_table.id
+}
+
 resource "aws_iam_role" "vpce_service_lambda_execution_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
