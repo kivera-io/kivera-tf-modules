@@ -209,7 +209,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   }
   tag {
     key                 = "Name"
-    value               = "${var.name_prefix}-proxy"
+    value               = "${var.name_prefix}-asg"
     propagate_at_launch = true
   }
 }
