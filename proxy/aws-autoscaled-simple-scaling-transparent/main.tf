@@ -121,7 +121,13 @@ resource "aws_security_group" "instance_sg" {
 
 resource "aws_vpc_security_group_ingress_rule" "instance_ingress_rule" {
   security_group_id = aws_security_group.instance_sg.id
-  ip_protocol       = -1
+  ip_protocol       = 6081
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "instance_mgmt_rule" {
+  security_group_id = aws_security_group.instance_sg.id
+  ip_protocol       = 8090
   cidr_ipv4         = "0.0.0.0/0"
 }
 
@@ -190,7 +196,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   min_size                  = var.proxy_min_asg_size
   max_size                  = var.proxy_max_asg_size
   health_check_type         = "ELB"
-  health_check_grace_period = 180
+  health_check_grace_period = 420
   vpc_zone_identifier       = var.proxy_subnet_ids
   target_group_arns         = [aws_lb_target_group.glb_target_group.arn]
   instance_refresh {
@@ -226,9 +232,9 @@ resource "aws_lb_target_group" "glb_target_group" {
     interval            = 10
     healthy_threshold   = 3
     unhealthy_threshold = 3
-    port                = 80
+    port                = 8090
     protocol            = "HTTP"
-    path                = "/"
+    path                = "/version"
   }
 }
 
@@ -264,7 +270,7 @@ resource "aws_autoscaling_policy" "scale_up_policy" {
   name                   = "${var.name_prefix}-scale-up"
   scaling_adjustment     = 3
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 420
+  cooldown               = 180
   autoscaling_group_name = aws_autoscaling_group.auto_scaling_group.name
 }
 
