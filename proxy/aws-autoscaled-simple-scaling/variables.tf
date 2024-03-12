@@ -132,26 +132,6 @@ variable "cache_enabled" {
   default     = true
 }
 
-variable "cache_default_password" {
-  description = "The password used to connect to the cache as default user"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "cache_kivera_username" {
-  description = "The username used to connect to the cache as kivera user"
-  type        = string
-  default     = "kivera"
-}
-
-variable "cache_kivera_password" {
-  description = "The password used to connect to the cache as kivera user"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
 variable "cache_type" {
   description = "What type of cache to deploy"
   type        = string
@@ -161,6 +141,26 @@ variable "cache_type" {
     condition     = contains(["redis"], var.cache_type)
     error_message = "Allowed value(s) for cache_type: \"redis\"."
   }
+}
+
+variable "cache_default_password" {
+  description = "The password used to connect to the cache as default user"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "cache_kivera_username" {
+  description = "The username used to connect to the cache as the kivera proxy user"
+  type        = string
+  default     = "kivera"
+}
+
+variable "cache_kivera_password" {
+  description = "The password used to connect to the cache as the kivera proxy user"
+  type        = string
+  sensitive   = true
+  default     = ""
 }
 
 variable "cache_subnet_ids" {
