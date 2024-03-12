@@ -143,6 +143,26 @@ variable "cache_type" {
   }
 }
 
+variable "cache_default_password" {
+  description = "The password used to connect to the cache as default user"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "cache_kivera_username" {
+  description = "The username used to connect to the cache as the kivera proxy user"
+  type        = string
+  default     = "kivera"
+}
+
+variable "cache_kivera_password" {
+  description = "The password used to connect to the cache as the kivera proxy user"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "cache_subnet_ids" {
   description = "Which Subnets to deploy the cache into"
   type        = list(string)
