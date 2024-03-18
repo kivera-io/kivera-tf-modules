@@ -121,13 +121,7 @@ resource "aws_security_group" "instance_sg" {
 
 resource "aws_vpc_security_group_ingress_rule" "instance_ingress_rule" {
   security_group_id = aws_security_group.instance_sg.id
-  ip_protocol       = 6081
-  cidr_ipv4         = "0.0.0.0/0"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "instance_mgmt_rule" {
-  security_group_id = aws_security_group.instance_sg.id
-  ip_protocol       = 8090
+  ip_protocol       = -1
   cidr_ipv4         = "0.0.0.0/0"
 }
 
