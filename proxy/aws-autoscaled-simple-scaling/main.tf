@@ -15,7 +15,6 @@ resource "random_string" "suffix" {
 
 locals {
   suffix                       = random_string.suffix.result
-  proxy_s3_path                = var.proxy_local_path != "" ? "s3://${var.s3_bucket}${var.s3_bucket_key}/proxy.zip" : ""
   proxy_credentials_secret_arn = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
   redis_enabled                = var.cache_enabled && var.cache_type == "redis" ? true : false
@@ -64,8 +63,7 @@ resource "aws_iam_role" "instance_role" {
   })
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
-    "arn:aws:iam::aws:policy/ReadOnlyAccess"
+    "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ]
   inline_policy {
     name = "${var.name_prefix}-get-secrets"
@@ -77,19 +75,7 @@ resource "aws_iam_role" "instance_role" {
           Effect = "Allow"
           Resource = [
             local.proxy_credentials_secret_arn,
-            local.proxy_private_key_secret_arn,
-            var.ddog_secret_arn
-          ]
-        },
-        {
-          Action = [
-            "s3:GetObject",
-            "s3:PutObject",
-            "s3:CreateMultipartUpload"
-          ]
-          Effect = "Allow"
-          Resource = [
-            "arn:aws:s3:::${var.s3_bucket}/*"
+            local.proxy_private_key_secret_arn
           ]
         },
       ]
@@ -181,19 +167,12 @@ resource "aws_launch_template" "launch_template" {
   iam_instance_profile {
     arn = aws_iam_instance_profile.instance_profile.arn
   }
-  block_device_mappings {
-    device_name = "/dev/xvda"
-    ebs {
-      volume_size = 50
-    }
-  }
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
   ]
   key_name = var.key_pair_name
   user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
     proxy_version                = var.proxy_version
-    proxy_s3_path                = local.proxy_s3_path
     proxy_cert_type              = var.proxy_cert_type
     proxy_public_cert            = var.proxy_public_cert
     proxy_credentials_secret_arn = local.proxy_credentials_secret_arn
@@ -203,10 +182,6 @@ resource "aws_launch_template" "launch_template" {
     redis_connection_string      = local.redis_connection_string
     log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
-    enable_datadog_tracing       = var.enable_datadog_tracing
-    enable_datadog_profiling     = var.enable_datadog_profiling
-    ddog_secret_arn              = var.ddog_secret_arn
-    ddog_trace_sampling_rate     = var.ddog_trace_sampling_rate
   }))
   block_device_mappings {
     device_name = "/dev/xvda"
@@ -364,28 +339,6 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
   comparison_operator = "LessThanThreshold"
 }
 
-data "aws_s3_bucket" "bucket" {
-  bucket = var.s3_bucket
-}
-
-data "archive_file" "proxy_binary" {
-  count = var.proxy_local_path != "" ? 1 : 0
-
-  type        = "zip"
-  source_file  = var.proxy_local_path
-  output_path = "${path.module}/temp/proxy.zip"
-}
-
-resource "aws_s3_object" "proxy_binary" {
-  count = var.proxy_local_path != "" ? 1 : 0
-
-  depends_on = [data.archive_file.proxy_binary]
-  bucket     = data.aws_s3_bucket.bucket.id
-  key        = "${var.s3_bucket_key}/proxy.zip"
-  source     = "${path.module}/temp/proxy.zip"
-  etag       = data.archive_file.proxy_binary[count.index].output_md5
-}
-
 resource "aws_security_group" "redis_sg" {
   count = local.redis_enabled ? 1 : 0
 
@@ -421,7 +374,7 @@ resource "aws_elasticache_subnet_group" "redis" {
   lifecycle {
     precondition {
       condition     = length(var.cache_subnet_ids) > 0
-      error_message = "cache_subnet_ids must be provided if cache_enabled is true"
+      error_message = "redis_subnet_ids must be provided if redis_cache_enabled is true"
     }
   }
 }

@@ -18,6 +18,11 @@ export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
 export KIVERA_REDIS_ADDR=${redis_connection_string}
 export KIVERA_TRANS_MODE=true
 
+## diable source/dest check
+INSTANCE_ID=$(curl 169.254.169.254/latest/meta-data/instance-id)
+INSTANCE_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//')
+aws ec2 modify-instance-attribute --no-source-dest-check --instance-id $INSTANCE_ID --region $INSTANCE_REGION
+
 ## install dependencies
 amazon-linux-extras install epel
 yum install -y supervisor cmake3 amazon-cloudwatch-agent jq

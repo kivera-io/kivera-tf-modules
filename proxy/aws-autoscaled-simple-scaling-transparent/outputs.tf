@@ -8,7 +8,7 @@ output "proxy_instance_id" {
   value       = aws_launch_template.launch_template.id
 }
 
-output "auto_scaling_group_name" {
-  description = "Auto scaling group name"
-  value       = aws_autoscaling_group.auto_scaling_group.name
+output "target_group_arn" {
+  description = "Proxy target group arn"
+  value       = aws_lb_target_group.glb_target_group.arn
 }

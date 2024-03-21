@@ -80,7 +80,7 @@ resource "aws_iam_role" "instance_role" {
           Effect = "Allow"
           Resource = ["*"]
           Condition = {
-            "StringEquals": { "aws:ResourceTag/Name": "kivera-proxy" }
+            "StringEquals": { "aws:ResourceTag/Name": "${var.name_prefix}-proxy" }
           }
         },
         {
@@ -121,7 +121,13 @@ resource "aws_security_group" "instance_sg" {
 
 resource "aws_vpc_security_group_ingress_rule" "instance_ingress_rule" {
   security_group_id = aws_security_group.instance_sg.id
-  ip_protocol       = -1
+  ip_protocol       = 6081
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "instance_mgmt_rule" {
+  security_group_id = aws_security_group.instance_sg.id
+  ip_protocol       = 8090
   cidr_ipv4         = "0.0.0.0/0"
 }
 
@@ -190,7 +196,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   min_size                  = var.proxy_min_asg_size
   max_size                  = var.proxy_max_asg_size
   health_check_type         = "ELB"
-  health_check_grace_period = 420
+  health_check_grace_period = 480
   vpc_zone_identifier       = var.proxy_subnet_ids
   target_group_arns         = [aws_lb_target_group.glb_target_group.arn]
   instance_refresh {
@@ -203,7 +209,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   }
   tag {
     key                 = "Name"
-    value               = "${var.name_prefix}-asg"
+    value               = "${var.name_prefix}-proxy"
     propagate_at_launch = true
   }
 }
