@@ -76,11 +76,11 @@ resource "aws_iam_role" "instance_role" {
       Version = "2012-10-17"
       Statement = [
         {
-          Action = "ec2:ModifyInstanceAttribute"
-          Effect = "Allow"
+          Action   = "ec2:ModifyInstanceAttribute"
+          Effect   = "Allow"
           Resource = ["*"]
           Condition = {
-            "StringEquals": { "aws:ResourceTag/Name": "${var.name_prefix}-proxy" }
+            "StringEquals" : { "aws:ResourceTag/Name" : "${var.name_prefix}-proxy" }
           }
         },
         {
@@ -121,13 +121,17 @@ resource "aws_security_group" "instance_sg" {
 
 resource "aws_vpc_security_group_ingress_rule" "instance_ingress_rule" {
   security_group_id = aws_security_group.instance_sg.id
-  ip_protocol       = 6081
+  from_port         = 6081
+  to_port           = 6081
+  ip_protocol       = "tcp"
   cidr_ipv4         = "0.0.0.0/0"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "instance_mgmt_rule" {
   security_group_id = aws_security_group.instance_sg.id
-  ip_protocol       = 8090
+  from_port         = 8090
+  to_port           = 8090
+  ip_protocol       = "tcp"
   cidr_ipv4         = "0.0.0.0/0"
 }
 
