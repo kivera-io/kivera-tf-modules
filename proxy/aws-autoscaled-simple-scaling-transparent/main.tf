@@ -123,7 +123,7 @@ resource "aws_vpc_security_group_ingress_rule" "instance_ingress_rule" {
   security_group_id = aws_security_group.instance_sg.id
   from_port         = 6081
   to_port           = 6081
-  ip_protocol       = "tcp"
+  ip_protocol       = "geneve"
   cidr_ipv4         = "0.0.0.0/0"
 }
 
