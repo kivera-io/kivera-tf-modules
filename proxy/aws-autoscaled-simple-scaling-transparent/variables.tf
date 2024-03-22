@@ -204,9 +204,11 @@ variable "private_subnet_ids" {
 
 variable "s3_bucket" {
   description = "The name of the bucket used to upload the tests/files"
+  type        = string
 }
 
 variable "s3_bucket_key" {
   description = "The key/path to be used to upload the tests/files"
+  type        = string
   default     = "/kivera/proxy"
 }

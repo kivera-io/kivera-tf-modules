@@ -1,3 +1,7 @@
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = "true"
@@ -27,7 +31,7 @@ resource "aws_eip" "eip" {
 
 resource "aws_nat_gateway" "nat_gateway" {
   allocation_id = aws_eip.eip.id
-  subnet_id     = aws_subnet.public_subnet.id
+  subnet_id     = aws_subnet.public_subnet[0].id
 
   tags = {
     Name = "${local.stack_name}-ngw"
@@ -35,9 +39,11 @@ resource "aws_nat_gateway" "nat_gateway" {
 }
 
 resource "aws_subnet" "public_subnet" {
+  count = 3
+
   vpc_id                  = aws_vpc.vpc.id
-  availability_zone       = var.availability_zone1
-  cidr_block              = var.egress_subnet_cidr
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  cidr_block              = var.egress_subnet_cidrs[count.index]
   map_public_ip_on_launch = "true"
 
   tags = {
@@ -46,9 +52,11 @@ resource "aws_subnet" "public_subnet" {
 }
 
 resource "aws_subnet" "proxy_subnet" {
+  count = 3
+
   vpc_id                  = aws_vpc.vpc.id
-  availability_zone       = var.availability_zone1
-  cidr_block              = var.inspection_subnet_cidr
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  cidr_block              = var.inspection_subnet_cidrs[count.index]
   map_public_ip_on_launch = "false"
 
   tags = {
@@ -57,9 +65,11 @@ resource "aws_subnet" "proxy_subnet" {
 }
 
 resource "aws_subnet" "private_subnet" {
+  count = 3
+
   vpc_id                  = aws_vpc.vpc.id
-  availability_zone       = var.availability_zone1
-  cidr_block              = var.private_subnet_cidr
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  cidr_block              = var.private_subnet_cidrs[count.index]
   map_public_ip_on_launch = "false"
 
   tags = {
@@ -81,7 +91,9 @@ resource "aws_route_table" "public_subnet_route_table" {
 }
 
 resource "aws_route_table_association" "public_subnet_route_table_association" {
-  subnet_id      = aws_subnet.public_subnet.id
+  count = 3
+
+  subnet_id      = "${element(aws_subnet.public_subnet.*.id, count.index)}"
   route_table_id = aws_route_table.public_subnet_route_table.id
 }
 
@@ -99,7 +111,9 @@ resource "aws_route_table" "proxy_subnet_route_table" {
 }
 
 resource "aws_route_table_association" "proxy_subnet_route_table_association" {
-  subnet_id      = aws_subnet.proxy_subnet.id
+  count = 3
+
+  subnet_id      = "${element(aws_subnet.proxy_subnet.*.id, count.index)}"
   route_table_id = aws_route_table.proxy_subnet_route_table.id
 }
 
@@ -112,7 +126,9 @@ resource "aws_route_table" "private_subnet_route_table" {
 }
 
 resource "aws_route_table_association" "private_subnet_route_table_association" {
-  subnet_id      = aws_subnet.private_subnet.id
+  count = 3
+
+  subnet_id      = "${element(aws_subnet.private_subnet.*.id, count.index)}"
   route_table_id = aws_route_table.private_subnet_route_table.id
 }
 

@@ -5,22 +5,22 @@ output "vpc_cidr" {
 
 output "vpc_id" {
   description = "VPC ID"
-    value       = aws_vpc.vpc.id
+  value       = aws_vpc.vpc.id
 }
 
-output "egress_subnet_id" {
-  description = "VPC Public Subnet ID"
-  value       = aws_subnet.public_subnet.id
+output "egress_subnet_ids" {
+  description = "List of VPC Public Subnet IDs"
+  value       = tolist([for i in aws_subnet.public_subnet : i.id])
 }
 
-output "inspection_subnet_id" {
-  description = "VPC Proxy Subnet ID"
-  value       = aws_subnet.proxy_subnet.id
+output "inspection_subnet_ids" {
+  description = "List of VPC Proxy Subnet IDs"
+  value       = tolist([for i in aws_subnet.proxy_subnet : i.id])
 }
 
-output "private_subnet_id" {
-  description = "VPC Private Subnet ID"
-  value       = aws_subnet.private_subnet.id
+output "private_subnet_ids" {
+  description = "List of VPC Private Subnet IDs"
+  value       = tolist([for i in aws_subnet.private_subnet : i.id])
 }
 
 output "private_subnet_rt_id" {
