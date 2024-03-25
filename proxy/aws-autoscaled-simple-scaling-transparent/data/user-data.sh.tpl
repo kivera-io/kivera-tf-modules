@@ -98,9 +98,11 @@ chown -R kivera:kivera /opt/kivera
 
 yum install amazon-cloudwatch-agent -y
 
-DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${ddog_secret_arn}`
-export DD_API_KEY
-DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
+  DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${ddog_secret_arn}`
+  export DD_API_KEY
+  DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+fi
 
 curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera

@@ -209,9 +209,10 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
 }
 
 resource "aws_lb" "glb" {
-  name               = "${var.name_prefix}-glb-${local.suffix}"
-  load_balancer_type = "gateway"
-  subnets            = var.proxy_subnet_ids
+  name                             = "${var.name_prefix}-glb-${local.suffix}"
+  load_balancer_type               = "gateway"
+  subnets                          = var.proxy_subnet_ids
+  enable_cross_zone_load_balancing = var.cross_zone_lb
 }
 
 resource "aws_lb_target_group" "glb_target_group" {
