@@ -205,3 +205,7 @@ variable "s3_bucket_key" {
   description = "The key/path to be used to upload the tests/files"
   default     = "/kivera/proxy"
 }
+
+variable "opa_plugin_file" {
+  description = "The path to the opa plugin file"
+}
