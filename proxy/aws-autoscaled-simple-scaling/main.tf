@@ -13,13 +13,27 @@ resource "random_string" "suffix" {
   special = false
 }
 
+resource "random_password" "default_pass" {
+  length  = 16
+  special = false
+}
+
+resource "random_password" "kivera_pass" {
+  length  = 16
+  special = false
+}
+
 locals {
-  suffix                       = random_string.suffix.result
-  proxy_s3_path                = var.proxy_local_path != "" ? "s3://${var.s3_bucket}${var.s3_bucket_key}/proxy.zip" : ""
-  proxy_credentials_secret_arn = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
-  proxy_private_key_secret_arn = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
-  redis_enabled                = var.cache_enabled && var.cache_type == "redis" ? true : false
-  redis_connection_string      = local.redis_enabled ? "rediss://${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379" : ""
+  suffix                             = random_string.suffix.result
+  proxy_s3_path                      = var.proxy_local_path != "" ? "s3://${var.s3_bucket}${var.s3_bucket_key}/proxy.zip" : ""
+  proxy_credentials_secret_arn       = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
+  proxy_private_key_secret_arn       = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
+  cache_default_pass                 = var.cache_default_password != "" ? var.cache_default_password : random_password.default_pass.result
+  cache_kivera_pass                  = var.cache_kivera_password != "" ? var.cache_kivera_password : random_password.kivera_pass.result
+  redis_enabled                      = var.cache_enabled && var.cache_type == "redis" ? true : false
+  redis_default_connection_string    = local.redis_enabled ? sensitive("rediss://default:${local.cache_default_pass}@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
+  redis_kivera_connection_string     = local.redis_enabled ? sensitive("rediss://${var.cache_kivera_username}:${local.cache_kivera_pass}@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
+  redis_connection_string_secret_arn = local.redis_enabled ? aws_secretsmanager_secret_version.redis_kivera_connection_string_version[0].arn : ""
 }
 
 resource "aws_secretsmanager_secret" "proxy_credentials" {
@@ -42,6 +56,28 @@ resource "aws_secretsmanager_secret_version" "proxy_private_key_version" {
   count         = var.proxy_private_key != "" ? 1 : 0
   secret_id     = aws_secretsmanager_secret.proxy_private_key[0].id
   secret_string = var.proxy_private_key
+}
+
+resource "aws_secretsmanager_secret" "redis_default_connection_string" {
+  count       = local.redis_enabled ? 1 : 0
+  name_prefix = "${var.name_prefix}-redis-connection-default-"
+}
+
+resource "aws_secretsmanager_secret_version" "redis_default_connection_string_version" {
+  count         = local.redis_enabled ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.redis_default_connection_string[0].id
+  secret_string = local.redis_default_connection_string
+}
+
+resource "aws_secretsmanager_secret" "redis_kivera_connection_string" {
+  count       = local.redis_enabled ? 1 : 0
+  name_prefix = "${var.name_prefix}-redis-connection-kivera-"
+}
+
+resource "aws_secretsmanager_secret_version" "redis_kivera_connection_string_version" {
+  count         = local.redis_enabled ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.redis_kivera_connection_string[0].id
+  secret_string = local.redis_kivera_connection_string
 }
 
 resource "aws_iam_role" "instance_role" {
@@ -95,6 +131,26 @@ resource "aws_iam_role" "instance_role" {
       ]
     })
   }
+}
+
+resource "aws_iam_role_policy" "redis_connection_string_access" {
+  count = local.redis_enabled ? 1 : 0
+
+  name = "${var.name_prefix}-get-redis-connection-secret"
+  role = aws_iam_role.instance_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "secretsmanager:GetSecretValue"
+        Effect = "Allow"
+        Resource = [
+          local.redis_connection_string_secret_arn
+        ]
+      },
+    ]
+  })
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
@@ -200,14 +256,14 @@ resource "aws_launch_template" "launch_template" {
     proxy_private_key_secret_arn = local.proxy_private_key_secret_arn
     proxy_log_to_kivera          = var.proxy_log_to_kivera
     proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
-    redis_connection_string      = local.redis_connection_string
+    redis_connection_string_arn  = local.redis_connection_string_secret_arn
     log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
     enable_datadog_agent         = var.enable_datadog_agent
     enable_datadog_tracing       = var.enable_datadog_tracing
     enable_datadog_profiling     = var.enable_datadog_profiling
-    datadog_secret_arn              = var.datadog_secret_arn
-    datadog_trace_sampling_rate     = var.datadog_trace_sampling_rate
+    datadog_secret_arn           = var.datadog_secret_arn
+    datadog_trace_sampling_rate  = var.datadog_trace_sampling_rate
   }))
 
   lifecycle {
@@ -448,6 +504,35 @@ resource "aws_elasticache_replication_group" "redis" {
   automatic_failover_enabled = true
   at_rest_encryption_enabled = true
   transit_encryption_enabled = true
+  user_group_ids             = [aws_elasticache_user_group.redis_kivera_user_group[0].user_group_id]
 
   apply_immediately = true
+}
+
+resource "aws_elasticache_user" "redis_kivera_default" {
+  count = local.redis_enabled ? 1 : 0
+
+  user_id       = "new-default-user"
+  user_name     = "default"
+  access_string = "on -@all +ping"
+  engine        = "REDIS"
+  passwords     = [local.cache_default_pass]
+}
+
+resource "aws_elasticache_user" "redis_kivera_user" {
+  count = local.redis_enabled ? 1 : 0
+
+  user_id       = var.cache_kivera_username
+  user_name     = var.cache_kivera_username
+  access_string = "on -@all +ping +mget +get +set +mset +cluster|slots +cluster|shards +command ~kivera*"
+  engine        = "REDIS"
+  passwords     = [local.cache_kivera_pass]
+}
+
+resource "aws_elasticache_user_group" "redis_kivera_user_group" {
+  count = local.redis_enabled ? 1 : 0
+
+  engine        = "REDIS"
+  user_group_id = "kivera"
+  user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id]
 }

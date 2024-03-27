@@ -15,7 +15,6 @@ export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
 export KIVERA_CA=/opt/kivera/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
 export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
-export KIVERA_REDIS_ADDR=${redis_connection_string}
 
 # log file
 cat << EOF | tee /etc/cron.hourly/kivera-logrotate
@@ -47,9 +46,22 @@ echo '${proxy_public_cert}' > $KIVERA_CA_CERT
 
 export KIVERA_CA_SECRET_REGION=$(echo ${proxy_private_key_secret_arn} | cut -d':' -f4)
 export KIVERA_CREDENTIALS_SECRET_REGION=$(echo ${proxy_credentials_secret_arn} | cut -d':' -f4)
+export REDIS_CONNECTION_STRING_SECRET_REGION=$(echo ${redis_connection_string_arn} | cut -d':' -f4)
 
 aws secretsmanager get-secret-value --secret-id '${proxy_private_key_secret_arn}' --region $KIVERA_CA_SECRET_REGION --query SecretString --output text > $KIVERA_CA
 aws secretsmanager get-secret-value --secret-id '${proxy_credentials_secret_arn}' --region $KIVERA_CREDENTIALS_SECRET_REGION --query SecretString --output text > $KIVERA_CREDENTIALS
+
+cat << EOF > /opt/kivera/etc/env.txt
+KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
+KIVERA_CA_CERT=$KIVERA_CA_CERT
+KIVERA_CA=$KIVERA_CA
+KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
+KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
+KIVERA_KV_STORE_CLUSTER_MODE=true
+KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
+KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
+DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
+EOF
 
 groupadd -r kivera
 useradd -mrg kivera kivera
@@ -87,15 +99,7 @@ User=kivera
 WorkingDirectory=$KIVERA_BIN_PATH
 ExecStart=/usr/bin/sh -c "$KIVERA_BIN_PATH/kivera | tee -a $KIVERA_LOGS_FILE"
 Restart=always
-Environment=KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
-Environment=KIVERA_CA_CERT=$KIVERA_CA_CERT
-Environment=KIVERA_CA=$KIVERA_CA
-Environment=KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
-Environment=KIVERA_KV_STORE_CONNECT=$KIVERA_REDIS_ADDR
-Environment=KIVERA_KV_STORE_CLUSTER_MODE=true
-Environment=KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
-Environment=KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
-Environment=DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
+EnvironmentFile=/opt/kivera/etc/env.txt
 
 [Install]
 WantedBy=multi-user.target
