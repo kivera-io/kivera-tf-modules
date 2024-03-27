@@ -262,6 +262,7 @@ resource "aws_launch_template" "launch_template" {
     enable_datadog_agent         = var.enable_datadog_agent
     enable_datadog_tracing       = var.enable_datadog_tracing
     enable_datadog_profiling     = var.enable_datadog_profiling
+    cache_enabled                = var.cache_enabled
     datadog_secret_arn           = var.datadog_secret_arn
     datadog_trace_sampling_rate  = var.datadog_trace_sampling_rate
   }))
