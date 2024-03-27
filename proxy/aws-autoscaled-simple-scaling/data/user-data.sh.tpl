@@ -96,7 +96,7 @@ Environment=KIVERA_KV_STORE_CLUSTER_MODE=true
 Environment=KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 Environment=KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
 Environment=DD_TRACE_SAMPLE_RATE=${ddog_trace_sampling_rate}
-# Environment=KIVERA_OPAPLUGIN=./opa-plugin
+Environment=KIVERA_OPAPLUGIN=./opa-plugin
 
 [Install]
 WantedBy=multi-user.target
