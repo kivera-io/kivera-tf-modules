@@ -203,15 +203,17 @@ resource "aws_launch_template" "launch_template" {
     redis_connection_string      = local.redis_connection_string
     log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
+    enable_datadog_agent         = var.enable_datadog_agent
     enable_datadog_tracing       = var.enable_datadog_tracing
     enable_datadog_profiling     = var.enable_datadog_profiling
     ddog_secret_arn              = var.ddog_secret_arn
     ddog_trace_sampling_rate     = var.ddog_trace_sampling_rate
   }))
-  block_device_mappings {
-    device_name = "/dev/xvda"
-    ebs {
-      volume_size = 50
+
+  lifecycle {
+    precondition {
+      condition     = var.enable_datadog_agent ? length(var.ddog_secret_arn) > 0 : true
+      error_message = "ddog_secret_arn must be provided if enable_datadog_agent is true"
     }
   }
 }
@@ -372,7 +374,7 @@ data "archive_file" "proxy_binary" {
   count = var.proxy_local_path != "" ? 1 : 0
 
   type        = "zip"
-  source_file  = var.proxy_local_path
+  source_file = var.proxy_local_path
   output_path = "${path.module}/temp/proxy.zip"
 }
 
