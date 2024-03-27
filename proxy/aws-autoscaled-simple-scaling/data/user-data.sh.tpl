@@ -209,12 +209,14 @@ if [[ ${proxy_log_to_kivera} == true ]]; then
   systemctl enable td-agent.service
   systemctl start td-agent.service
 fi
+if [[ ${enable_datadog_agent} == true ]]; then
+  systemctl enable datadog-agent
+  systemctl start datadog-agent
+fi
 systemctl enable amazon-cloudwatch-agent.service
 systemctl start amazon-cloudwatch-agent.service
 systemctl enable kivera.service
 systemctl start kivera.service
-systemctl enable datadog-agent
-systemctl start datadog-agent
 
 sleep 10
 
