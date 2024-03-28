@@ -55,7 +55,7 @@ variable "proxy_cert_type" {
 variable "proxy_instance_type" {
   description = "The EC2 Instance Type of the proxy"
   type        = string
-  default     = "t3.medium"
+  default     = "c5d.xlarge"
 }
 
 variable "proxy_log_to_kivera" {
@@ -93,31 +93,31 @@ variable "proxy_subnet_ids" {
 variable "load_balancer_internal" {
   description = "Which load balancer scheme to use"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "proxy_allowed_ingress_range" {
   description = "IP range allowed to connect to proxy"
   type        = string
-  default     = "10.0.0.0/8"
+  default     = "0.0.0.0/0"
 }
 
 variable "proxy_allowed_ssh_range" {
   description = "IP range allowed to SSH to proxy"
   type        = string
-  default     = "10.0.0.0/8"
+  default     = "0.0.0.0/0"
 }
 
 variable "proxy_min_asg_size" {
   description = "Minimum instances in the Autoscaling Group"
   type        = number
-  default     = 5
+  default     = 3
 }
 
 variable "proxy_max_asg_size" {
   description = "Maximum number of instances in the autoscaling group"
   type        = number
-  default     = 5
+  default     = 12
 }
 
 variable "proxy_local_path" {
@@ -130,37 +130,6 @@ variable "proxy_log_group_retention" {
   description = "The number of days to retain proxy logs in CloudWatch Logs"
   type        = number
   default     = 14
-}
-
-variable "enable_datadog_agent" {
-  description = "Enable Datadog agent on the proxy instance"
-  type        = bool
-  default     = false
-}
-
-variable "datadog_secret_arn" {
-  description = "The arn for the Datadog API key secret"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "datadog_trace_sampling_rate" {
-  description = "The samping rate Datadog uses for tracing"
-  type        = number
-  default     = 0.2
-}
-
-variable "enable_datadog_tracing" {
-  description = "Enable trace metrics to be sent to Datadog"
-  type        = bool
-  default     = true
-}
-
-variable "enable_datadog_profiling" {
-  description = "Enable profile metrics to be sent to Datadog"
-  type        = bool
-  default     = true
 }
 
 variable "cache_enabled" {
@@ -231,4 +200,35 @@ variable "s3_bucket" {
 variable "s3_bucket_key" {
   description = "The key/path to be used to upload the tests/files"
   default     = "/kivera/proxy"
+}
+
+variable "enable_datadog_agent" {
+  description = "Enable Datadog agent on the proxy instance"
+  type        = bool
+  default     = false
+}
+
+variable "datadog_secret_arn" {
+  description = "The arn for the Datadog API key secret"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "datadog_trace_sampling_rate" {
+  description = "The samping rate Datadog uses for tracing"
+  type        = number
+  default     = 0.2
+}
+
+variable "enable_datadog_tracing" {
+  description = "Enable trace metrics to be sent to Datadog"
+  type        = bool
+  default     = true
+}
+
+variable "enable_datadog_profiling" {
+  description = "Enable profile metrics to be sent to Datadog"
+  type        = bool
+  default     = true
 }
