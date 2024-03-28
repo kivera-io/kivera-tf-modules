@@ -111,19 +111,56 @@ variable "proxy_allowed_ssh_range" {
 variable "proxy_min_asg_size" {
   description = "Minimum instances in the Autoscaling Group"
   type        = number
-  default     = 3
+  default     = 5
 }
 
 variable "proxy_max_asg_size" {
   description = "Maximum number of instances in the autoscaling group"
   type        = number
-  default     = 12
+  default     = 5
+}
+
+variable "proxy_local_path" {
+  description = "Path to a local proxy binary (takes precedence over proxy_version)"
+  type        = string
+  default     = ""
 }
 
 variable "proxy_log_group_retention" {
   description = "The number of days to retain proxy logs in CloudWatch Logs"
   type        = number
   default     = 14
+}
+
+variable "enable_datadog_agent" {
+  description = "Enable Datadog agent on the proxy instance"
+  type        = bool
+  default     = false
+}
+
+variable "datadog_secret_arn" {
+  description = "The arn for the Datadog API key secret"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "datadog_trace_sampling_rate" {
+  description = "The samping rate Datadog uses for tracing"
+  type        = number
+  default     = 0.2
+}
+
+variable "enable_datadog_tracing" {
+  description = "Enable trace metrics to be sent to Datadog"
+  type        = bool
+  default     = true
+}
+
+variable "enable_datadog_profiling" {
+  description = "Enable profile metrics to be sent to Datadog"
+  type        = bool
+  default     = true
 }
 
 variable "cache_enabled" {
@@ -185,4 +222,13 @@ variable "redis_replicas_per_node_group" {
   description = "The number of replicas for each node groups in the Redis cluster"
   type        = number
   default     = 2
+}
+
+variable "s3_bucket" {
+  description = "The name of the bucket used to upload the tests/files"
+}
+
+variable "s3_bucket_key" {
+  description = "The key/path to be used to upload the tests/files"
+  default     = "/kivera/proxy"
 }

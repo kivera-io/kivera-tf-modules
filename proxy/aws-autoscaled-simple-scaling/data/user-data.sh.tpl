@@ -1,5 +1,13 @@
-#!/bin/bash -ex
+#!/bin/bash -x
 STATE=0
+
+## tune box
+echo "* hard nofile 100000" >> /etc/security/limits.conf
+echo "* soft nofile 100000" >> /etc/security/limits.conf
+echo "net.core.somaxconn=16384" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
+echo "net.core.netdev_max_backlog=1000" >> /etc/sysctl.conf
+sysctl -p
 
 export KIVERA_BIN_PATH=/opt/kivera/bin
 export KIVERA_CREDENTIALS=/opt/kivera/etc/credentials.json
@@ -7,6 +15,30 @@ export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
 export KIVERA_CA=/opt/kivera/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
 export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
+
+# log file
+cat << EOF | tee /etc/cron.hourly/kivera-logrotate
+#!/bin/sh
+
+/usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
+EXITVALUE=\$?
+if [ \$EXITVALUE != 0 ]; then
+    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
+fi
+exit 0
+EOF
+
+cat << EOF | tee /etc/klogrotate.conf
+$KIVERA_LOGS_FILE {
+    maxsize 500M
+    hourly
+    missingok
+    rotate 8
+    compress
+    notifempty
+    copytruncate
+}
+EOF
 
 mkdir -p $KIVERA_BIN_PATH /opt/kivera/etc/ /opt/kivera/var/log/
 
@@ -24,23 +56,40 @@ KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
 KIVERA_CA_CERT=$KIVERA_CA_CERT
 KIVERA_CA=$KIVERA_CA
 KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
+KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
+KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
+DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
+EOF
+
+if [[ ${cache_enabled} == true ]]; then
+cat << EOF >> /opt/kivera/etc/env.txt
 KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
 KIVERA_KV_STORE_CLUSTER_MODE=true
 EOF
+fi
 
 groupadd -r kivera
 useradd -mrg kivera kivera
 useradd -g kivera td-agent
 
-# Download proxy binary
-wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${proxy_version}.tar.gz -O proxy.tar.gz
-tar -xvzf proxy.tar.gz -C /opt/kivera
-cp $KIVERA_BIN_PATH/linux/amd64/kivera $KIVERA_BIN_PATH/kivera
+if [[ "${proxy_s3_path}" != "" ]]; then
+    aws s3 cp ${proxy_s3_path} ./proxy.zip
+    unzip ./proxy.zip -d $KIVERA_BIN_PATH
+else
+    wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${proxy_version}.tar.gz -O proxy.tar.gz
+    tar -xvzf proxy.tar.gz -C /opt/kivera
+    cp $KIVERA_BIN_PATH/linux/amd64/kivera $KIVERA_BIN_PATH/kivera
+fi
 chmod 0755 $KIVERA_BIN_PATH/kivera
 chown -R kivera:kivera /opt/kivera
 
-# Install dependencies
 yum install amazon-cloudwatch-agent -y
+
+if [[ "${enable_datadog_agent}" == true ]]; then
+  DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${datadog_secret_arn}`
+  export DD_API_KEY
+  DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+fi
 
 curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera
@@ -160,18 +209,14 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
 }
 EOF
 
-# Tune system parameters
-echo "* hard nofile 100000" >> /etc/security/limits.conf
-echo "* soft nofile 100000" >> /etc/security/limits.conf
-echo "net.core.somaxconn=4096" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
-echo "net.core.netdev_max_backlog=5000" >> /etc/sysctl.conf
-sysctl -p
-
 # Enable services
 if [[ ${proxy_log_to_kivera} == true ]]; then
   systemctl enable td-agent.service
   systemctl start td-agent.service
+fi
+if [[ ${enable_datadog_agent} == true ]]; then
+  systemctl enable datadog-agent
+  systemctl start datadog-agent
 fi
 systemctl enable amazon-cloudwatch-agent.service
 systemctl start amazon-cloudwatch-agent.service
@@ -197,4 +242,3 @@ KIVERA_CONNECTIONS=$(lsof -i -P -n | grep kivera)
 [[ $KIVERA_PROCESS -eq "active" && $KIVERA_CONNECTIONS == *"(ESTABLISHED)"* && $KIVERA_CONNECTIONS == *"(LISTEN)"* ]] \
   && echo "The Kivera service and connections appears to be healthy." \
   || (echo "The Kivera service and connections appear unhealthy." && STATE=1)
-
