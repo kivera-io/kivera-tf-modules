@@ -93,7 +93,7 @@ variable "proxy_subnet_ids" {
 variable "load_balancer_internal" {
   description = "Which load balancer scheme to use"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "proxy_allowed_ingress_range" {
