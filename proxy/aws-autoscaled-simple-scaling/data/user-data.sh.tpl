@@ -65,9 +65,6 @@ if [[ ${cache_enabled} == true ]]; then
 cat << EOF >> /opt/kivera/etc/env.txt
 KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
 KIVERA_KV_STORE_CLUSTER_MODE=true
-KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
-KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
-DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
 EOF
 fi
 
