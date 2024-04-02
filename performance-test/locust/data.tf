@@ -8,22 +8,17 @@ data "aws_ami" "amazon_linux_2" {
   owners = ["amazon"]
 }
 
-resource "random_string" "deployment_id" {
-  length  = 10
-  special = false
-}
-
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
   account_id                  = data.aws_caller_identity.current.account_id
   aws_region                  = data.aws_region.current.name
-  deployment_id               = formatdate("YYYYMMDDhhmmss", timestamp())
-  redis_instance_name         = "${var.deployment_name}-redis-${local.deployment_id}"
-  redis_subnet_group_name     = "${var.deployment_name}-subnets-${local.deployment_id}"
-  locust_leader_instance_name = "${var.deployment_name}-locust-leader-${local.deployment_id}"
-  locust_node_instance_name   = "${var.deployment_name}-locust-node-${local.deployment_id}"
+  deployment_id               = formatdate("YYYYMMDDhh", timestamp())
+  redis_instance_name         = "${var.deployment_name}-redis"
+  redis_subnet_group_name     = "${var.deployment_name}-subnets"
+  locust_leader_instance_name = "${var.deployment_name}-locust-leader"
+  locust_node_instance_name   = "${var.deployment_name}-locust-node"
 }
 
 data "archive_file" "tests" {

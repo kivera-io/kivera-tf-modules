@@ -1,6 +1,6 @@
 resource "aws_security_group" "locust" {
 
-  name = "${var.deployment_name}-locust-sg-${local.deployment_id}"
+  name = "${var.deployment_name}-locust-sg"
 
   description = "Locust SG"
 
@@ -37,7 +37,7 @@ resource "aws_security_group" "locust" {
   }
 
   tags = {
-    Name : "${var.deployment_name}-locust-sg-${local.deployment_id}"
+    Name : "${var.deployment_name}-locust-sg"
     DeploymentName : var.deployment_name
     DeploymentId : local.deployment_id
   }
@@ -51,7 +51,7 @@ resource "aws_kms_alias" "test_key" {
 }
 
 resource "aws_iam_role" "locust" {
-  name = "${var.deployment_name}-locust-role-${local.deployment_id}"
+  name = "${var.deployment_name}-locust-role"
 
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
@@ -60,7 +60,7 @@ resource "aws_iam_role" "locust" {
   ]
 
   inline_policy {
-    name = "${var.deployment_name}-locust-policy-${local.deployment_id}"
+    name = "${var.deployment_name}-locust-policy"
     policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
@@ -102,13 +102,13 @@ resource "aws_iam_role" "locust" {
   })
 
   tags = {
-    Name : "${var.deployment_name}-locust-role-${local.deployment_id}"
+    Name : "${var.deployment_name}-locust-role"
     DeploymentName : var.deployment_name
     DeploymentId : local.deployment_id
   }
 }
 
 resource "aws_iam_instance_profile" "locust" {
-  name = "${var.deployment_name}-locust-profile-${local.deployment_id}"
+  name = "${var.deployment_name}-locust-profile"
   role = aws_iam_role.locust.name
 }
