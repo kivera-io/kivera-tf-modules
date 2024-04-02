@@ -7,9 +7,9 @@ Kivera uses [Locust](https://locust.io/) for performance testing. This repo incl
 Ensure all appropriate variables are included in the relevant var files (`proxy_var.tfvars` and `locust_var.tfvars`). Refer to the table below, and the modules for more info on all available variables. Locust module in `/locust` and proxy module in `/proxy/aws-autoscaled-simple-scaling`
 
 ### Deploy and run Locust performance test
-Run the following script
+Run the following script from the repository root folder:
 ```
-./start-performance-test.sh
+./examples/locust-performance-test/start-performance-test.sh
 ```
 
 ### Note
