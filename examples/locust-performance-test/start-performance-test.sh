@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-base_dir=$(pwd)/../..
+base_dir=$(pwd)
 proxy_dir=$base_dir/proxy/aws-autoscaled-simple-scaling
 locust_dir=$base_dir/performance-test/locust
 
