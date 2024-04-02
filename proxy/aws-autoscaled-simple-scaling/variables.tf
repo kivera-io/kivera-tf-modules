@@ -91,7 +91,7 @@ variable "proxy_subnet_ids" {
 }
 
 variable "load_balancer_internal" {
-  description = "Which load balancer scheme to use"
+  description = "Enable to use an internal load balancer"
   type        = bool
   default     = true
 }
@@ -109,13 +109,13 @@ variable "proxy_allowed_ssh_range" {
 }
 
 variable "proxy_min_asg_size" {
-  description = "Minimum instances in the Autoscaling Group"
+  description = "Minimum number of proxy instances"
   type        = number
   default     = 3
 }
 
 variable "proxy_max_asg_size" {
-  description = "Maximum number of instances in the autoscaling group"
+  description = "Maximum number of proxy instances"
   type        = number
   default     = 12
 }
@@ -133,7 +133,7 @@ variable "proxy_log_group_retention" {
 }
 
 variable "cache_enabled" {
-  description = "Whether to deploy and use a cache"
+  description = "Whether to deploy and use a cache with the proxy"
   type        = bool
   default     = true
 }
@@ -194,11 +194,11 @@ variable "redis_replicas_per_node_group" {
 }
 
 variable "s3_bucket" {
-  description = "The name of the bucket used to upload the tests/files"
+  description = "The name of the bucket used to upload the files"
 }
 
 variable "s3_bucket_key" {
-  description = "The key/path to be used to upload the tests/files"
+  description = "The key/path to be used to upload the files"
   default     = "/kivera/proxy"
 }
 
@@ -209,7 +209,7 @@ variable "enable_datadog_agent" {
 }
 
 variable "datadog_secret_arn" {
-  description = "The arn for the Datadog API key secret"
+  description = "The arn for the Datadog API key secret (required if enabled_datadog_agent is true)"
   type        = string
   sensitive   = true
   default     = ""

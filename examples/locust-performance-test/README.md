@@ -6,6 +6,16 @@ Kivera uses [Locust](https://locust.io/) for performance testing. This repo incl
 ### Getting Started
 
 Ensure all appropriate variables are included in the relevant var files. Refer to the table below for all the required variables, and the modules for more info on all available variables. Locust module in `/locust` and proxy module in `/proxy/aws-autoscaled-simple-scaling`
+
+### Deploy and run Locust performance test
+
+Run the following script
+```
+./start-performance-test.sh
+```
+
+### Appendix
+TF vars **required** to deploy and run the performance test:
 | Module | Required TF Vars | Description |
 |--|--|--|
 | Proxy | `proxy_credentials` | Proxy credentials as json string |
@@ -21,10 +31,15 @@ Ensure all appropriate variables are included in the relevant var files. Refer t
 | Locust | `vpc_id` | VPC to deploy the proxy into |
 | Locust | `public_subnet_id` | Public subnet to deploy the Locust leader |
 | Locust | `private_subnet_ids` | Private subnets to deploy the Locust nodes |
-
-### Deploy and run Locust performance test
-
-Run the following script
-```
-./start-performance-test.sh
-```
+---
+TF vars **recommended** to customize to deploy and run the performance test:
+| Module | Recommended TF Vars | Description |
+|--|--|--|
+| Proxy | `proxy_min_asg_size` | Minimum number of proxy instances |
+| Proxy | `proxy_max_asg_size` | Maximum number of proxy instances |
+| Locust | `nodes_count` | Number of total nodes/instances |
+| Locust | `public_subnet_id` | Public subnet to deploy the Locust leader |
+| Locust | `private_subnet_ids` | Private subnets to deploy the Locust nodes |
+| Locust | `locust_max_users` | Max number of Locust users |
+| Locust | `locust_spawn_rate` | Rate at which Locust users spawn (per second) |
+| Locust | `locust_run_time` | Duration of the Locust test (e.g. 20s, 3m, 2h, 3h30m10s) |

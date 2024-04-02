@@ -4,7 +4,7 @@ variable "deployment_name" {
 }
 
 variable "nodes_count" {
-  description = "Number of total nodes"
+  description = "Number of total nodes/instances"
   default     = 45
 }
 
