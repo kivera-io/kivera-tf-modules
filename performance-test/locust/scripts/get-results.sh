@@ -14,7 +14,7 @@ echo -e "\nWaiting for leader to become ready...\n"
 while true; do
     status_code=$(curl -s -o /dev/null -w "%{http_code}" -u ${LEADER_USERNAME}:${LEADER_PASSWORD} http://${LEADER_ADDRESS} || :)
     [[ "$status_code" == "000" ]] && status_code="503"
-    if [[ $GITHUB_ACTIONS == false ]]; then
+    if [[ $GITHUB_ACTIONS != true ]]; then
         echo -e "\e[1A\e[KStatusCode: $status_code, Timeout: $time"
     elif [[ $(($time % 15)) == 0 ]]; then
         echo -e "StatusCode: $status_code, Timeout: $time"
@@ -49,7 +49,7 @@ while true; do
         echo "Testing timed out"
         break
     else
-        if [[ $GITHUB_ACTIONS == false ]]; then
+        if [[ $GITHUB_ACTIONS != true ]]; then
             echo -e "\e[1A\e[KState: $state, Workers: $workers, Users: $users, RPS: $rps, Timeout: $time"
         elif [[ $(($time % 15)) == 0 ]]; then
             echo -e "State: $state, Workers: $workers, Users: $users, RPS: $rps, Timeout: $time"

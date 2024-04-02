@@ -1,11 +1,11 @@
 variable "deployment_name" {
   description = "Deployment name"
-  default     = "kivera-perf-testing"
+  default     = "kivera-perf-test"
 }
 
 variable "nodes_count" {
   description = "Number of total nodes"
-  default     = 3
+  default     = 45
 }
 
 variable "leader_instance_type" {
@@ -71,7 +71,6 @@ variable "private_subnet_ids" {
 
 variable "ec2_key_pair" {
   description = "Name of EC2 key pair on AWS"
-  type        = string
   default     = ""
 }
 
@@ -89,7 +88,7 @@ variable "web_cidr_ingress_blocks" {
 variable "locust_max_users" {
   description = "Max number of Locust users"
   type        = number
-  default     = 100
+  default     = 10000
 }
 
 variable "locust_spawn_rate" {
@@ -100,8 +99,7 @@ variable "locust_spawn_rate" {
 
 variable "locust_run_time" {
   description = "Duration of the Locust test"
-  type        = string
-  default     = "5m"
+  default     = "10m"
 }
 
 variable "user_wait_min" {
@@ -118,6 +116,5 @@ variable "user_wait_max" {
 
 variable "proxy_pub_cert" {
   description = "Public cert used by the proxy"
-  type        = string
   default     = ""
 }

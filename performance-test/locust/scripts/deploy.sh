@@ -3,10 +3,6 @@ set -e
 
 base_dir=$(dirname "$0")/..
 
-[[ -e ${TFVARS_FILE} ]] && TF_VARS="-var-file=${TFVARS_FILE} $TF_VARS" || (echo "No TFVARS_FILE found" && exit 1)
-[[ -n ${PROXY_ENDPOINT} ]] && TF_VARS="$TF_VARS -var=proxy_endpoint=${PROXY_ENDPOINT}" || (echo "No PROXY_ENDPOINT found in env" && exit 1)
-
-echo "locust tf_vars: $TF_VARS"
 terraform -chdir="${base_dir}" init -upgrade
 terraform -chdir="${base_dir}" apply $TF_VARS --auto-approve
 
