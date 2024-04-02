@@ -56,12 +56,20 @@ KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
 KIVERA_CA_CERT=$KIVERA_CA_CERT
 KIVERA_CA=$KIVERA_CA
 KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
+KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
+KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
+DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
+EOF
+
+if [[ ${cache_enabled} == true ]]; then
+cat << EOF >> /opt/kivera/etc/env.txt
 KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
 KIVERA_KV_STORE_CLUSTER_MODE=true
 KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
 DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
 EOF
+fi
 
 groupadd -r kivera
 useradd -mrg kivera kivera
@@ -237,4 +245,3 @@ KIVERA_CONNECTIONS=$(lsof -i -P -n | grep kivera)
 [[ $KIVERA_PROCESS -eq "active" && $KIVERA_CONNECTIONS == *"(ESTABLISHED)"* && $KIVERA_CONNECTIONS == *"(LISTEN)"* ]] \
   && echo "The Kivera service and connections appears to be healthy." \
   || (echo "The Kivera service and connections appear unhealthy." && STATE=1)
-
