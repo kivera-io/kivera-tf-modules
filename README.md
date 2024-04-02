@@ -1,23 +1,17 @@
 # kivera-tf-modules
 
-To use a module:
+Repo containing a collection of Terraform modules used as an example for deploying Kivera and other relevant tools. The proxy can be used and deployed as a Terraform module.
 
 ```
-module "kivera" {
-  source = "git::https://github.com/kivera-io/kivera-tf-modules.git//proxy/aws-autoscaled-simple-scaling"
-
-  proxy_credentials           = var.proxy_credentials
-  proxy_private_key           = var.proxy_private_key
-  proxy_public_cert           = var.proxy_public_cert
-  proxy_instance_type         = var.proxy_instance_type
-  key_pair_name               = var.key_pair_name
-  vpc_id                      = var.vpc_id
-  proxy_subnet_ids            = var.proxy_subnet_ids
-  load_balancer_subnet_ids    = var.load_balancer_subnet_ids
-  load_balancer_internal      = var.load_balancer_internal
-  proxy_allowed_ingress_range = var.proxy_allowed_ingress_range
-  proxy_allowed_ssh_range     = var.proxy_allowed_ssh_range
-  redis_cache_enabled         = var.redis_cache_enabled
-  redis_subnet_ids            = var.redis_subnet_ids
-}
+.
+├── examples                            # Examples of use case
+│   └── locust-performance-test.sh      # Script for deploying and running Kivera proxy and Locust
+├── performance-test                    #
+│   └── Locust                          # Contains Locust performance test
+│      ├── data                         # Contains user data for the Locust leader and node instances
+│      ├── plans                        # Contains Python script containing AWS tests for Locust
+│      └── script                       # Scripts for deploying and running Locust
+├── proxy                               # Terraform modules for deploying Kivera proxy
+│   └── aws-autoscaled-simple-scaling   # Deploys a simple proxy with auto scaling
+└── README.md
 ```
