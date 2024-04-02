@@ -1,3 +1,4 @@
+# Proxy variables
 vpc_id                       = "vpc-id"
 proxy_instance_type          = "c5d.xlarge"
 key_pair_name                = "keypair-name"
