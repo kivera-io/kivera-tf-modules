@@ -99,13 +99,13 @@ variable "load_balancer_internal" {
 variable "proxy_allowed_ingress_range" {
   description = "IP range allowed to connect to proxy"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = "10.0.0.0/8"
 }
 
 variable "proxy_allowed_ssh_range" {
   description = "IP range allowed to SSH to proxy"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = "10.0.0.0/8"
 }
 
 variable "proxy_min_asg_size" {
@@ -129,7 +129,7 @@ variable "proxy_local_path" {
 variable "proxy_log_group_retention" {
   description = "The number of days to retain proxy logs in CloudWatch Logs"
   type        = number
-  default     = 14
+  default     = 30
 }
 
 variable "cache_enabled" {
@@ -224,11 +224,11 @@ variable "datadog_trace_sampling_rate" {
 variable "enable_datadog_tracing" {
   description = "Enable trace metrics to be sent to Datadog"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "enable_datadog_profiling" {
   description = "Enable profile metrics to be sent to Datadog"
   type        = bool
-  default     = true
+  default     = false
 }
