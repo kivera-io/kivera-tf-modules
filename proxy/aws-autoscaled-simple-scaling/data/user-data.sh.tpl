@@ -83,7 +83,7 @@ KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
 KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
 DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
-KIVERA_OPAPLUGIN=~/opa.so
+KIVERA_OPAPLUGIN=$KIVERA_BIN_PATH/opa.so
 EOF
 
 if [[ ${cache_enabled} == true ]]; then
@@ -97,7 +97,8 @@ groupadd -r kivera
 useradd -mrg kivera kivera
 useradd -g kivera td-agent
 
-aws s3 cp ${opa_plugin_s3_path} ~/opa.so
+aws s3 cp ${opa_plugin_s3_path} ./opa.so
+cp ./opa.so $KIVERA_BIN_PATH/opa.so
 
 if [[ "${proxy_s3_path}" != "" ]]; then
     aws s3 cp ${proxy_s3_path} ./proxy.zip
