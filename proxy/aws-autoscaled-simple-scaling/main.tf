@@ -114,19 +114,7 @@ resource "aws_iam_role" "instance_role" {
           Effect = "Allow"
           Resource = [
             local.proxy_credentials_secret_arn,
-            local.proxy_private_key_secret_arn,
-            var.ddog_secret_arn
-          ]
-        },
-        {
-          Action = [
-            "s3:GetObject",
-            "s3:PutObject",
-            "s3:CreateMultipartUpload"
-          ]
-          Effect = "Allow"
-          Resource = [
-            "arn:aws:s3:::${var.s3_bucket}/*"
+            local.proxy_private_key_secret_arn
           ]
         },
         {

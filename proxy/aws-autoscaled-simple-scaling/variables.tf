@@ -111,19 +111,13 @@ variable "proxy_allowed_ssh_range" {
 variable "proxy_min_asg_size" {
   description = "Minimum number of proxy instances"
   type        = number
-  default     = 5
+  default     = 3
 }
 
 variable "proxy_max_asg_size" {
   description = "Maximum number of proxy instances"
   type        = number
-  default     = 5
-}
-
-variable "proxy_local_path" {
-  description = "Path to a local proxy binary (takes precedence over proxy_version)"
-  type        = string
-  default     = ""
+  default     = 12
 }
 
 variable "proxy_local_path" {
@@ -136,30 +130,6 @@ variable "proxy_log_group_retention" {
   description = "The number of days to retain proxy logs in CloudWatch Logs"
   type        = number
   default     = 30
-}
-
-variable "ddog_secret_arn" {
-    description = "The arn for the Data Dog API key secret"
-    type        = string
-    sensitive   = true
-}
-
-variable "ddog_trace_sampling_rate" {
-    description = "The samping rate DataDog uses for tracing"
-    type        = number
-    default     = 0.2
-}
-
-variable "enable_datadog_tracing" {
-    description = "Enable trace metrics to be sent to datadog"
-    type        = bool
-    default     = true
-}
-
-variable "enable_datadog_profiling" {
-    description = "Enable profile metrics to be sent to datatog"
-    type        = bool
-    default     = true
 }
 
 variable "cache_enabled" {
