@@ -25,7 +25,7 @@ resource "random_password" "kivera_pass" {
 
 locals {
   suffix                             = random_string.suffix.result
-  opa_plugin_s3_path                 = "s3://${var.s3_bucket}${var.s3_bucket_key}/opa-plugin"
+  opa_plugin_s3_path                 = "s3://${var.s3_bucket}${var.s3_bucket_key}/opa.so"
   proxy_s3_path                      = var.proxy_local_path != "" ? "s3://${var.s3_bucket}${var.s3_bucket_key}/proxy.zip" : ""
   proxy_credentials_secret_arn       = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn       = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
