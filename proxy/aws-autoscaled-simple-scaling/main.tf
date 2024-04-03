@@ -468,7 +468,7 @@ resource "aws_s3_object" "proxy_binary" {
 
 resource "aws_s3_object" "opa_plugin" {
   bucket = data.aws_s3_bucket.bucket.id
-  key    = "${var.s3_bucket_key}/opa-plugin"
+  key    = "${var.s3_bucket_key}/opa.so"
   source = var.opa_plugin_file
 }
 
