@@ -83,7 +83,7 @@ KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
 KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
 DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
-Environment=KIVERA_OPAPLUGIN=~/opa-plugin
+KIVERA_OPAPLUGIN=~/opa-plugin
 EOF
 
 if [[ ${cache_enabled} == true ]]; then
