@@ -15,7 +15,30 @@ export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
 export KIVERA_CA=/opt/kivera/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
 export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
-export KIVERA_REDIS_ADDR=${redis_connection_string}
+
+# log file
+cat << EOF | tee /etc/cron.hourly/kivera-logrotate
+#!/bin/sh
+
+/usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
+EXITVALUE=\$?
+if [ \$EXITVALUE != 0 ]; then
+    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
+fi
+exit 0
+EOF
+
+cat << EOF | tee /etc/klogrotate.conf
+$KIVERA_LOGS_FILE {
+    maxsize 500M
+    hourly
+    missingok
+    rotate 8
+    compress
+    notifempty
+    copytruncate
+}
+EOF
 
 # log file
 cat << EOF | tee /etc/cron.hourly/kivera-logrotate
@@ -47,9 +70,28 @@ echo '${proxy_public_cert}' > $KIVERA_CA_CERT
 
 export KIVERA_CA_SECRET_REGION=$(echo ${proxy_private_key_secret_arn} | cut -d':' -f4)
 export KIVERA_CREDENTIALS_SECRET_REGION=$(echo ${proxy_credentials_secret_arn} | cut -d':' -f4)
+export REDIS_CONNECTION_STRING_SECRET_REGION=$(echo ${redis_connection_string_arn} | cut -d':' -f4)
 
 aws secretsmanager get-secret-value --secret-id '${proxy_private_key_secret_arn}' --region $KIVERA_CA_SECRET_REGION --query SecretString --output text > $KIVERA_CA
 aws secretsmanager get-secret-value --secret-id '${proxy_credentials_secret_arn}' --region $KIVERA_CREDENTIALS_SECRET_REGION --query SecretString --output text > $KIVERA_CREDENTIALS
+
+cat << EOF > /opt/kivera/etc/env.txt
+KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
+KIVERA_CA_CERT=$KIVERA_CA_CERT
+KIVERA_CA=$KIVERA_CA
+KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
+KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
+KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
+DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
+Environment=KIVERA_OPAPLUGIN=~/opa-plugin
+EOF
+
+if [[ ${cache_enabled} == true ]]; then
+cat << EOF >> /opt/kivera/etc/env.txt
+KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
+KIVERA_KV_STORE_CLUSTER_MODE=true
+EOF
+fi
 
 groupadd -r kivera
 useradd -mrg kivera kivera
@@ -70,9 +112,11 @@ chown -R kivera:kivera /opt/kivera
 
 yum install amazon-cloudwatch-agent -y
 
-DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${ddog_secret_arn}`
-export DD_API_KEY
-DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+if [[ "${enable_datadog_agent}" == true ]]; then
+  DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${datadog_secret_arn}`
+  export DD_API_KEY
+  DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+fi
 
 curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera
@@ -87,16 +131,7 @@ User=kivera
 WorkingDirectory=$KIVERA_BIN_PATH
 ExecStart=/usr/bin/sh -c "$KIVERA_BIN_PATH/kivera | tee -a $KIVERA_LOGS_FILE"
 Restart=always
-Environment=KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
-Environment=KIVERA_CA_CERT=$KIVERA_CA_CERT
-Environment=KIVERA_CA=$KIVERA_CA
-Environment=KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
-Environment=KIVERA_KV_STORE_CONNECT=$KIVERA_REDIS_ADDR
-Environment=KIVERA_KV_STORE_CLUSTER_MODE=true
-Environment=KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
-Environment=KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
-Environment=DD_TRACE_SAMPLE_RATE=${ddog_trace_sampling_rate}
-Environment=KIVERA_OPAPLUGIN=~/opa-plugin
+EnvironmentFile=/opt/kivera/etc/env.txt
 
 [Install]
 WantedBy=multi-user.target
@@ -206,6 +241,10 @@ if [[ ${proxy_log_to_kivera} == true ]]; then
   systemctl enable td-agent.service
   systemctl start td-agent.service
 fi
+if [[ ${enable_datadog_agent} == true ]]; then
+  systemctl enable datadog-agent
+  systemctl start datadog-agent
+fi
 systemctl enable amazon-cloudwatch-agent.service
 systemctl start amazon-cloudwatch-agent.service
 systemctl enable kivera.service
@@ -232,4 +271,3 @@ KIVERA_CONNECTIONS=$(lsof -i -P -n | grep kivera)
 [[ $KIVERA_PROCESS -eq "active" && $KIVERA_CONNECTIONS == *"(ESTABLISHED)"* && $KIVERA_CONNECTIONS == *"(LISTEN)"* ]] \
   && echo "The Kivera service and connections appears to be healthy." \
   || (echo "The Kivera service and connections appear unhealthy." && STATE=1)
-
