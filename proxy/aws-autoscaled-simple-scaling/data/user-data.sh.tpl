@@ -84,6 +84,7 @@ KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
 DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
 KIVERA_OPAPLUGIN=$KIVERA_BIN_PATH/opa.so
+CGO_ENABLED=1
 EOF
 
 if [[ ${cache_enabled} == true ]]; then
