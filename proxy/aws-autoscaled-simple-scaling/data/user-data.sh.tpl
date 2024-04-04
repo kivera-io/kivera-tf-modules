@@ -15,6 +15,7 @@ export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
 export KIVERA_CA=/opt/kivera/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
 export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
+export CGO_ENABLED=1
 
 # log file
 cat << EOF | tee /etc/cron.hourly/kivera-logrotate
