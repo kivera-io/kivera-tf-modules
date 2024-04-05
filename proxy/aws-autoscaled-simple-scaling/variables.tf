@@ -236,3 +236,7 @@ variable "enable_datadog_profiling" {
 variable "opa_plugin_file" {
   description = "The path to the opa plugin file"
 }
+
+variable "opa_plugin_name" {
+  description = "The name of opa plugin file"
+}
