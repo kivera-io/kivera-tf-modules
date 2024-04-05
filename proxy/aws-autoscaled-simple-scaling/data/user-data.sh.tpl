@@ -111,6 +111,7 @@ else
     cp $KIVERA_BIN_PATH/linux/amd64/kivera $KIVERA_BIN_PATH/kivera
 fi
 chmod 0755 $KIVERA_BIN_PATH/kivera
+chmod 0755 $KIVERA_BIN_PATH/${opa_plugin_name}
 chown -R kivera:kivera /opt/kivera
 
 yum install amazon-cloudwatch-agent -y
