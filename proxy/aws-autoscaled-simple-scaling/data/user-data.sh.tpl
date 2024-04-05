@@ -97,7 +97,7 @@ fi
 
 groupadd -r kivera
 useradd -mrg kivera kivera
-useradd -g kivera td-agent
+# useradd -g kivera td-agent
 
 aws s3 cp ${opa_plugin_s3_path} ./opa.so
 cp ./opa.so $KIVERA_BIN_PATH/opa.so
@@ -121,8 +121,8 @@ if [[ "${enable_datadog_agent}" == true ]]; then
   DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 fi
 
-curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
-td-agent-gem install -N fluent-plugin-out-kivera
+# curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
+# td-agent-gem install -N fluent-plugin-out-kivera
 
 # Configure Kivera service
 cat << EOF | tee /etc/systemd/system/kivera.service
@@ -140,37 +140,37 @@ EnvironmentFile=/opt/kivera/etc/env.txt
 WantedBy=multi-user.target
 EOF
 
-# Configure remote logging
-mkdir -p /etc/systemd/system/td-agent.service.d/
+# # Configure remote logging
+# mkdir -p /etc/systemd/system/td-agent.service.d/
 
-cat << EOF | tee /etc/systemd/system/td-agent.service.d/override.conf
-[Service]
-Group=kivera
-EOF
+# cat << EOF | tee /etc/systemd/system/td-agent.service.d/override.conf
+# [Service]
+# Group=kivera
+# EOF
 
-cat << EOF | tee /etc/td-agent/td-agent.conf
-<source>
-  @type tail
-  tag kivera
-  path $KIVERA_LOGS_FILE
-  pos_file /var/log/td-agent/kivera.log.pos
-  <parse>
-    @type json
-  </parse>
-</source>
-<match kivera>
-  @type kivera
-  config_file $KIVERA_CREDENTIALS
-  bulk_request
-  <buffer>
-    flush_interval 1
-    chunk_limit_size 1m
-    flush_thread_interval 0.1
-    flush_thread_burst_interval 0.01
-    flush_thread_count 15
-  </buffer>
-</match>
-EOF
+# cat << EOF | tee /etc/td-agent/td-agent.conf
+# <source>
+#   @type tail
+#   tag kivera
+#   path $KIVERA_LOGS_FILE
+#   pos_file /var/log/td-agent/kivera.log.pos
+#   <parse>
+#     @type json
+#   </parse>
+# </source>
+# <match kivera>
+#   @type kivera
+#   config_file $KIVERA_CREDENTIALS
+#   bulk_request
+#   <buffer>
+#     flush_interval 1
+#     chunk_limit_size 1m
+#     flush_thread_interval 0.1
+#     flush_thread_burst_interval 0.01
+#     flush_thread_count 15
+#   </buffer>
+# </match>
+# EOF
 
 # Enable CloudWatch logging/metrics
 cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
@@ -217,10 +217,10 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
 EOF
 
 # Enable services
-if [[ ${proxy_log_to_kivera} == true ]]; then
-  systemctl enable td-agent.service
-  systemctl start td-agent.service
-fi
+# if [[ ${proxy_log_to_kivera} == true ]]; then
+#   systemctl enable td-agent.service
+#   systemctl start td-agent.service
+# fi
 if [[ ${enable_datadog_agent} == true ]]; then
   systemctl enable datadog-agent
   systemctl start datadog-agent
@@ -232,12 +232,12 @@ systemctl start kivera.service
 
 sleep 10
 
-if [[ ${proxy_log_to_kivera} == true ]]; then
-FLUENTD_PROCESS=$(systemctl is-active td-agent.service)
-  [[ $FLUENTD_PROCESS -eq "active" ]] \
-    && echo "Fluentd service is running" \
-    || (echo "Fluentd service is not running" && STATE=1)
-fi
+# if [[ ${proxy_log_to_kivera} == true ]]; then
+# FLUENTD_PROCESS=$(systemctl is-active td-agent.service)
+#   [[ $FLUENTD_PROCESS -eq "active" ]] \
+#     && echo "Fluentd service is running" \
+#     || (echo "Fluentd service is not running" && STATE=1)
+# fi
 
 CLOUDWATCH_PROCESS=$(systemctl is-active amazon-cloudwatch-agent.service)
   [[ $CLOUDWATCH_PROCESS -eq "active" ]] \
