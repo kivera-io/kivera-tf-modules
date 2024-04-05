@@ -55,7 +55,7 @@ variable "proxy_cert_type" {
 variable "proxy_instance_type" {
   description = "The EC2 Instance Type of the proxy"
   type        = string
-  default     = "t3.medium"
+  default     = "c5d.xlarge"
 }
 
 variable "proxy_log_to_kivera" {
@@ -91,7 +91,7 @@ variable "proxy_subnet_ids" {
 }
 
 variable "load_balancer_internal" {
-  description = "Which load balancer scheme to use"
+  description = "Enable to use an internal load balancer"
   type        = bool
   default     = true
 }
@@ -109,25 +109,31 @@ variable "proxy_allowed_ssh_range" {
 }
 
 variable "proxy_min_asg_size" {
-  description = "Minimum instances in the Autoscaling Group"
+  description = "Minimum number of proxy instances"
   type        = number
   default     = 3
 }
 
 variable "proxy_max_asg_size" {
-  description = "Maximum number of instances in the autoscaling group"
+  description = "Maximum number of proxy instances"
   type        = number
   default     = 12
+}
+
+variable "proxy_local_path" {
+  description = "Path to a local proxy binary (takes precedence over proxy_version)"
+  type        = string
+  default     = ""
 }
 
 variable "proxy_log_group_retention" {
   description = "The number of days to retain proxy logs in CloudWatch Logs"
   type        = number
-  default     = 14
+  default     = 30
 }
 
 variable "cache_enabled" {
-  description = "Whether to deploy and use a cache"
+  description = "Whether to deploy and use a cache with the proxy"
   type        = bool
   default     = true
 }
@@ -141,6 +147,26 @@ variable "cache_type" {
     condition     = contains(["redis"], var.cache_type)
     error_message = "Allowed value(s) for cache_type: \"redis\"."
   }
+}
+
+variable "cache_default_password" {
+  description = "The password used to connect to the cache as default user"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "cache_kivera_username" {
+  description = "The username used to connect to the cache as the kivera proxy user"
+  type        = string
+  default     = "kivera"
+}
+
+variable "cache_kivera_password" {
+  description = "The password used to connect to the cache as the kivera proxy user"
+  type        = string
+  sensitive   = true
+  default     = ""
 }
 
 variable "cache_subnet_ids" {
@@ -165,4 +191,44 @@ variable "redis_replicas_per_node_group" {
   description = "The number of replicas for each node groups in the Redis cluster"
   type        = number
   default     = 2
+}
+
+variable "s3_bucket" {
+  description = "The name of the bucket used to upload the files"
+}
+
+variable "s3_bucket_key" {
+  description = "The key/path to be used to upload the files"
+  default     = "/kivera/proxy"
+}
+
+variable "enable_datadog_agent" {
+  description = "Enable Datadog agent on the proxy instance"
+  type        = bool
+  default     = false
+}
+
+variable "datadog_secret_arn" {
+  description = "The arn for the Datadog API key secret (required if enabled_datadog_agent is true)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "datadog_trace_sampling_rate" {
+  description = "The samping rate Datadog uses for tracing"
+  type        = number
+  default     = 0.2
+}
+
+variable "enable_datadog_tracing" {
+  description = "Enable trace metrics to be sent to Datadog"
+  type        = bool
+  default     = false
+}
+
+variable "enable_datadog_profiling" {
+  description = "Enable profile metrics to be sent to Datadog"
+  type        = bool
+  default     = false
 }
