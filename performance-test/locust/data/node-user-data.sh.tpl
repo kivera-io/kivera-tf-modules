@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 ## tune box
 echo "* hard nofile 100000" >> /etc/security/limits.conf
@@ -7,6 +8,19 @@ echo "net.core.somaxconn=16384" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
 echo "net.core.netdev_max_backlog=1000" >> /etc/sysctl.conf
 sysctl -p
+
+mkdir -p ~/kivera
+
+if [[ ${proxy_transparent_enabled} == true ]]; then
+    echo "${proxy_pub_cert}" > ~/kivera/ca-cert.pem
+
+    cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
+    update-ca-trust extract
+
+    echo "export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"" >> ~/kivera/setenv.sh
+
+    source ~/kivera/setenv.sh
+fi
 
 yum update -y
 yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent -y
@@ -38,8 +52,6 @@ cd /locust
 
 [[ -e requirements.txt ]] && pip3 install -r requirements.txt
 
-mkdir -p ~/kivera
-
 if [[ ${proxy_transparent_enabled} == false ]]; then
     time=180
     echo Polling http://${proxy_host}:8090/version
@@ -49,28 +61,22 @@ if [[ ${proxy_transparent_enabled} == false ]]; then
     done
 
     curl -s http://${proxy_host}:8090/pub.cert > ~/kivera/ca-cert.pem
-else
-    echo ${proxy_pub_cert} > ~/kivera/ca-cert.pem
+
+    cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
+    update-ca-trust extract
+
+    echo "
+    export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"
+    export HTTPS_PROXY=\"http://${proxy_host}:8080\"
+    export HTTP_PROXY=\"http://${proxy_host}:8080\"
+    export https_proxy=\"http://${proxy_host}:8080\"
+    export http_proxy=\"http://${proxy_host}:8080\"
+    export NO_PROXY=\"${leader_ip},${proxy_host},169.254.169.254,.github.com\"
+    export no_proxy=\"\$NO_PROXY\"
+    " >> ~/kivera/setenv.sh
+
+    source ~/kivera/setenv.sh
 fi
-
-cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
-update-ca-trust extract
-
-echo "
-export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"
-" > ~/kivera/setenv.sh
-if [[ ${proxy_transparent_enabled} == false ]]; then
-echo "
-export HTTPS_PROXY=\"http://${proxy_host}:8080\"
-export HTTP_PROXY=\"http://${proxy_host}:8080\"
-export https_proxy=\"http://${proxy_host}:8080\"
-export http_proxy=\"http://${proxy_host}:8080\"
-export NO_PROXY=\"${leader_ip},${proxy_host},169.254.169.254,.github.com\"
-export no_proxy=\"\$NO_PROXY\"
-" >> ~/kivera/setenv.sh
-fi
-
-source ~/kivera/setenv.sh
 
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}

@@ -231,11 +231,6 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
 }
 EOF
 
-# Update source/dest check
-EC2_INSTANCE_ID="`wget -q -O - http://169.254.169.254/latest/meta-data/instance-id`"
-EC2_REGION_ID="`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`"
-aws ec2 modify-instance-attribute --no-source-dest-check --instance-id $EC2_INSTANCE_ID --region $EC2_REGION_ID
-
 # Enable services
 if [[ ${proxy_log_to_kivera} == true ]]; then
   systemctl enable td-agent.service

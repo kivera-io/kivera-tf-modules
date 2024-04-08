@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 ## tune box
 echo "* hard nofile 100000" >> /etc/security/limits.conf
