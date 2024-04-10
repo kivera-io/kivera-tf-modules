@@ -55,7 +55,7 @@ variable "proxy_cert_type" {
 variable "proxy_instance_type" {
   description = "The EC2 Instance Type of the proxy"
   type        = string
-  default     = "t3.medium"
+  default     = "c5d.xlarge"
 }
 
 variable "proxy_log_to_kivera" {
