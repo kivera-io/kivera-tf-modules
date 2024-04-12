@@ -31,8 +31,8 @@ case $1 in
                 export instance_id=$(cat /home/ec2-user/iid | jq -r .instanceId);
                 export instance_ip=$(cat /home/ec2-user/iid | jq -r .privateIp);
                 echo "Setting up NAT and IP FORWARD"
-                iptables -t nat -A PREROUTING -p tcp -m tcp ! -d $instance_ip --dport 443 -j DNAT --to-destination $instance_ip:10080
-                iptables -t nat -A PREROUTING -p tcp -m tcp ! -d $instance_ip --dport 443 -j REDIRECT --to-ports 10080
+                # iptables -t nat -A PREROUTING -p tcp -m tcp ! -d $instance_ip --dport 443 -j DNAT --to-destination $instance_ip:10080
+                # iptables -t nat -A PREROUTING -p tcp -m tcp ! -d $instance_ip --dport 443 -j REDIRECT --to-ports 10080
                 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
                 iptables -A FORWARD -i $2 -o $2 -j ACCEPT
 
