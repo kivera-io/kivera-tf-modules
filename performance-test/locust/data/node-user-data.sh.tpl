@@ -11,17 +11,6 @@ sysctl -p
 
 mkdir -p ~/kivera
 
-# if [[ ${proxy_transparent_enabled} == true ]]; then
-#     echo "${proxy_pub_cert}" > ~/kivera/ca-cert.pem
-
-#     cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
-#     update-ca-trust extract
-
-#     echo "export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"" >> ~/kivera/setenv.sh
-
-#     source ~/kivera/setenv.sh
-# fi
-
 yum update -y
 yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent -y
 
