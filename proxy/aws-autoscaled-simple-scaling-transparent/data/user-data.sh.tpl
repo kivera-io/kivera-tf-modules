@@ -47,3 +47,15 @@ systemctl daemon-reload
 systemctl enable --no-block gwlbtun.service
 systemctl restart gwlbtun.service
 systemctl status gwlbtun.service
+
+if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
+  DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${ddog_secret_arn}`
+  export DD_API_KEY
+  DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+fi
+
+# Enable services
+if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
+  systemctl enable datadog-agent
+  systemctl start datadog-agent
+fi
