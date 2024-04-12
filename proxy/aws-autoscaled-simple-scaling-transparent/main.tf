@@ -227,9 +227,9 @@ resource "aws_lb_target_group" "glb_target_group" {
     interval            = 10
     healthy_threshold   = 3
     unhealthy_threshold = 3
-    port                = 8090
+    port                = 80
     protocol            = "HTTP"
-    path                = "/version"
+    path                = "/"
   }
 }
 
