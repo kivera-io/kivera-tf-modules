@@ -358,11 +358,11 @@ class AwsS3Tasks(TaskSet):
     #     client = get_client('s3', 'ap-southeast-2')
     #     client.create_bucket(Bucket="test-bucket", ACL='public-read', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
 
-    @task(1)
-    @result_decorator
-    def aws_s3_create_bucket_allow(self):
-        client = get_client('s3', 'ap-southeast-2')
-        client.create_bucket(Bucket="test-bucket", ACL='private', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
+    # @task(1)
+    # @result_decorator
+    # def aws_s3_create_bucket_allow(self):
+    #     client = get_client('s3', 'ap-southeast-2')
+    #     client.create_bucket(Bucket="test-bucket", ACL='private', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
 
 
 
@@ -779,25 +779,63 @@ class AwsCloudFormationTasks(TaskSet):
         client = get_client('cloudformation')
         client.describe_type(Type='RESOURCE', TypeName=type_name)
 
+### LIGHTSAIL ###
+class AwsLightSailTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_lightsail_get_instances_allow(self):
+        client = get_client('lightsail')
+        client.get_instances()
+
+    @task(1)
+    @result_decorator
+    def aws_lightsail_get_instances_allow(self):
+        client = get_client('lightsail')
+        client.get_active_names()
+
+### OUTPOST ###
+class AwsOutpostTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_outpost_list_outposts_allow(self):
+        client = get_client('outpost')
+        client.list_outposts()
+
+    @task(1)
+    @result_decorator
+    def aws_outpost_list_sites_allow(self):
+        client = get_client('outpost')
+        client.list_sites()
+
+### EFS ###
+class AwsEFSTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_efs_describe_file_systems(self):
+        client = get_client('efs')
+        client.describe_file_systems()
+
+
 
 class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
-        AwsEc2Tasks: 1,
-        AwsDynamoDBTasks: 1,
-        AwsStsTasks: 1,
-        AwsS3Tasks: 1,
-        AwsApiGatewayTasks: 1,
-        AwsEventBridgeTasks: 1,
-        AwsIamTasks: 1,
-        AwsRdsTasks: 1,
-        AwsCloudFrontTasks: 1,
-        AwsSqsTasks: 1,
-        AwsLambdaTasks: 1,
-        AwsLogsTasks: 1,
-        AwsAutoScalingTasks: 1,
-        AwsBatchTasks: 1,
-        AwsEcsTasks: 1,
-        AwsSnsTasks: 1,
-        AwsCloudFormationTasks: 1
+        # AwsEc2Tasks: 1,
+        # AwsDynamoDBTasks: 1,
+        # AwsStsTasks: 1,
+        AwsS3Tasks: 1
+        # AwsApiGatewayTasks: 1,
+        # AwsEventBridgeTasks: 1,
+        # AwsIamTasks: 1,
+        # AwsRdsTasks: 1,
+        # AwsCloudFrontTasks: 1,
+        # AwsSqsTasks: 1,
+        # AwsLambdaTasks: 1,
+        # AwsLogsTasks: 1,
+        # AwsAutoScalingTasks: 1,
+        # AwsBatchTasks: 1,
+        # AwsEcsTasks: 1,
+        # AwsSnsTasks: 1,
+        # AwsCloudFormationTasks: 1,
+        # AwsLightSailTasks: 1
     }
