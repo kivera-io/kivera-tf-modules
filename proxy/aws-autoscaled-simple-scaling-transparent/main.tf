@@ -261,16 +261,16 @@ resource "aws_vpc_endpoint_service" "vpc_endpoint_service" {
 #   }
 # }
 
-# resource "aws_vpc_endpoint" "glb_endpoint" {
-#   vpc_id            = var.vpc_id
-#   vpc_endpoint_type = "GatewayLoadBalancer"
-#   subnet_ids        = ["subnet-076ece045ef968dc9"]
-#   service_name      = aws_vpc_endpoint_service.vpc_endpoint_service.service_name
+resource "aws_vpc_endpoint" "glb_endpoint" {
+  vpc_id            = var.vpc_id
+  vpc_endpoint_type = "GatewayLoadBalancer"
+  subnet_ids        = ["subnet-076ece045ef968dc9"]
+  service_name      = aws_vpc_endpoint_service.vpc_endpoint_service.service_name
 
-#   tags = {
-#     Name = "${var.name_prefix}-glb-endpoint"
-#   }
-# }
+  tags = {
+    Name = "${var.name_prefix}-glb-endpoint"
+  }
+}
 
 resource "aws_autoscaling_policy" "scale_up_policy" {
   name                   = "${var.name_prefix}-scale-up"
