@@ -2,7 +2,7 @@
 Description=AWS GWLB Tunnel Handler
 
 [Service]
-ExecStart=/opt/aws-gateway-load-balancer-tunnel-handler/gwlbtun -c /opt/aws-gateway-load-balancer-tunnel-handler/tunnel-handler.sh -r  /opt/aws-gateway-load-balancer-tunnel-handler/tunnel-handler.sh -p 80 --udpthreads 1024 --tunthreads 1024
+ExecStart=/opt/aws-gateway-load-balancer-tunnel-handler/gwlbtun -c /opt/aws-gateway-load-balancer-tunnel-handler/tunnel-handler.sh -r  /opt/aws-gateway-load-balancer-tunnel-handler/tunnel-handler.sh -p 80
 Restart=always
 RestartSec=5s
 

@@ -34,7 +34,6 @@ systemctl enable supervisord
 aws s3 cp ${tunneler_file} /tmp/tunnel-handler.sh
 git clone https://github.com/kivera-io/aws-gateway-load-balancer-tunnel-handler.git /opt/aws-gateway-load-balancer-tunnel-handler
 cd /opt/aws-gateway-load-balancer-tunnel-handler
-git checkout transparent-tuning
 cp /tmp/tunnel-handler.sh /opt/aws-gateway-load-balancer-tunnel-handler/
 cmake3 .
 make
