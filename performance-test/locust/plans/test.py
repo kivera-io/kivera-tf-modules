@@ -32,30 +32,30 @@ aws_regions = [
 ]
 
 allowed_errors = [
-    'AccessDenied',
-    'AccessDeniedException',
-    'UnauthorizedOperation',
-    'InvalidClientTokenId',
-    'UnrecognizedClientException',
-    'AuthFailure',
+    # 'AccessDenied',
+    # 'AccessDeniedException',
+    # 'UnauthorizedOperation',
+    # 'InvalidClientTokenId',
+    # 'UnrecognizedClientException',
+    # 'AuthFailure',
 
-    'AWS.SimpleQueueService.NonExistentQueue',
+    # 'AWS.SimpleQueueService.NonExistentQueue',
 
-    'Throttling',
-    'ThrottlingException',
-    'ThrottledException',
-    'RequestThrottledException',
-    'TooManyRequestsException',
-    'ProvisionedThroughputExceededException',
-    'TransactionInProgressException',
-    'RequestLimitExceeded',
-    'BandwidthLimitExceeded',
-    'LimitExceededException',
-    'RequestThrottled',
-    'SlowDown',
-    'EC2ThrottledException',
+    # 'Throttling',
+    # 'ThrottlingException',
+    # 'ThrottledException',
+    # 'RequestThrottledException',
+    # 'TooManyRequestsException',
+    # 'ProvisionedThroughputExceededException',
+    # 'TransactionInProgressException',
+    # 'RequestLimitExceeded',
+    # 'BandwidthLimitExceeded',
+    # 'LimitExceededException',
+    # 'RequestThrottled',
+    # 'SlowDown',
+    # 'EC2ThrottledException',
 
-    'KMS.NotFoundException',
+    # 'KMS.NotFoundException',
 ]
 
 cloudfront_dist_config = {
