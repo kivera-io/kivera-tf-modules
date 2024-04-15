@@ -17,10 +17,10 @@ variable "private_subnet_id" {
   type        = string
 }
 
-# variable "vpc_endpoint_id" {
-#   description = "Endpoint ID for VPC"
-#   type        = string
-# }
+variable "vpc_endpoint_id" {
+  description = "Endpoint ID for VPC"
+  type        = string
+}
 
 variable "private_subnet_rt_id" {
   description = "Endpoint ID for VPC"

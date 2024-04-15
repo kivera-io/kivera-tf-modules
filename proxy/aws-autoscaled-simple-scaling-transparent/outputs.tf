@@ -1,7 +1,7 @@
-# output "vpc_service_endpoint_id" {
-#   description = "VPC service endpoint id"
-#   value       = aws_vpc_endpoint.glb_endpoint.id
-# }
+output "vpc_service_endpoint_id" {
+  description = "VPC service endpoint id"
+  value       = aws_vpc_endpoint.glb_endpoint.id
+}
 
 output "proxy_instance_id" {
   description = "Instance ID of proxy"

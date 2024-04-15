@@ -1,8 +1,8 @@
-# resource "aws_route" "route_vpc_endpoint" {
-#   route_table_id         = var.private_subnet_rt_id
-#   destination_cidr_block = "0.0.0.0/0"
-#   vpc_endpoint_id        = var.vpc_endpoint_id
-# }
+resource "aws_route" "route_vpc_endpoint" {
+  route_table_id         = var.private_subnet_rt_id
+  destination_cidr_block = "0.0.0.0/0"
+  vpc_endpoint_id        = var.vpc_endpoint_id
+}
 
 data "aws_ami" "latest" {
   most_recent = true
