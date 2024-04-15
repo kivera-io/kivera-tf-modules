@@ -350,7 +350,7 @@ class AwsS3Tasks(TaskSet):
     @result_decorator
     def aws_s3_put_object_allow(self):
         client = get_client('s3', 'ap-southeast-2')
-        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
+        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode()) #, ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
 
     # @task(3)
     # @result_decorator
