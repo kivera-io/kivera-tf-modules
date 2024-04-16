@@ -16,11 +16,6 @@ if [[ ${proxy_transparent_enabled} == true ]]; then
 
     cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
     update-ca-trust extract
-
-    echo "
-    export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"
-    " >> ~/kivera/setenv.sh
-    source ~/kivera/setenv.sh
 fi
 
 yum update -y
