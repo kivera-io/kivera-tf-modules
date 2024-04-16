@@ -38,7 +38,7 @@ data "template_file" "node_user_data" {
   vars = {
     proxy_host                = var.proxy_endpoint
     proxy_transparent_enabled = var.proxy_transparent_enabled
-    proxy_pub_cert            = var.proxy_pub_cert
+    proxy_pub_cert            = var.proxy_public_cert
     user_wait_min             = var.user_wait_min
     user_wait_max             = var.user_wait_max
     deployment_name           = var.deployment_name
