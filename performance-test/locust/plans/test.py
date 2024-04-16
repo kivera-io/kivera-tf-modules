@@ -348,19 +348,19 @@ class AwsS3Tasks(TaskSet):
 
     @task(1)
     @result_decorator
-    def aws_s3_get_object_allow(self):
+    def aws_s3_get_object_allow_1(self):
         client = get_client('s3', 'ap-southeast-2')
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-01/data.txt")
 
     @task(1)
     @result_decorator
-    def aws_s3_get_object_allow(self):
+    def aws_s3_get_object_allow_2(self):
         client = get_client('s3', 'ap-southeast-2')
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-02/data.txt")
 
     @task(1)
     @result_decorator
-    def aws_s3_get_object_allow(self):
+    def aws_s3_get_object_allow_3(self):
         client = get_client('s3', 'ap-southeast-2')
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-03/data.txt")
 
