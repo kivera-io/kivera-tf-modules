@@ -12,7 +12,7 @@ sysctl -p
 mkdir -p ~/kivera
 
 if [[ ${proxy_transparent_enabled} == true ]]; then
-    echo ${proxy_public_cert} > ~/kivera/ca-cert.pem
+    echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
 
     cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
     update-ca-trust extract
