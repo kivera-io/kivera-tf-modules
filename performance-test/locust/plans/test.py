@@ -364,10 +364,27 @@ class AwsS3Tasks(TaskSet):
         client = get_client('s3', 'ap-southeast-2')
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-03/data.txt")
 
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow_4(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-04/data.txt")
 
     @task(1)
     @result_decorator
-    def aws_s3_put_object_allow(self):
+    def aws_s3_get_object_allow_5(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-05/data.txt")
+
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow_6(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-06/data.txt")
+
+    @task(1)
+    @result_decorator
+    def aws_s3_put_object_block(self):
         client = get_client('s3', 'ap-southeast-2')
         client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode()) #, ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
 
