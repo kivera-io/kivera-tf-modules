@@ -12,6 +12,6 @@ Repo containing a collection of Terraform modules used as an example for deployi
 │      ├── plans                        # Contains Python script containing AWS tests for Locust
 │      └── script                       # Scripts for deploying and running Locust
 ├── proxy                               # Terraform modules for deploying Kivera proxy
-│   └── aws-autoscaled-simple-scaling   # Deploys a simple proxy with auto scaling
+│   └── aws-autoscaled-simple-scaling   # Deploys a proxy in an autoscale group (implements dynamic scaling using "simple scaling")
 └── README.md
 ```
