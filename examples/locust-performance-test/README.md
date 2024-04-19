@@ -26,11 +26,11 @@ In `proxy_var.tfvars` TF vars used to deploy and run the performance test are:
 | `proxy_private_key` | Private key/cert to be used by Kivera proxy | Yes |
 | `proxy_private_key_secret_arn` | ARN of private key (if `proxy_private_key` not provided) | Yes |
 | `proxy_public_cert` | Public key/cert associated with `proxy_private_key` | Yes |
-| `key_pair_name` | Name of an existing EC2 KeyPair to enable SSH access to the instances | Yes |
 | `vpc_id` | VPC to deploy the proxy into | Yes |
 | `proxy_subnet_ids` | Subnets to deploy the proxy into | Yes |
 | `load_balancer_subnet_ids` | Subnets to deploy the load balancer into | Yes |
 | `s3_bucket` | Name of the bucket used to upload the tests/files | Yes |
+| `key_pair_name` | Name of an existing EC2 KeyPair to enable SSH access to the instances | - |
 | `proxy_instance_type` | Instance type to deploy the proxy into | - |
 | `cache_enabled` | Enable to use redis alongside the proxy | - |
 | `proxy_min_asg_size` | Minimum number of proxy instances | - |
