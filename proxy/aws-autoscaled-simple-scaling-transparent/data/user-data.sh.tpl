@@ -99,7 +99,7 @@ chown -R kivera:kivera /opt/kivera
 yum install amazon-cloudwatch-agent -y
 
 if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
-  DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${ddog_secret_arn}`
+  DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${datadog_secret_arn}`
   export DD_API_KEY
   DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 fi
@@ -125,7 +125,7 @@ Environment=KIVERA_KV_STORE_CONNECT=$KIVERA_REDIS_ADDR
 Environment=KIVERA_KV_STORE_CLUSTER_MODE=true
 Environment=KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 Environment=KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
-Environment=DD_TRACE_SAMPLE_RATE=${ddog_trace_sampling_rate}
+Environment=DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
 Environment=KIVERA_TRANS_MODE=$KIVERA_TRANS_MODE
 
 [Install]

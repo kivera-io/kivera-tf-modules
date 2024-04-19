@@ -89,7 +89,7 @@ resource "aws_iam_role" "instance_role" {
           Resource = [
             local.proxy_credentials_secret_arn,
             local.proxy_private_key_secret_arn,
-            var.ddog_secret_arn
+            var.datadog_secret_arn
           ]
         },
         {
@@ -164,8 +164,8 @@ resource "aws_launch_template" "launch_template" {
     log_group_retention_in_days  = var.proxy_log_group_retention
     enable_datadog_tracing       = var.enable_datadog_tracing
     enable_datadog_profiling     = var.enable_datadog_profiling
-    ddog_secret_arn              = var.ddog_secret_arn
-    ddog_trace_sampling_rate     = var.ddog_trace_sampling_rate
+    datadog_secret_arn           = var.datadog_secret_arn
+    datadog_trace_sampling_rate  = var.datadog_trace_sampling_rate
   }))
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
