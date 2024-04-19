@@ -39,7 +39,7 @@ cd /locust
 
 [[ -e requirements.txt ]] && pip3 install -r requirements.txt
 
-sleep 30
+sleep 60
 
 if [[ ${proxy_transparent_enabled} == false ]]; then
     time=180
