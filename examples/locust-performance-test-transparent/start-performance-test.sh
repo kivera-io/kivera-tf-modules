@@ -9,7 +9,6 @@ locust_var_file=$base_dir/examples/locust-performance-test-transparent/locust_va
 # Deploy infrastructure and transparent proxy
 terraform -chdir=$proxy_dir init -upgrade
 [[ $CLEANUP != false ]] && trap "terraform -chdir=$proxy_dir destroy --auto-approve" EXIT || echo "Skipping cleanup for proxy"
-exit 0
 terraform -chdir=$proxy_dir apply --auto-approve
 
 tfvars="-var-file=$locust_var_file -var=proxy_endpoint=nil"
