@@ -88,8 +88,7 @@ resource "aws_iam_role" "instance_role" {
           Effect = "Allow"
           Resource = [
             local.proxy_credentials_secret_arn,
-            local.proxy_private_key_secret_arn,
-            var.datadog_secret_arn
+            local.proxy_private_key_secret_arn
           ]
         },
         {
@@ -106,6 +105,26 @@ resource "aws_iam_role" "instance_role" {
       ]
     })
   }
+}
+
+resource "aws_iam_role_policy" "instance_default_policies" {
+  count = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
+
+  name = "proxy_default_policies"
+  role = aws_iam_role.instance_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "secretsmanager:GetSecretValue"
+        Effect = "Allow"
+        Resource = [
+          var.datadog_secret_arn
+        ]
+      }
+    ]
+  })
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
