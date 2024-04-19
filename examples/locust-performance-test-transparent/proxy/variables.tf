@@ -63,3 +63,9 @@ variable "s3_bucket" {
   description = "The name of the bucket used to upload the tests/files"
   type        = string
 }
+
+variable "cross_zone_lb" {
+  description = "Enable for cross zone load balancing"
+  type        = bool
+  default     = false
+}

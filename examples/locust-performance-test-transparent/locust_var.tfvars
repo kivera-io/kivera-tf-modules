@@ -12,3 +12,6 @@ proxy_transparent_enabled = true
 s3_bucket                          = "s3-bucket"
 leader_username                    = "user"
 leader_associate_public_ip_address = true
+proxy_public_cert                  = <<-EOT
+cert-here
+EOT

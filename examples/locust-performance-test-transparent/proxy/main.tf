@@ -15,6 +15,7 @@ module "proxy" {
   cache_enabled                = var.cache_enabled
   s3_bucket                    = var.s3_bucket
   key_pair_name                = var.ec2_key_pair
+  cross_zone_lb                = var.cross_zone_lb
   proxy_credentials_secret_arn = var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn = var.proxy_private_key_secret_arn
   proxy_public_cert            = var.proxy_public_cert

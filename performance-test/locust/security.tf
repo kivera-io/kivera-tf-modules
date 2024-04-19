@@ -80,7 +80,7 @@ resource "aws_iam_role" "locust" {
           ]
           Effect = "Allow"
           Resource = [
-            "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}${local.deployment_id}/*"
+            "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}/*"
           ]
         },
         {
