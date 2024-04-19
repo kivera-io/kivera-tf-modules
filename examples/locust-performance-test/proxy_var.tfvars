@@ -14,7 +14,6 @@ proxy_log_to_cloudwatch      = true
 s3_bucket                    = "s3-bucket"
 proxy_credentials_secret_arn = "arn:aws:secretsmanager:arn"
 proxy_private_key_secret_arn = "arn:aws:secretsmanager:arn"
-
-proxy_public_cert = <<-EOT
+proxy_public_cert            = <<-EOT
 cert-here
 EOT

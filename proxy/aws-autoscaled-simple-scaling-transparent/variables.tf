@@ -80,20 +80,9 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "load_balancer_subnet_ids" {
-  description = "Which Subnets to deploy the load balancer into"
-  type        = list(string)
-}
-
 variable "proxy_subnet_ids" {
   description = "Which Subnets to deploy the proxy into"
   type        = list(string)
-}
-
-variable "load_balancer_internal" {
-  description = "Which load balancer scheme to use"
-  type        = bool
-  default     = true
 }
 
 variable "proxy_allowed_ingress_range" {
@@ -111,13 +100,13 @@ variable "proxy_allowed_ssh_range" {
 variable "proxy_min_asg_size" {
   description = "Minimum instances in the Autoscaling Group"
   type        = number
-  default     = 5
+  default     = 3
 }
 
 variable "proxy_max_asg_size" {
   description = "Maximum number of instances in the autoscaling group"
   type        = number
-  default     = 5
+  default     = 12
 }
 
 variable "proxy_local_path" {
