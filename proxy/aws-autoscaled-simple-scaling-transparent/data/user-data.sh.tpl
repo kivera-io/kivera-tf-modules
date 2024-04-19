@@ -48,7 +48,7 @@ systemctl enable --no-block gwlbtun.service
 systemctl restart gwlbtun.service
 systemctl status gwlbtun.service
 
-# log file
+# configure log file rotation
 cat << EOF | tee /etc/cron.hourly/kivera-logrotate
 #!/bin/sh
 /usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
@@ -162,29 +162,6 @@ cat << EOF | tee /etc/td-agent/td-agent.conf
     flush_thread_count 15
   </buffer>
 </match>
-EOF
-
-# Configure log file rotation
-cat << EOF | tee /etc/cron.hourly/kivera-logrotate
-#!/bin/sh
-/usr/sbin/logrotate -s /var/lib/logrotate/kivera.status /etc/kivera-logrotate.conf
-EXITVALUE=\$?
-if [ \$EXITVALUE != 0 ]; then
-    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
-fi
-exit 0
-EOF
-
-cat << EOF | tee /etc/kivera-logrotate.conf
-$KIVERA_LOGS_FILE {
-    maxsize 500M
-    hourly
-    missingok
-    rotate 8
-    compress
-    notifempty
-    copytruncate
-}
 EOF
 
 # Enable CloudWatch logging/metrics
