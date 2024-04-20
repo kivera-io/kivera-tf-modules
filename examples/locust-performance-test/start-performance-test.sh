@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -e
 
 base_dir=$(pwd)
@@ -13,4 +14,5 @@ terraform -chdir=$proxy_dir init -upgrade
 terraform -chdir=$proxy_dir apply -var-file=$proxy_var_file --auto-approve
 
 export TF_VARS="-var-file=$locust_var_file -var=proxy_endpoint=$(terraform -chdir=$proxy_dir output --raw load_balancer_dns)"
+
 $locust_dir/scripts/main.sh

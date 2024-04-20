@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -e
 
 echo -e "\n############################\n"
@@ -7,6 +8,28 @@ echo -e "Link: http://${LEADER_USERNAME}:${LEADER_PASSWORD}@${LEADER_ADDRESS}\n"
 echo "Endpoint: http://${LEADER_ADDRESS}"
 echo "Username: ${LEADER_USERNAME}"
 echo "Password: ${LEADER_PASSWORD}"
+
+function durationToSeconds () {
+  set -f
+  normalize () { echo $1 | tr '[:upper:]' '[:lower:]' | tr -d "\"\\\'" | sed 's/years\{0,1\}/y/g; s/months\{0,1\}/m/g; s/days\{0,1\}/d/g; s/hours\{0,1\}/h/g; s/minutes\{0,1\}/m/g; s/min/m/g; s/seconds\{0,1\}/s/g; s/sec/s/g;  s/ //g;'; }
+  local value=$(normalize "$1")
+  local fallback=$(normalize "$2")
+
+  echo $value | grep -v '^[-+*/0-9ydhms]\{0,30\}$' > /dev/null 2>&1
+  if [ $? -eq 0 ]
+  then
+    >&2 echo Invalid duration pattern \"$value\"
+  else
+    if [ "$value" = "" ]; then
+      [ "$fallback" != "" ] && durationToSeconds "$fallback"
+    else
+      sedtmpl () { echo "s/\([0-9]\+\)$1/(0\1 * $2)/g;"; }
+      local template="$(sedtmpl '\( \|$\)' 1) $(sedtmpl y '365 * 86400') $(sedtmpl d 86400) $(sedtmpl h 3600) $(sedtmpl m 60) $(sedtmpl s 1) s/) *(/) + (/g;"
+      echo $value | sed "$template" | bc
+    fi
+  fi
+  set +f
+}
 
 time=300
 
@@ -26,8 +49,7 @@ done
 
 echo -e "\n############################"
 
-run_time=${LOCUST_RUN_TIME::-1}
-time=$(((run_time * 60) + 300))
+time=$(($(durationToSeconds $LOCUST_RUN_TIME) + 300))
 
 echo -e "\nWaiting for tests to finish...\n"
 while true; do

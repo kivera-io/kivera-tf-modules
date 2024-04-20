@@ -1,9 +1,9 @@
 module "network" {
-  source = "git::https://github.com/kivera-io/kivera-tf-modules.git//network/aws-network-transparent-proxy"
+  source = "git::https://github.com/kivera-io/kivera-tf-modules.git//network/aws-network-transparent-proxy?ref=transparent-proxy"
 }
 
 module "proxy" {
-  source = "git::https://github.com/kivera-io/kivera-tf-modules.git//proxy/aws-autoscaled-simple-scaling-transparent"
+  source = "git::https://github.com/kivera-io/kivera-tf-modules.git//proxy/aws-autoscaled-simple-scaling-transparent?ref=transparent-proxy"
 
   vpc_id                       = module.network.vpc_id
   proxy_subnet_ids             = module.network.inspection_subnet_ids
@@ -22,7 +22,7 @@ module "proxy" {
 }
 
 module "network-changes" {
-  source = "git::https://github.com/kivera-io/kivera-tf-modules.git//network/aws-network-transparent-proxy/route-table-updates"
+  source = "git::https://github.com/kivera-io/kivera-tf-modules.git//network/aws-network-transparent-proxy/route-table-updates?ref=transparent-proxy"
 
   vpc_id               = module.network.vpc_id
   public_subnet_id     = element(module.network.egress_subnet_ids, 0)
