@@ -14,6 +14,14 @@ resource "aws_security_group" "locust" {
   }
 
   ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "HTTP"
     from_port   = 80
     to_port     = 80
@@ -72,7 +80,7 @@ resource "aws_iam_role" "locust" {
           ]
           Effect = "Allow"
           Resource = [
-            "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}${local.deployment_id}/*"
+            "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}/*"
           ]
         },
         {

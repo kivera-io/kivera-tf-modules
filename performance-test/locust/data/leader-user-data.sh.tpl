@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 ## tune box
 echo "* hard nofile 100000" >> /etc/security/limits.conf
@@ -52,8 +53,10 @@ fi
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
 
+test_file=$([[ ${proxy_transparent_enabled} == true ]] && echo "test_transparent.py" || echo "test.py")
+
 nohup locust \
-    -f test.py \
+    -f $test_file \
     --autostart \
     --web-port=80 \
     --web-auth ${leader_username}:${leader_password} \

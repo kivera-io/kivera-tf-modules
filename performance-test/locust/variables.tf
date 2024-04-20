@@ -114,7 +114,7 @@ variable "user_wait_max" {
   default     = 4
 }
 
-variable "proxy_pub_cert" {
+variable "proxy_public_cert" {
   description = "Public cert used by the proxy"
   default     = ""
 }
