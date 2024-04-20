@@ -12,8 +12,8 @@ ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
 
 client_config = Config(
+   connect_timeout=3,
    retries = {
-      'max_attempts': 1,
       'mode': 'standard'
    }
 )
