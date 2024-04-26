@@ -58,38 +58,6 @@ allowed_errors = [
     'KMS.NotFoundException',
 ]
 
-cloudfront_dist_config = {
-    "CallerReference": "cf-cli-distribution",
-    "Comment": "Test Cloudfront Distribution",
-    "Origins": {
-        "Quantity": 1,
-        "Items": [{
-            "Id": "test-cloudfront",
-            "DomainName": "test-cloudfront.s3.amazonaws.com",
-            "S3OriginConfig": {
-                "OriginAccessIdentity": ""
-            }
-        }]
-    },
-    "DefaultCacheBehavior": {
-        "TargetOriginId": "test-cloudfront",
-        "ViewerProtocolPolicy": "redirect-to-https",
-        "TrustedSigners": {
-            "Quantity": 0,
-            "Enabled": False
-        },
-        "ForwardedValues": {
-            "Cookies": {"Forward": "all"},
-            "Headers": {"Quantity": 0},
-            "QueryString": False,
-            "QueryStringCacheKeys": {"Quantity": 0}
-        },
-        "DefaultTTL": 86400,
-        "MinTTL": 3600
-    },
-    "Enabled": True
-}
-
 boto3.setup_default_session(region_name='ap-southeast-2')
 
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', 4))

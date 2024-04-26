@@ -18,6 +18,11 @@ resource "aws_instance" "nodes" {
 
   key_name = var.ec2_key_pair
 
+  root_block_device {
+    device_name = "/dev/xvda"
+    volume_size = 15
+  }
+
   tags = {
     Name = local.locust_node_instance_name
     Type = "locust-node"
