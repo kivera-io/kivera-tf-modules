@@ -20,7 +20,7 @@ resource "aws_instance" "nodes" {
 
   ebs_block_device {
     device_name = "/dev/xvda"
-    volume_size = 15
+    volume_size = 25
   }
 
   tags = {
