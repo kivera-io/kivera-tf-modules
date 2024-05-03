@@ -1,22 +1,7 @@
-import secrets
-import os
 import time
 import boto3
 import botocore
-import ddtrace
-from botocore.config import Config
 from locust import User, TaskSet, task, between, events
-from ddtrace.propagation.http import HTTPPropagator
-
-ddtrace.patch(botocore=True)
-ddtrace.config.botocore['distributed_tracing'] = False
-
-client_config = Config(
-   connect_timeout=3,
-   retries = {
-      'mode': 'standard'
-   }
-)
 
 allowed_errors = [
     'AccessDenied',
@@ -46,19 +31,6 @@ allowed_errors = [
 ]
 
 boto3.setup_default_session(region_name='ap-southeast-2')
-
-def add_trace_headers(request, **kwargs):
-    span = ddtrace.tracer.current_span()
-    span.service = "locust"
-    headers = {}
-    HTTPPropagator.inject(span.context, headers)
-    for h, v in headers.items():
-        request.headers.add_header(h, v)
-
-def get_client(service, region="ap-southeast-2"):
-    client = boto3.client(service, region_name=region, config=client_config)
-    client.meta.events.register_first('before-sign.*.*', add_trace_headers)
-    return client
 
 def result_decorator(method):
     def decorator(self):
@@ -125,12 +97,12 @@ def failure(class_name, method_name, s, e):
 class AwsS3Tasks(TaskSet):
     @task
     @result_decorator
-    def aws_s3_get_object_allow_3(self):
-        client = get_client('s3')
-        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/ubuntu-22.04.4-desktop-amd64.iso")
+    def aws_s3_get_object_allow(self):
+        s3 = boto3.resource('s3')
+        s3.meta.client.download_file("kivera-poc-deployment", "kivera/locust-perf-test/ubuntu-22.04.4-desktop-amd64.iso", "/root/kivera/ubuntu.iso")
 
 class KiveraPerf(User):
-    wait_time = between(9999, 9999)
+    wait_time = between(70, 90)
     tasks = {
         AwsS3Tasks: 1
     }
