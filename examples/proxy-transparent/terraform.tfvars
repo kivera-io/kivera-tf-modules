@@ -1,5 +1,5 @@
 # Network 1
-name_prefix                  = "throughput-test"
+name_prefix                  = "kivera"
 ec2_key_pair                 = "kivera-poc-keypair"
 proxy_instance_type          = "c5d.xlarge"
 proxy_min_asg_size           = 3
