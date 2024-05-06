@@ -42,10 +42,10 @@ cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
 update-ca-trust extract
 
 echo "
-export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"
-" > ~/kivera/setenv.sh
+export AWS_CA_BUNDLE=\"/etc/pki/tls/certs/ca-bundle.pem\"
+" >> ~/.bashrc
 
-source ~/kivera/setenv.sh
+source ~/.bashrc
 EOF
 
   tags = {
