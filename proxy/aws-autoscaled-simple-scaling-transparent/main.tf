@@ -110,7 +110,7 @@ resource "aws_iam_role" "instance_role" {
 resource "aws_iam_role_policy" "instance_default_policies" {
   count = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
 
-  name = "proxy_default_policies"
+  name = "${var.name_prefix}-proxy_default_policies-${local.name_suffix}"
   role = aws_iam_role.instance_role.id
 
   policy = jsonencode({
@@ -125,6 +125,13 @@ resource "aws_iam_role_policy" "instance_default_policies" {
       }
     ]
   })
+
+  lifecycle {
+    precondition {
+      condition     = length(var.datadog_secret_arn) > 0
+      error_message = "datadog_secret_arn must be provided if enable_datadog_profiling or enable_datadog_tracing is true"
+    }
+  }
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {

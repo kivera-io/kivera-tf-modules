@@ -150,6 +150,13 @@ resource "aws_iam_role_policy" "instance_default_policies" {
       }
     ]
   })
+
+  lifecycle {
+    precondition {
+      condition     = length(var.datadog_secret_arn) > 0
+      error_message = "datadog_secret_arn must be provided if enable_datadog_profiling or enable_datadog_tracing is true"
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "redis_connection_string_access" {
@@ -284,13 +291,6 @@ resource "aws_launch_template" "launch_template" {
     datadog_secret_arn           = var.datadog_secret_arn
     datadog_trace_sampling_rate  = var.datadog_trace_sampling_rate
   }))
-
-  lifecycle {
-    precondition {
-      condition     = var.enable_datadog_profiling || var.enable_datadog_tracing ? length(var.datadog_secret_arn) > 0 : true
-      error_message = "datadog_secret_arn must be provided if enable_datadog_profiling or enable_datadog_tracing is true"
-    }
-  }
 }
 
 resource "aws_autoscaling_group" "auto_scaling_group" {
