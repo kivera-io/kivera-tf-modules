@@ -32,3 +32,8 @@ variable "instance_key_pair" {
   type        = string
   default     = ""
 }
+
+variable "proxy_public_cert" {
+  description = "The public certificate associated with the proxies private key"
+  type        = string
+}

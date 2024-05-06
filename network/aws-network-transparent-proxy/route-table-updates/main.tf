@@ -36,7 +36,7 @@ resource "aws_instance" "client_instance" {
   vpc_security_group_ids = [aws_security_group.instance_sg.id]
   user_data              = <<EOF
 #!/bin/bash
-curl -s http://localhost:8090/pub.cert > ~/kivera/ca-cert.pem
+echo ${var.proxy_public_cert} > ~/kivera/ca-cert.pem
 
 cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
 update-ca-trust extract
