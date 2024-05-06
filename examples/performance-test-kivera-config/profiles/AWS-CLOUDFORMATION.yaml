@@ -1,0 +1,9 @@
+---
+AWS-CLOUDFORMATION:
+    name: AWS-CLOUDFORMATION
+    description: AWS CLOUDFORMATION rules
+    rules:
+        - AWS-CLOUDFORMATION-DescribeStacks-1
+        - AWS-CLOUDFORMATION-DescribeType-1
+    tags: {}
+

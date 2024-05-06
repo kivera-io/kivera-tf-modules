@@ -1,0 +1,12 @@
+---
+AWS-EC2:
+    name: AWS-EC2
+    description: AWS EC2 rules
+    rules:
+        - AWS-EC2-AuthorizeSecurityGroupIngress-1
+        - AWS-EC2-AuthorizeSecurityGroupIngress-2
+        - AWS-EC2-CreateKeyPair-1
+        - AWS-EC2-CreateVolume-1
+        - AWS-EC2-DescribeInstances-1
+    tags: {}
+

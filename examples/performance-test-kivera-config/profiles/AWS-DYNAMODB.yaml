@@ -1,0 +1,11 @@
+---
+AWS-DYNAMODB:
+    name: AWS-DYNAMODB
+    description: AWS DYNAMODB rules
+    rules:
+        - AWS-DYNAMODB-ListTables-1
+        - AWS-DYNAMODB-MultiAction-1
+        - AWS-DYNAMODB-MultiAction-2
+        - AWS-DYNAMODB-MultiAction-3
+    tags: {}
+

@@ -1,0 +1,39 @@
+---
+AWS-IAM-CreateRole-1:
+    description: IAM-CreateRole-allow
+    provider: AWS
+    service: IAM
+    actions:
+        - CreateRole
+    policy: valid { json.unmarshal(input.Body.AssumeRolePolicyDocument).Statement[_].Principal.AWS == approved_aws_data_boundary[_] }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-IAM-ListUsers-1:
+    description: IAM-ListUsers-allow
+    provider: AWS
+    service: IAM
+    actions:
+        - ListUsers
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

@@ -1,0 +1,58 @@
+---
+AWS-CLOUDFRONT-AssociateAlias-1:
+    description: CLOUDFRONT-AssociateAlias-valid-domain
+    provider: AWS
+    service: CLOUDFRONT
+    actions:
+        - AssociateAlias
+    policy: valid { endswith(input.Qs.Alias[_], ".kivera.io") }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-CLOUDFRONT-CreateDistribution-1:
+    description: CLOUDFRONT-CreateDistribution-disallow-http1.1
+    provider: AWS
+    service: CLOUDFRONT
+    actions:
+        - CreateDistribution
+    policy: valid { input.Body.DistributionConfig.HttpVersion != "http1.1" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-CLOUDFRONT-ListDistributions-1:
+    description: CLOUDFRONT-ListDistributions-allow
+    provider: AWS
+    service: CLOUDFRONT
+    actions:
+        - ListDistributions
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

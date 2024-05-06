@@ -1,0 +1,10 @@
+---
+AWS-APIGATEWAY:
+    name: AWS-APIGATEWAY
+    description: AWS APIGATEWAY rules
+    rules:
+        - AWS-APIGATEWAY-CreateApi-1
+        - AWS-APIGATEWAY-CreateRoute-1
+        - AWS-APIGATEWAY-GetApis-1
+    tags: {}
+

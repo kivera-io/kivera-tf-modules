@@ -1,0 +1,39 @@
+---
+AWS-RDS-CreateDBInstance-1:
+    description: RDS-CreateDBInstance-allow
+    provider: AWS
+    service: RDS
+    actions:
+        - CreateDBInstance
+    policy: valid { input.Body.StorageEncrypted; input.Body.KmsKeyId == "alias/secure-key" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-RDS-DescribeDBInstances-1:
+    description: RDS-DescribeDBInstances-allow
+    provider: AWS
+    service: RDS
+    actions:
+        - DescribeDBInstances
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

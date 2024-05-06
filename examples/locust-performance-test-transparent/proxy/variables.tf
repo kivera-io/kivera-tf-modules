@@ -32,7 +32,7 @@ variable "proxy_public_cert" {
 variable "proxy_instance_type" {
   description = "The EC2 Instance Type of the proxy"
   type        = string
-  default     = "t3.medium"
+  default     = "c5d.xlarge"
 }
 
 variable "ec2_key_pair" {
@@ -64,7 +64,7 @@ variable "s3_bucket" {
   type        = string
 }
 
-variable "cross_zone_lb" {
+variable "load_balancer_cross_zone" {
   description = "Enable for cross zone load balancing"
   type        = bool
   default     = false

@@ -1,0 +1,39 @@
+---
+AWS-ECS-ListServices-1:
+    description: ECS-ListServices-allow
+    provider: AWS
+    service: ECS
+    actions:
+        - ListServices
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-ECS-ListTasks-1:
+    description: ECS-ListTasks-allow
+    provider: AWS
+    service: ECS
+    actions:
+        - ListTasks
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

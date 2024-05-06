@@ -1,0 +1,39 @@
+---
+AWS-CLOUDFORMATION-DescribeStacks-1:
+    description: CLOUDFORMATION-DescribeStacks-allow
+    provider: AWS
+    service: CLOUDFORMATION
+    actions:
+        - DescribeStacks
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-CLOUDFORMATION-DescribeType-1:
+    description: CLOUDFORMATION-DescribeType-allow
+    provider: AWS
+    service: CLOUDFORMATION
+    actions:
+        - DescribeType
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

@@ -1,0 +1,58 @@
+---
+AWS-LAMBDA-CreateFunction-1:
+    description: LAMBDA-CreateFunction-approved-runtimes
+    provider: AWS
+    service: LAMBDA
+    actions:
+        - CreateFunction
+    policy: valid { input.Body.Runtime == approved_lambda_runtimes[_] }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-LAMBDA-CreateFunction-2:
+    description: LAMBDA-CreateFunction-KMS-key
+    provider: AWS
+    service: LAMBDA
+    actions:
+        - CreateFunction
+    policy: valid { input.Body.KMSKeyArn == "arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-LAMBDA-CreateFunction-3:
+    description: LAMBDA-CreateFunction-private
+    provider: AWS
+    service: LAMBDA
+    actions:
+        - CreateFunction
+    policy: valid { input.Body.VpcConfig }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

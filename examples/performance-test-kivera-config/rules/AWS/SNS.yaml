@@ -1,0 +1,39 @@
+---
+AWS-SNS-ListSubscriptions-1:
+    description: SNS-ListSubscriptions-allow
+    provider: AWS
+    service: SNS
+    actions:
+        - ListSubscriptions
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-SNS-ListTopics-1:
+    description: SNS-ListTopics-allow
+    provider: AWS
+    service: SNS
+    actions:
+        - ListTopics
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

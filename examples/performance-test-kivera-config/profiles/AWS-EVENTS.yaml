@@ -1,0 +1,9 @@
+---
+AWS-EVENTS:
+    name: AWS-EVENTS
+    description: AWS EVENTS rules
+    rules:
+        - AWS-EVENTS-ListRules-1
+        - AWS-EVENTS-PutPermission-1
+    tags: {}
+

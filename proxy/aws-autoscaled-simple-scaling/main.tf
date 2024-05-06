@@ -9,7 +9,7 @@ data "aws_ami" "latest" {
 }
 
 resource "random_string" "suffix" {
-  length  = 10
+  length  = 5
   special = false
 }
 
@@ -24,7 +24,7 @@ resource "random_password" "kivera_pass" {
 }
 
 locals {
-  suffix                             = random_string.suffix.result
+  name_suffix                        = random_string.suffix.result
   proxy_s3_path                      = var.proxy_local_path != "" ? "s3://${var.s3_bucket}${var.s3_bucket_key}/proxy.zip" : ""
   proxy_credentials_secret_arn       = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn       = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
@@ -37,8 +37,8 @@ locals {
 }
 
 resource "aws_secretsmanager_secret" "proxy_credentials" {
-  count       = var.proxy_credentials != "" ? 1 : 0
-  name_prefix = "${var.name_prefix}-credentials-"
+  count = var.proxy_credentials != "" ? 1 : 0
+  name  = "${var.name_prefix}-credentials-${local.name_suffix}"
 }
 
 resource "aws_secretsmanager_secret_version" "proxy_credentials_version" {
@@ -48,8 +48,8 @@ resource "aws_secretsmanager_secret_version" "proxy_credentials_version" {
 }
 
 resource "aws_secretsmanager_secret" "proxy_private_key" {
-  count       = var.proxy_private_key != "" ? 1 : 0
-  name_prefix = "${var.name_prefix}-private-key-"
+  count = var.proxy_private_key != "" ? 1 : 0
+  name  = "${var.name_prefix}-private-key-${local.name_suffix}"
 }
 
 resource "aws_secretsmanager_secret_version" "proxy_private_key_version" {
@@ -59,8 +59,8 @@ resource "aws_secretsmanager_secret_version" "proxy_private_key_version" {
 }
 
 resource "aws_secretsmanager_secret" "redis_default_connection_string" {
-  count       = local.redis_enabled ? 1 : 0
-  name_prefix = "${var.name_prefix}-redis-connection-default-"
+  count = local.redis_enabled ? 1 : 0
+  name  = "${var.name_prefix}-redis-connection-default-${local.name_suffix}"
 }
 
 resource "aws_secretsmanager_secret_version" "redis_default_connection_string_version" {
@@ -70,8 +70,8 @@ resource "aws_secretsmanager_secret_version" "redis_default_connection_string_ve
 }
 
 resource "aws_secretsmanager_secret" "redis_kivera_connection_string" {
-  count       = local.redis_enabled ? 1 : 0
-  name_prefix = "${var.name_prefix}-redis-connection-kivera-"
+  count = local.redis_enabled ? 1 : 0
+  name  = "${var.name_prefix}-redis-connection-kivera-${local.name_suffix}"
 }
 
 resource "aws_secretsmanager_secret_version" "redis_kivera_connection_string_version" {
@@ -81,7 +81,7 @@ resource "aws_secretsmanager_secret_version" "redis_kivera_connection_string_ver
 }
 
 resource "aws_iam_role" "instance_role" {
-  name_prefix = "${var.name_prefix}-instance-"
+  name = "${var.name_prefix}-instance-${local.name_suffix}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -104,7 +104,7 @@ resource "aws_iam_role" "instance_role" {
     "arn:aws:iam::aws:policy/ReadOnlyAccess"
   ]
   inline_policy {
-    name = "${var.name_prefix}-get-secrets"
+    name = "${var.name_prefix}-get-secrets-${local.name_suffix}"
     policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
@@ -133,9 +133,9 @@ resource "aws_iam_role" "instance_role" {
 }
 
 resource "aws_iam_role_policy" "instance_default_policies" {
-  count = var.enable_datadog_agent ? 1 : 0
+  count = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
 
-  name = "proxy_default_policies"
+  name = "${var.name_prefix}-proxy_default_policies-${local.name_suffix}"
   role = aws_iam_role.instance_role.id
 
   policy = jsonencode({
@@ -155,7 +155,7 @@ resource "aws_iam_role_policy" "instance_default_policies" {
 resource "aws_iam_role_policy" "redis_connection_string_access" {
   count = local.redis_enabled ? 1 : 0
 
-  name = "${var.name_prefix}-get-redis-connection-secret"
+  name = "${var.name_prefix}-get-redis-connection-secret-${local.name_suffix}"
   role = aws_iam_role.instance_role.id
 
   policy = jsonencode({
@@ -173,12 +173,12 @@ resource "aws_iam_role_policy" "redis_connection_string_access" {
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
-  name_prefix = "${var.name_prefix}-instance-"
-  role        = aws_iam_role.instance_role.name
+  name = "${var.name_prefix}-instance-${local.name_suffix}"
+  role = aws_iam_role.instance_role.name
 }
 
 resource "aws_security_group" "load_balancer_sg" {
-  name_prefix = "${var.name_prefix}-lb-"
+  name        = "${var.name_prefix}-lb-${local.name_suffix}"
   vpc_id      = var.vpc_id
   description = "Access to the load balancer"
 }
@@ -214,7 +214,7 @@ resource "aws_vpc_security_group_egress_rule" "load_balancer_egress_rule" {
 }
 
 resource "aws_security_group" "instance_sg" {
-  name_prefix = "${var.name_prefix}-instance-"
+  name        = "${var.name_prefix}-instance-${local.name_suffix}"
   vpc_id      = var.vpc_id
   description = "Access to the proxy instances"
 }
@@ -250,7 +250,7 @@ resource "aws_vpc_security_group_egress_rule" "instance_egress_rule" {
 }
 
 resource "aws_launch_template" "launch_template" {
-  name_prefix   = "${var.name_prefix}-instance-"
+  name          = "${var.name_prefix}-template-${local.name_suffix}"
   image_id      = data.aws_ami.latest.id
   instance_type = var.proxy_instance_type
   iam_instance_profile {
@@ -265,7 +265,7 @@ resource "aws_launch_template" "launch_template" {
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
   ]
-  key_name = var.key_pair_name
+  key_name = var.ec2_key_pair
   user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
     proxy_version                = var.proxy_version
     proxy_s3_path                = local.proxy_s3_path
@@ -276,9 +276,8 @@ resource "aws_launch_template" "launch_template" {
     proxy_log_to_kivera          = var.proxy_log_to_kivera
     proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
     redis_connection_string_arn  = local.redis_connection_string_secret_arn
-    log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
+    log_group_name               = "${var.name_prefix}-proxy-${local.name_suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
-    enable_datadog_agent         = var.enable_datadog_agent
     enable_datadog_tracing       = var.enable_datadog_tracing
     enable_datadog_profiling     = var.enable_datadog_profiling
     cache_enabled                = var.cache_enabled
@@ -288,14 +287,14 @@ resource "aws_launch_template" "launch_template" {
 
   lifecycle {
     precondition {
-      condition     = var.enable_datadog_agent ? length(var.datadog_secret_arn) > 0 : true
-      error_message = "datadog_secret_arn must be provided if enable_datadog_agent is true"
+      condition     = var.enable_datadog_profiling || var.enable_datadog_tracing ? length(var.datadog_secret_arn) > 0 : true
+      error_message = "datadog_secret_arn must be provided if enable_datadog_profiling or enable_datadog_tracing is true"
     }
   }
 }
 
 resource "aws_autoscaling_group" "auto_scaling_group" {
-  name_prefix = "${var.name_prefix}-"
+  name = "${var.name_prefix}-asg-${local.name_suffix}"
   launch_template {
     id      = aws_launch_template.launch_template.id
     version = aws_launch_template.launch_template.latest_version
@@ -325,7 +324,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
 }
 
 resource "aws_lb_target_group" "traffic_target_group" {
-  name = "${var.name_prefix}-traffic-${local.suffix}"
+  name = "${var.name_prefix}-traffic-${local.name_suffix}"
   health_check {
     enabled             = true
     interval            = 10
@@ -351,7 +350,7 @@ resource "aws_lb_listener" "traffic_listener" {
 }
 
 resource "aws_lb_target_group" "management_target_group" {
-  name = "${var.name_prefix}-mgmt-${local.suffix}"
+  name = "${var.name_prefix}-mgmt-${local.name_suffix}"
   health_check {
     enabled             = true
     interval            = 10
@@ -380,18 +379,18 @@ resource "aws_lb_listener" "management_listener" {
 }
 
 resource "aws_lb" "load_balancer" {
-  name               = "${var.name_prefix}-lb-${local.suffix}"
+  name               = "${var.name_prefix}-lb-${local.name_suffix}"
   internal           = var.load_balancer_internal
   subnets            = var.load_balancer_subnet_ids
   load_balancer_type = "network"
   security_groups = [
     aws_security_group.load_balancer_sg.id
   ]
-  enable_cross_zone_load_balancing = true
+  enable_cross_zone_load_balancing = var.load_balancer_cross_zone
 }
 
 resource "aws_autoscaling_policy" "scale_up_policy" {
-  name                   = "${var.name_prefix}-scale-up"
+  name                   = "${var.name_prefix}-scale-up-${local.name_suffix}"
   scaling_adjustment     = 3
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 180
@@ -399,7 +398,7 @@ resource "aws_autoscaling_policy" "scale_up_policy" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "cpu_alarm_high" {
-  alarm_name         = "${var.name_prefix}-cpu-alarm-high"
+  alarm_name         = "${var.name_prefix}-cpu-alarm-high-${local.name_suffix}"
   alarm_description  = "Alarm if CPU too high"
   statistic          = "Average"
   threshold          = 70
@@ -417,7 +416,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_high" {
 }
 
 resource "aws_autoscaling_policy" "scale_down_policy" {
-  name                   = "${var.name_prefix}-scale-down"
+  name                   = "${var.name_prefix}-scale-down-${local.name_suffix}"
   scaling_adjustment     = -1
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 30
@@ -425,7 +424,7 @@ resource "aws_autoscaling_policy" "scale_down_policy" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
-  alarm_name         = "${var.name_prefix}-cpu-alarm-low"
+  alarm_name         = "${var.name_prefix}-cpu-alarm-low-${local.name_suffix}"
   alarm_description  = "Alarm if CPU too low"
   statistic          = "Average"
   threshold          = 30
@@ -467,7 +466,7 @@ resource "aws_s3_object" "proxy_binary" {
 resource "aws_security_group" "redis_sg" {
   count = local.redis_enabled ? 1 : 0
 
-  name_prefix = "${var.name_prefix}-redis-"
+  name        = "${var.name_prefix}-redis-${local.name_suffix}"
   vpc_id      = var.vpc_id
   description = "Access to the Redis cache"
 }
@@ -493,7 +492,7 @@ resource "aws_vpc_security_group_egress_rule" "redis_egress_rule" {
 resource "aws_elasticache_subnet_group" "redis" {
   count = local.redis_enabled ? 1 : 0
 
-  name       = "${var.name_prefix}-subnet-group-${local.suffix}"
+  name       = "${var.name_prefix}-subnet-group-${local.name_suffix}"
   subnet_ids = var.cache_subnet_ids
 
   lifecycle {
@@ -507,7 +506,7 @@ resource "aws_elasticache_subnet_group" "redis" {
 resource "aws_elasticache_replication_group" "redis" {
   count = local.redis_enabled ? 1 : 0
 
-  replication_group_id = "${var.name_prefix}-redis-${local.suffix}"
+  replication_group_id = "${var.name_prefix}-redis-${local.name_suffix}"
   description          = "Redis Cache for Kivera proxy"
 
   node_type            = var.cache_instance_type
