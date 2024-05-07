@@ -1,6 +1,7 @@
 module "kivera-proxy" {
   source = "git::https://github.com/kivera-io/kivera-tf-modules.git//proxy/aws-autoscaled-simple-scaling"
 
+  name_prefix                  = var.name_prefix
   proxy_instance_type          = var.proxy_instance_type
   proxy_subnet_ids             = var.proxy_subnet_ids
   proxy_log_to_kivera          = var.proxy_log_to_kivera

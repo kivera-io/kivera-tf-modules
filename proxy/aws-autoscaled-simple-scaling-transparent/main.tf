@@ -26,8 +26,8 @@ locals {
 }
 
 resource "aws_secretsmanager_secret" "proxy_credentials" {
-  count = var.proxy_credentials != "" ? 1 : 0
-  name  = "${var.name_prefix}-credentials-${local.name_suffix}"
+  count       = var.proxy_credentials != "" ? 1 : 0
+  name_prefix = "${var.name_prefix}-credentials-"
 }
 
 resource "aws_secretsmanager_secret_version" "proxy_credentials_version" {
@@ -37,8 +37,8 @@ resource "aws_secretsmanager_secret_version" "proxy_credentials_version" {
 }
 
 resource "aws_secretsmanager_secret" "proxy_private_key" {
-  count = var.proxy_private_key != "" ? 1 : 0
-  name  = "${var.name_prefix}-private-key-${local.name_suffix}"
+  count       = var.proxy_private_key != "" ? 1 : 0
+  name_prefix = "${var.name_prefix}-private-key-"
 }
 
 resource "aws_secretsmanager_secret_version" "proxy_private_key_version" {
@@ -48,7 +48,7 @@ resource "aws_secretsmanager_secret_version" "proxy_private_key_version" {
 }
 
 resource "aws_iam_role" "instance_role" {
-  name = "${var.name_prefix}-instance-${local.name_suffix}"
+  name_prefix = "${var.name_prefix}-instance-"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -71,7 +71,7 @@ resource "aws_iam_role" "instance_role" {
     "arn:aws:iam::aws:policy/ReadOnlyAccess"
   ]
   inline_policy {
-    name = "${var.name_prefix}-get-secrets-${local.name_suffix}"
+    name = "${var.name_prefix}-get-secrets"
     policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
@@ -110,7 +110,7 @@ resource "aws_iam_role" "instance_role" {
 resource "aws_iam_role_policy" "instance_default_policies" {
   count = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
 
-  name = "${var.name_prefix}-proxy_default_policies-${local.name_suffix}"
+  name = "proxy_default_policies"
   role = aws_iam_role.instance_role.id
 
   policy = jsonencode({
@@ -135,12 +135,12 @@ resource "aws_iam_role_policy" "instance_default_policies" {
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = "${var.name_prefix}-instance-${local.name_suffix}"
-  role = aws_iam_role.instance_role.name
+  name_prefix = "${var.name_prefix}-instance-"
+  role        = aws_iam_role.instance_role.name
 }
 
 resource "aws_security_group" "instance_sg" {
-  name        = "${var.name_prefix}-instance-${local.name_suffix}"
+  name_prefix = "${var.name_prefix}-instance-"
   vpc_id      = var.vpc_id
   description = "Access to the proxy instances"
 }
@@ -170,7 +170,7 @@ resource "aws_s3_object" "tunneler_file" {
 }
 
 resource "aws_launch_template" "launch_template" {
-  name          = "${var.name_prefix}-instance-${local.name_suffix}"
+  name_prefix   = "${var.name_prefix}-instance-"
   image_id      = data.aws_ami.latest.id
   instance_type = var.proxy_instance_type
   key_name      = var.ec2_key_pair
@@ -208,7 +208,7 @@ resource "aws_launch_template" "launch_template" {
 }
 
 resource "aws_autoscaling_group" "auto_scaling_group" {
-  name = "${var.name_prefix}-asg-${local.name_suffix}"
+  name_prefix = "${var.name_prefix}-"
   launch_template {
     id      = aws_launch_template.launch_template.id
     version = aws_launch_template.launch_template.latest_version
@@ -242,7 +242,7 @@ resource "aws_lb" "glb" {
 }
 
 resource "aws_lb_target_group" "glb_target_group" {
-  name                 = "${var.name_prefix}-glb-tg-${local.name_suffix}"
+  name                 = "${var.name_prefix}-glb-tg"
   vpc_id               = var.vpc_id
   port                 = 6081
   protocol             = "GENEVE"
@@ -267,7 +267,7 @@ resource "aws_lb_listener" "glb_listener" {
   }
 
   tags = {
-    Name = "${var.name_prefix}-glb-listener-${local.name_suffix}"
+    Name = "${var.name_prefix}-glb-listner"
   }
 }
 
@@ -283,12 +283,12 @@ resource "aws_vpc_endpoint" "glb_endpoint" {
   service_name      = aws_vpc_endpoint_service.vpc_endpoint_service.service_name
 
   tags = {
-    Name = "${var.name_prefix}-glb-endpoint-${local.name_suffix}"
+    Name = "${var.name_prefix}-glb-endpoint"
   }
 }
 
 resource "aws_autoscaling_policy" "scale_up_policy" {
-  name                   = "${var.name_prefix}-scale-up-${local.name_suffix}"
+  name                   = "${var.name_prefix}-scale-up"
   scaling_adjustment     = 3
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 180
@@ -296,7 +296,7 @@ resource "aws_autoscaling_policy" "scale_up_policy" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "cpu_alarm_high" {
-  alarm_name         = "${var.name_prefix}-cpu-alarm-high-${local.name_suffix}"
+  alarm_name         = "${var.name_prefix}-cpu-alarm-high"
   alarm_description  = "Alarm if CPU too high"
   statistic          = "Average"
   threshold          = 70
@@ -314,7 +314,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_high" {
 }
 
 resource "aws_autoscaling_policy" "scale_down_policy" {
-  name                   = "${var.name_prefix}-scale-down-${local.name_suffix}"
+  name                   = "${var.name_prefix}-scale-down"
   scaling_adjustment     = -1
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 30
@@ -322,7 +322,7 @@ resource "aws_autoscaling_policy" "scale_down_policy" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
-  alarm_name         = "${var.name_prefix}-cpu-alarm-low-${local.name_suffix}"
+  alarm_name         = "${var.name_prefix}-cpu-alarm-low"
   alarm_description  = "Alarm if CPU too low"
   statistic          = "Average"
   threshold          = 30
@@ -364,7 +364,7 @@ resource "aws_s3_object" "proxy_binary" {
 resource "aws_security_group" "redis_sg" {
   count = local.redis_enabled ? 1 : 0
 
-  name        = "${var.name_prefix}-redis-${local.name_suffix}"
+  name_prefix = "${var.name_prefix}-redis-"
   vpc_id      = var.vpc_id
   description = "Access to the Redis cache"
 }
