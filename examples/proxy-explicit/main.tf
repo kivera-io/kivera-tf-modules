@@ -11,7 +11,7 @@ module "kivera-proxy" {
   proxy_max_asg_size           = var.proxy_max_asg_size
   cache_subnet_ids             = var.cache_subnet_ids
   cache_enabled                = var.cache_enabled
-  ec2_key_pair                = var.ec2_key_pair
+  ec2_key_pair                 = var.ec2_key_pair
   vpc_id                       = var.vpc_id
   load_balancer_subnet_ids     = var.load_balancer_subnet_ids
   load_balancer_internal       = var.load_balancer_internal

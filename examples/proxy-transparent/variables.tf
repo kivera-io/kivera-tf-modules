@@ -131,7 +131,7 @@ variable "s3_bucket_key" {
   default     = "/kivera/proxy"
 }
 
-variable "cross_zone_lb" {
+variable "load_balancer_cross_zone" {
   description = "Enable for cross zone load balancing"
   type        = bool
   default     = false
