@@ -42,7 +42,7 @@ cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
 update-ca-trust extract
 
 echo "
-export AWS_CA_BUNDLE=\"/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt"
+export AWS_CA_BUNDLE=\"/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt\"
 " >> ~/.bashrc
 
 source ~/.bashrc
