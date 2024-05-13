@@ -1,0 +1,58 @@
+---
+AWS-APIGATEWAY-CreateApi-1:
+    description: APIGATEWAY-CreateApi-only-http
+    provider: AWS
+    service: APIGATEWAY
+    actions:
+        - CreateApi
+    policy: valid { input.Body.protocolType == "HTTP" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-APIGATEWAY-CreateRoute-1:
+    description: APIGATEWAY-CreateRoute-must-have-auth
+    provider: AWS
+    service: APIGATEWAY
+    actions:
+        - CreateRoute
+    policy: valid { input.Body.authorizationType; input.Body.authorizationType != "NONE" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-APIGATEWAY-GetApis-1:
+    description: APIGATEWAY-GetApis-allowed
+    provider: AWS
+    service: APIGATEWAY
+    actions:
+        - GetApis
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

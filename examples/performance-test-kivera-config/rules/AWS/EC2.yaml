@@ -1,0 +1,96 @@
+---
+AWS-EC2-AuthorizeSecurityGroupIngress-1:
+    description: EC2-AuthorizeSecurityGroupIngress-allowed-port
+    provider: AWS
+    service: EC2
+    actions:
+        - AuthorizeSecurityGroupIngress
+    policy: valid { input.Body.IpPermissions[_].ipRanges[_].toport == "22" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-EC2-AuthorizeSecurityGroupIngress-2:
+    description: EC2-AuthorizeSecurityGroupIngress-within-cidr
+    provider: AWS
+    service: EC2
+    actions:
+        - AuthorizeSecurityGroupIngress
+    policy: valid { net.cidr_contains("10.0.0.0/8", input.Body.IpPermissions[_].ipRanges[_].cidrIp) }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-EC2-CreateKeyPair-1:
+    description: EC2-CreateKeyPair-only-allow-ed25519
+    provider: AWS
+    service: EC2
+    actions:
+        - CreateKeyPair
+    policy: valid { input.Body.KeyType == "ed25519" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-EC2-CreateVolume-1:
+    description: EC2-CreateVolume-encrypted
+    provider: AWS
+    service: EC2
+    actions:
+        - CreateVolume
+    policy: valid { input.Body.Encrypted; input.Body.KmsKeyId == "alias/secure-key" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-EC2-DescribeInstances-1:
+    description: EC2-DescribeInstances-max-results
+    provider: AWS
+    service: EC2
+    actions:
+        - DescribeInstances
+    policy: valid { input.Body.MaxResults <= 10 }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

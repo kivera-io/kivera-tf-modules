@@ -1,0 +1,10 @@
+---
+AWS-CLOUDFRONT:
+    name: AWS-CLOUDFRONT
+    description: AWS CLOUDFRONT rules
+    rules:
+        - AWS-CLOUDFRONT-AssociateAlias-1
+        - AWS-CLOUDFRONT-CreateDistribution-1
+        - AWS-CLOUDFRONT-ListDistributions-1
+    tags: {}
+

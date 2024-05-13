@@ -1,0 +1,58 @@
+---
+AWS-AUTOSCALING-CreateLaunchConfiguration-1:
+    description: AUTOSCALING-CreateLaunchConfiguration-encrypted-volumes
+    provider: AWS
+    service: AUTOSCALING
+    actions:
+        - CreateLaunchConfiguration
+    policy: valid { input.Body.BlockDeviceMappings[_].Ebs.Encrypted == "true" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-AUTOSCALING-CreateLaunchConfiguration-2:
+    description: AUTOSCALING-CreateLaunchConfiguration-approved-ami
+    provider: AWS
+    service: AUTOSCALING
+    actions:
+        - CreateLaunchConfiguration
+    policy: valid { input.Body.ImageId == approved_amis[_] }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-AUTOSCALING-DescribeAutoScalingGroups-1:
+    description: AUTOSCALING-DescribeAutoScalingGroups-allow
+    provider: AWS
+    service: AUTOSCALING
+    actions:
+        - DescribeAutoScalingGroups
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

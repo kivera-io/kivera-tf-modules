@@ -1,0 +1,9 @@
+---
+AWS-SNS:
+    name: AWS-SNS
+    description: AWS SNS rules
+    rules:
+        - AWS-SNS-ListSubscriptions-1
+        - AWS-SNS-ListTopics-1
+    tags: {}
+

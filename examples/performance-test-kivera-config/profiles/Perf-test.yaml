@@ -1,0 +1,9 @@
+---
+Perf-test:
+    name: Perf-test
+    description: Profile used for perf testing
+    rules:
+        - AWS-S3-MultiAction-1
+        - AWS-SSM-MultiAction-1
+    tags: {}
+

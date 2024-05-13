@@ -1,0 +1,9 @@
+---
+AWS-IAM:
+    name: AWS-IAM
+    description: AWS IAM rules
+    rules:
+        - AWS-IAM-CreateRole-1
+        - AWS-IAM-ListUsers-1
+    tags: {}
+

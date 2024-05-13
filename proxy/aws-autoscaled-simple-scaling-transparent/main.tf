@@ -9,12 +9,12 @@ data "aws_ami" "latest" {
 }
 
 resource "random_string" "suffix" {
-  length  = 10
+  length  = 5
   special = false
 }
 
 locals {
-  suffix                       = random_string.suffix.result
+  name_suffix                  = random_string.suffix.result
   s3_path                      = "s3://${var.s3_bucket}${var.s3_bucket_key}"
   glb_s3_path                  = "${local.s3_path}/gwlbtun.service"
   tunneler_s3_path             = "${local.s3_path}/tunnel-handler.sh"
@@ -125,6 +125,13 @@ resource "aws_iam_role_policy" "instance_default_policies" {
       }
     ]
   })
+
+  lifecycle {
+    precondition {
+      condition     = length(var.datadog_secret_arn) > 0
+      error_message = "datadog_secret_arn must be provided if enable_datadog_profiling or enable_datadog_tracing is true"
+    }
+  }
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
@@ -166,7 +173,7 @@ resource "aws_launch_template" "launch_template" {
   name_prefix   = "${var.name_prefix}-instance-"
   image_id      = data.aws_ami.latest.id
   instance_type = var.proxy_instance_type
-  key_name      = var.key_pair_name
+  key_name      = var.ec2_key_pair
   user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
     proxy_version                = var.proxy_version
     proxy_s3_path                = local.proxy_s3_path
@@ -179,7 +186,7 @@ resource "aws_launch_template" "launch_template" {
     redis_connection_string      = local.redis_connection_string
     glb_file                     = local.glb_s3_path
     tunneler_file                = local.tunneler_s3_path
-    log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
+    log_group_name               = "${var.name_prefix}-proxy-${local.name_suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
     enable_datadog_tracing       = var.enable_datadog_tracing
     enable_datadog_profiling     = var.enable_datadog_profiling
@@ -228,10 +235,10 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
 }
 
 resource "aws_lb" "glb" {
-  name                             = "${var.name_prefix}-glb-${local.suffix}"
+  name                             = "${var.name_prefix}-glb-${local.name_suffix}"
   load_balancer_type               = "gateway"
   subnets                          = var.proxy_subnet_ids
-  enable_cross_zone_load_balancing = var.cross_zone_lb
+  enable_cross_zone_load_balancing = var.load_balancer_cross_zone
 }
 
 resource "aws_lb_target_group" "glb_target_group" {
@@ -383,7 +390,7 @@ resource "aws_vpc_security_group_egress_rule" "redis_egress_rule" {
 resource "aws_elasticache_subnet_group" "redis" {
   count = local.redis_enabled ? 1 : 0
 
-  name       = "${var.name_prefix}-subnet-group-${local.suffix}"
+  name       = "${var.name_prefix}-subnet-group-${local.name_suffix}"
   subnet_ids = var.cache_subnet_ids
 
   lifecycle {
@@ -397,7 +404,7 @@ resource "aws_elasticache_subnet_group" "redis" {
 resource "aws_elasticache_replication_group" "redis" {
   count = local.redis_enabled ? 1 : 0
 
-  replication_group_id = "${var.name_prefix}-redis-${local.suffix}"
+  replication_group_id = "${var.name_prefix}-redis-${local.name_suffix}"
   description          = "Redis Cache for Kivera proxy"
 
   node_type            = var.cache_instance_type
