@@ -134,5 +134,5 @@ variable "s3_bucket_key" {
 variable "load_balancer_cross_zone" {
   description = "Enable for cross zone load balancing"
   type        = bool
-  default     = false
+  default     = true
 }
