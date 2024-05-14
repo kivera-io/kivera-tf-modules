@@ -18,7 +18,7 @@ resource "aws_instance" "bastion_instance" {
   ami                    = data.aws_ami.latest.id
   instance_type          = "t2.micro"
   subnet_id              = var.public_subnet_id
-  key_name               = var.instance_key_pair
+  key_name               = var.ec2_key_pair
   iam_instance_profile   = "AmazonSSMRoleForInstancesQuickSetup"
   vpc_security_group_ids = [aws_security_group.instance_sg.id]
 
@@ -31,7 +31,7 @@ resource "aws_instance" "client_instance" {
   ami                    = data.aws_ami.latest.id
   instance_type          = "t2.micro"
   subnet_id              = var.private_subnet_id
-  key_name               = var.instance_key_pair
+  key_name               = var.ec2_key_pair
   iam_instance_profile   = "AmazonSSMRoleForInstancesQuickSetup"
   vpc_security_group_ids = [aws_security_group.instance_sg.id]
   user_data              = <<EOF
