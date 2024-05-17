@@ -12,5 +12,6 @@ vpc_id                             = "vpc-id"
 public_subnet_id                   = "subnet-id"
 private_subnet_ids                 = ["subnet-id-1", "subnet-id-2", "subnet-id-3"]
 s3_bucket                          = "s3-bucket"
+ec2_key_pair                       = "kivera-poc-keypair"
 leader_username                    = "user"
 leader_associate_public_ip_address = true

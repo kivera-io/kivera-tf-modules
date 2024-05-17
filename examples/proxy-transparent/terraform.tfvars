@@ -2,7 +2,6 @@
 name_prefix                  = "kivera"
 proxy_instance_type          = "c5d.xlarge"
 ec2_key_pair                 = "kivera-poc-keypair"
-load_balancer_cross_zone     = true
 proxy_min_asg_size           = 6
 proxy_max_asg_size           = 15
 cache_enabled                = true

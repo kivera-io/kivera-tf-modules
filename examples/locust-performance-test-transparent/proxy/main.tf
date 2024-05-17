@@ -29,5 +29,6 @@ module "network-changes" {
   private_subnet_id    = element(module.network.private_subnet_ids, 0)
   vpc_endpoint_id      = module.proxy.vpc_service_endpoint_id
   private_subnet_rt_id = module.network.private_subnet_rt_id
-  instance_key_pair    = var.ec2_key_pair
+  ec2_key_pair         = var.ec2_key_pair
+  proxy_public_cert    = var.proxy_public_cert
 }
