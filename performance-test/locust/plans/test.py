@@ -784,20 +784,20 @@ class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
         AwsEc2Tasks: 1,
-        AwsDynamoDBTasks: 1,
+        # AwsDynamoDBTasks: 1,
         AwsStsTasks: 1,
         AwsS3Tasks: 1,
-        AwsApiGatewayTasks: 1,
-        AwsEventBridgeTasks: 1,
-        AwsIamTasks: 1,
-        AwsRdsTasks: 1,
-        AwsCloudFrontTasks: 1,
+        # AwsApiGatewayTasks: 1,
+        # AwsEventBridgeTasks: 1,
+        # AwsIamTasks: 1,
+        # AwsRdsTasks: 1,
+        # AwsCloudFrontTasks: 1,
         AwsSqsTasks: 1,
         AwsLambdaTasks: 1,
-        AwsLogsTasks: 1,
-        AwsAutoScalingTasks: 1,
-        AwsBatchTasks: 1,
-        AwsEcsTasks: 1,
-        AwsSnsTasks: 1,
-        AwsCloudFormationTasks: 1
+        # AwsLogsTasks: 1,
+        # AwsAutoScalingTasks: 1,
+        # AwsBatchTasks: 1,
+        # AwsEcsTasks: 1,
+        # AwsSnsTasks: 1,
+        # AwsCloudFormationTasks: 1
     }
