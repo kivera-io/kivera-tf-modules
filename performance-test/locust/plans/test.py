@@ -174,11 +174,11 @@ def failure(class_name, method_name, s, e):
 
 ### EC2 ###
 class AwsEc2Tasks(TaskSet):
-    @task(3)
-    @result_decorator
-    def aws_ec2_describe_instances_block(self):
-        client = get_client('ec2')
-        client.describe_instances()
+    # @task(3)
+    # @result_decorator
+    # def aws_ec2_describe_instances_block(self):
+    #     client = get_client('ec2')
+    #     client.describe_instances()
 
     @task(1)
     @result_decorator
@@ -187,41 +187,41 @@ class AwsEc2Tasks(TaskSet):
         client.get_paginator('describe_instances').paginate(PaginationConfig={'MaxItems': 1})
 
 
-    @task(3)
-    @result_decorator
-    def aws_ec2_authorize_security_group_ingress_block(self):
-        client = get_client('ec2')
-        client.authorize_security_group_ingress(
-            CidrIp='0.0.0.0/0',
-            ToPort=22,
-            FromPort=22,
-            IpProtocol="TCP",
-            GroupId="sg-09a320fc24c2fd3c5",
-        )
+    # @task(3)
+    # @result_decorator
+    # def aws_ec2_authorize_security_group_ingress_block(self):
+    #     client = get_client('ec2')
+    #     client.authorize_security_group_ingress(
+    #         CidrIp='0.0.0.0/0',
+    #         ToPort=22,
+    #         FromPort=22,
+    #         IpProtocol="TCP",
+    #         GroupId="sg-09a320fc24c2fd3c5",
+    #     )
 
-    @task(2)
-    @result_decorator
-    def aws_ec2_create_key_pair_block(self):
-        client = get_client('ec2')
-        client.create_key_pair(KeyName='test-key-pair', KeyType='rsa', KeyFormat='pem' )
+    # @task(2)
+    # @result_decorator
+    # def aws_ec2_create_key_pair_block(self):
+    #     client = get_client('ec2')
+    #     client.create_key_pair(KeyName='test-key-pair', KeyType='rsa', KeyFormat='pem' )
 
-    @task(2)
-    @result_decorator
-    def aws_ec2_create_key_pair_allow(self):
-        client = get_client('ec2')
-        client.create_key_pair(KeyName='test-key-pair', KeyType='ed25519', KeyFormat='pem' )
+    # @task(2)
+    # @result_decorator
+    # def aws_ec2_create_key_pair_allow(self):
+    #     client = get_client('ec2')
+    #     client.create_key_pair(KeyName='test-key-pair', KeyType='ed25519', KeyFormat='pem' )
 
-    @task(2)
-    @result_decorator
-    def aws_ec2_create_volume_block(self):
-        client = get_client('ec2', 'ap-southeast-2')
-        client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=False)
+    # @task(2)
+    # @result_decorator
+    # def aws_ec2_create_volume_block(self):
+    #     client = get_client('ec2', 'ap-southeast-2')
+    #     client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=False)
 
-    @task(1)
-    @result_decorator
-    def aws_ec2_create_volume_allow(self):
-        client = get_client('ec2', 'ap-southeast-2')
-        client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=True, KmsKeyId='alias/secure-key', Size=100)
+    # @task(1)
+    # @result_decorator
+    # def aws_ec2_create_volume_allow(self):
+    #     client = get_client('ec2', 'ap-southeast-2')
+    #     client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=True, KmsKeyId='alias/secure-key', Size=100)
 
 
 
@@ -289,32 +289,32 @@ class AwsStsTasks(TaskSet):
         client = get_client('sts')
         client.get_caller_identity()
 
-    @task(2)
-    @result_decorator
-    def aws_sts_assume_role_block_1(self):
-        client = get_client('sts')
-        client.assume_role(
-            RoleArn="arn:aws:iam::326190351503:role/test-role",
-            RoleSessionName="invalid-session-name",
-        )
+    # @task(2)
+    # @result_decorator
+    # def aws_sts_assume_role_block_1(self):
+    #     client = get_client('sts')
+    #     client.assume_role(
+    #         RoleArn="arn:aws:iam::326190351503:role/test-role",
+    #         RoleSessionName="invalid-session-name",
+    #     )
 
-    @task(2)
-    @result_decorator
-    def aws_sts_assume_role_block_2(self):
-        client = get_client('sts')
-        client.assume_role(
-            RoleArn="arn:aws:iam::000000000000:role/test-role",
-            RoleSessionName="org-dev-session",
-        )
+    # @task(2)
+    # @result_decorator
+    # def aws_sts_assume_role_block_2(self):
+    #     client = get_client('sts')
+    #     client.assume_role(
+    #         RoleArn="arn:aws:iam::000000000000:role/test-role",
+    #         RoleSessionName="org-dev-session",
+    #     )
 
-    @task(4)
-    @result_decorator
-    def aws_sts_assume_role_allow(self):
-        client = get_client('sts')
-        client.assume_role(
-            RoleArn="arn:aws:iam::326190351503:role/test-role",
-            RoleSessionName="org-dev-session",
-        )
+    # @task(4)
+    # @result_decorator
+    # def aws_sts_assume_role_allow(self):
+    #     client = get_client('sts')
+    #     client.assume_role(
+    #         RoleArn="arn:aws:iam::326190351503:role/test-role",
+    #         RoleSessionName="org-dev-session",
+    #     )
 
 
 ### S3 ###
@@ -328,11 +328,11 @@ class AwsS3Tasks(TaskSet):
     #     transfer = boto3.s3.transfer.S3Transfer(client=client)
     #     transfer.upload_file('test.data', bucket, path, extra_args={'ServerSideEncryption':'aws:kms', 'SSEKMSKeyId':'alias/secure-key'} )
 
-    @task(5)
-    @result_decorator
-    def aws_s3_list_objects_block(self):
-        client = get_client('s3')
-        client.list_objects(Bucket='kivera-poc-deployment')
+    # @task(5)
+    # @result_decorator
+    # def aws_s3_list_objects_block(self):
+    #     client = get_client('s3')
+    #     client.list_objects(Bucket='kivera-poc-deployment')
 
     @task(1)
     @result_decorator
@@ -340,29 +340,29 @@ class AwsS3Tasks(TaskSet):
         client = get_client('s3')
         client.get_paginator('list_objects').paginate(Bucket='kivera-poc-deployment', PaginationConfig={'MaxItems': 1})
 
-    @task(3)
-    @result_decorator
-    def aws_s3_put_object_block(self):
-        client = get_client('s3', 'ap-southeast-2')
-        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode())
+    # @task(3)
+    # @result_decorator
+    # def aws_s3_put_object_block(self):
+    #     client = get_client('s3', 'ap-southeast-2')
+    #     client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode())
 
-    @task(1)
-    @result_decorator
-    def aws_s3_put_object_allow(self):
-        client = get_client('s3', 'ap-southeast-2')
-        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
+    # @task(1)
+    # @result_decorator
+    # def aws_s3_put_object_allow(self):
+    #     client = get_client('s3', 'ap-southeast-2')
+    #     client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
 
-    @task(3)
-    @result_decorator
-    def aws_s3_create_bucket_block(self):
-        client = get_client('s3', 'ap-southeast-2')
-        client.create_bucket(Bucket="test-bucket", ACL='public-read', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
+    # @task(3)
+    # @result_decorator
+    # def aws_s3_create_bucket_block(self):
+    #     client = get_client('s3', 'ap-southeast-2')
+    #     client.create_bucket(Bucket="test-bucket", ACL='public-read', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
 
-    @task(1)
-    @result_decorator
-    def aws_s3_create_bucket_allow(self):
-        client = get_client('s3', 'ap-southeast-2')
-        client.create_bucket(Bucket="test-bucket", ACL='private', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
+    # @task(1)
+    # @result_decorator
+    # def aws_s3_create_bucket_allow(self):
+    #     client = get_client('s3', 'ap-southeast-2')
+    #     client.create_bucket(Bucket="test-bucket", ACL='private', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
 
 
 
@@ -507,19 +507,19 @@ class AwsCloudFrontTasks(TaskSet):
 
 ### SQS ###
 class AwsSqsTasks(TaskSet):
-    @task(2)
-    @result_decorator
-    def aws_sqs_create_queue_block_1(self):
-        policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":"sqs:*","Resource":"*"}]}'
-        client = get_client('sqs')
-        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/aws/sqs', 'Policy': policy } )
+    # @task(2)
+    # @result_decorator
+    # def aws_sqs_create_queue_block_1(self):
+    #     policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":"sqs:*","Resource":"*"}]}'
+    #     client = get_client('sqs')
+    #     client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/aws/sqs', 'Policy': policy } )
 
-    @task(2)
-    @result_decorator
-    def aws_sqs_create_queue_block_2(self):
-        policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"000000000000"},"Action":"sqs:*","Resource":"*"}]}'
-        client = get_client('sqs')
-        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
+    # @task(2)
+    # @result_decorator
+    # def aws_sqs_create_queue_block_2(self):
+    #     policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"000000000000"},"Action":"sqs:*","Resource":"*"}]}'
+    #     client = get_client('sqs')
+    #     client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
 
     @task(2)
     @result_decorator
@@ -528,65 +528,65 @@ class AwsSqsTasks(TaskSet):
         client = get_client('sqs')
         client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
 
-    @task(2)
-    @result_decorator
-    def aws_sqs_send_message_block(self):
-        client = get_client('sqs')
-        client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/000000000000/test-queue', MessageBody='test-message' )
+    # @task(2)
+    # @result_decorator
+    # def aws_sqs_send_message_block(self):
+    #     client = get_client('sqs')
+    #     client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/000000000000/test-queue', MessageBody='test-message' )
 
-    @task(2)
-    @result_decorator
-    def aws_sqs_send_message_allow(self):
-        client = get_client('sqs')
-        client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/326190351503/test-queue', MessageBody='test-message' )
+    # @task(2)
+    # @result_decorator
+    # def aws_sqs_send_message_allow(self):
+    #     client = get_client('sqs')
+    #     client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/326190351503/test-queue', MessageBody='test-message' )
 
 
 
 ### LAMBDA ###
 class AwsLambdaTasks(TaskSet):
-    @task(2)
-    @result_decorator
-    def aws_lambda_create_function_block_1(self):
-        client = get_client('lambda')
-        client.create_function(
-            FunctionName='test-lambda',
-            Role='arn:aws:iam::326190351503:role/test-role',
-            Code={ 'S3Bucket': 'test-bucket', 'S3Key': 'function-code'},
-            Runtime='python2.7',
-            VpcConfig={
-                'SubnetIds': ['subnet-08ce806b357e7a444'],
-                'SecurityGroupIds': ['sg-0ad587d38f88c4799']
-            },
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
-        )
+    # @task(2)
+    # @result_decorator
+    # def aws_lambda_create_function_block_1(self):
+    #     client = get_client('lambda')
+    #     client.create_function(
+    #         FunctionName='test-lambda',
+    #         Role='arn:aws:iam::326190351503:role/test-role',
+    #         Code={ 'S3Bucket': 'test-bucket', 'S3Key': 'function-code'},
+    #         Runtime='python2.7',
+    #         VpcConfig={
+    #             'SubnetIds': ['subnet-08ce806b357e7a444'],
+    #             'SecurityGroupIds': ['sg-0ad587d38f88c4799']
+    #         },
+    #         KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
+    #     )
 
-    @task(2)
-    @result_decorator
-    def aws_lambda_create_function_block_2(self):
-        client = get_client('lambda')
-        client.create_function(
-            FunctionName='test-lambda',
-            Role='arn:aws:iam::326190351503:role/test-role',
-            Code={ 'S3Bucket': 'test-bucket', 'S3Key': 'function-code'},
-            Runtime='python3.12',
-            VpcConfig={
-                'SubnetIds': ['subnet-08ce806b357e7a444'],
-                'SecurityGroupIds': ['sg-0ad587d38f88c4799']
-            },
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:000000000000:alias/aws/lambda',
-        )
+    # @task(2)
+    # @result_decorator
+    # def aws_lambda_create_function_block_2(self):
+    #     client = get_client('lambda')
+    #     client.create_function(
+    #         FunctionName='test-lambda',
+    #         Role='arn:aws:iam::326190351503:role/test-role',
+    #         Code={ 'S3Bucket': 'test-bucket', 'S3Key': 'function-code'},
+    #         Runtime='python3.12',
+    #         VpcConfig={
+    #             'SubnetIds': ['subnet-08ce806b357e7a444'],
+    #             'SecurityGroupIds': ['sg-0ad587d38f88c4799']
+    #         },
+    #         KMSKeyArn='arn:aws:kms:ap-southeast-2:000000000000:alias/aws/lambda',
+    #     )
 
-    @task(2)
-    @result_decorator
-    def aws_lambda_create_function_block_3(self):
-        client = get_client('lambda')
-        client.create_function(
-            FunctionName='test-lambda',
-            Role='arn:aws:iam::326190351503:role/test-role',
-            Code={ 'S3Bucket': 'test-bucket', 'S3Key': 'function-code'},
-            Runtime='python3.12',
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
-        )
+    # @task(2)
+    # @result_decorator
+    # def aws_lambda_create_function_block_3(self):
+    #     client = get_client('lambda')
+    #     client.create_function(
+    #         FunctionName='test-lambda',
+    #         Role='arn:aws:iam::326190351503:role/test-role',
+    #         Code={ 'S3Bucket': 'test-bucket', 'S3Key': 'function-code'},
+    #         Runtime='python3.12',
+    #         KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
+    #     )
 
     @task(2)
     @result_decorator
