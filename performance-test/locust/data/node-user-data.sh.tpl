@@ -11,34 +11,6 @@ sysctl -p
 
 mkdir -p ~/kivera
 
-if [[ ${proxy_transparent_enabled} == true ]]; then
-    echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
-else
-    time=180
-    echo Polling http://${proxy_host}:8090/version
-    while ! curl -s http://${proxy_host}:8090/version; do
-        [[ $time == 0 ]] && echo "Failed to get response" && exit 1
-        ((time-=1)); sleep 1;
-    done
-
-    curl -s http://${proxy_host}:8090/pub.cert > ~/kivera/ca-cert.pem
-
-    echo "
-    export HTTPS_PROXY=\"http://${proxy_host}:8080\"
-    export HTTP_PROXY=\"http://${proxy_host}:8080\"
-    export https_proxy=\"http://${proxy_host}:8080\"
-    export http_proxy=\"http://${proxy_host}:8080\"
-    export NO_PROXY=\"${leader_ip},${proxy_host},169.254.169.254,.github.com\"
-    export no_proxy=\"\$NO_PROXY\"
-    " >> ~/kivera/setenv.sh
-fi
-
-cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
-update-ca-trust extract
-
-echo "export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"" >> ~/kivera/setenv.sh
-source ~/kivera/setenv.sh
-
 yum update -y
 yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent -y
 
@@ -76,6 +48,30 @@ fallocate -l 50M test.data
 
 export S3_TEST_BUCKET=${s3_bucket}
 export S3_TEST_PATH=${s3_bucket_key}${deployment_id}
+
+time=180
+echo Polling http://${proxy_host}:8090/version
+while ! curl -s http://${proxy_host}:8090/version; do
+    [[ $time == 0 ]] && echo "Failed to get response" && exit 1
+    ((time-=1)); sleep 1;
+done
+
+curl -s http://${proxy_host}:8090/pub.cert > ~/kivera/ca-cert.pem
+
+echo "
+export HTTPS_PROXY=\"http://${proxy_host}:8080\"
+export HTTP_PROXY=\"http://${proxy_host}:8080\"
+export https_proxy=\"http://${proxy_host}:8080\"
+export http_proxy=\"http://${proxy_host}:8080\"
+export NO_PROXY=\"${leader_ip},${proxy_host},169.254.169.254,.github.com\"
+export no_proxy=\"\$NO_PROXY\"
+" >> ~/kivera/setenv.sh
+
+cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
+update-ca-trust extract
+
+echo "export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"" >> ~/kivera/setenv.sh
+source ~/kivera/setenv.sh
 
 test_file=$([[ ${proxy_transparent_enabled} == true ]] && echo "test_transparent.py" || echo "test.py")
 
