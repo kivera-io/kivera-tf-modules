@@ -174,17 +174,17 @@ def failure(class_name, method_name, s, e):
 
 ### EC2 ###
 class AwsEc2Tasks(TaskSet):
-    # @task(3)
-    # @result_decorator
-    # def aws_ec2_describe_instances_block(self):
-    #     client = get_client('ec2')
-    #     client.describe_instances()
-
-    @task(1)
+    @task(3)
     @result_decorator
-    def aws_ec2_describe_instances_allow(self):
+    def aws_ec2_describe_instances_block(self):
         client = get_client('ec2')
-        client.get_paginator('describe_instances').paginate(PaginationConfig={'MaxItems': 1})
+        client.describe_instances()
+
+    # @task(1)
+    # @result_decorator
+    # def aws_ec2_describe_instances_allow(self):
+    #     client = get_client('ec2')
+    #     client.get_paginator('describe_instances').paginate(PaginationConfig={'MaxItems': 1})
 
 
     # @task(3)
@@ -285,7 +285,7 @@ class AwsDynamoDBTasks(TaskSet):
 class AwsStsTasks(TaskSet):
     @task(4)
     @result_decorator
-    def aws_sts_get_caller_identity_allow(self):
+    def aws_sts_get_caller_identity_block(self):
         client = get_client('sts')
         client.get_caller_identity()
 
@@ -336,7 +336,7 @@ class AwsS3Tasks(TaskSet):
 
     @task(1)
     @result_decorator
-    def aws_s3_list_objects_allow(self):
+    def aws_s3_list_objects_block(self):
         client = get_client('s3')
         client.get_paginator('list_objects').paginate(Bucket='kivera-poc-deployment', PaginationConfig={'MaxItems': 1})
 
@@ -523,7 +523,7 @@ class AwsSqsTasks(TaskSet):
 
     @task(2)
     @result_decorator
-    def aws_sqs_create_queue_allow(self):
+    def aws_sqs_create_queue_block(self):
         policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":"sqs:*","Resource":"*"}]}'
         client = get_client('sqs')
         client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
@@ -590,7 +590,7 @@ class AwsLambdaTasks(TaskSet):
 
     @task(2)
     @result_decorator
-    def aws_lambda_create_function_allow(self):
+    def aws_lambda_create_function_block(self):
         client = get_client('lambda')
         client.create_function(
             FunctionName='test-lambda',
