@@ -613,12 +613,6 @@ class AwsLogsTasks(TaskSet):
         client = get_client('logs', 'ap-southeast-2')
         client.create_log_group(logGroupName='test-log-group')
 
-    @task(1)
-    @result_decorator
-    def aws_logs_create_log_group_allow(self):
-        client = get_client('logs', 'ap-southeast-2')
-        client.create_log_group(logGroupName='test-log-group', kmsKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
-
     @task(2)
     @result_decorator
     def aws_logs_put_subscription_filter_block(self):
@@ -736,15 +730,15 @@ class AwsBatchTasks(TaskSet):
 class AwsEcsTasks(TaskSet):
     @task(1)
     @result_decorator
-    def aws_ecs_list_services_allow(self):
+    def aws_ecs_list_clusters_allow(self):
         client = get_client('ecs')
-        client.list_services(cluster='test')
+        client.list_clusters()
 
     @task(1)
     @result_decorator
-    def aws_ecs_list_tasks_allow(self):
+    def aws_ecs_list_task_definitions_allow(self):
         client = get_client('ecs')
-        client.list_tasks(cluster='test')
+        client.list_task_definitions()
 
 
 
@@ -779,6 +773,18 @@ class AwsCloudFormationTasks(TaskSet):
         client = get_client('cloudformation')
         client.describe_type(Type='RESOURCE', TypeName=type_name)
 
+class AwsSensitiveFieldsTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_kms_update_custom_key_store_block(self):
+        client = get_client('kms')
+        client.update_custom_key_store(CustomKeyStoreId='cks-1234567890abcdef0', KeyStorePassword='ExamplePassword')
+
+    @task(1)
+    @result_decorator
+    def aws_workmail_reset_password_block(self):
+        client = get_client('workmail')
+        client.reset_password(OrganizationId='m-d281d0a2fd824be5b6cd3d3ce909fd27', UserId='S-1-1-11-1111111111-2222222222-3333333333-3333', Password='examplePa$$w0rd')
 
 class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
@@ -799,5 +805,6 @@ class KiveraPerf(User):
         AwsBatchTasks: 1,
         AwsEcsTasks: 1,
         AwsSnsTasks: 1,
-        AwsCloudFormationTasks: 1
+        AwsCloudFormationTasks: 1,
+        AwsSensitiveFieldsTasks: 1
     }
