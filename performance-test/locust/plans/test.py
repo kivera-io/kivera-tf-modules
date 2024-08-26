@@ -805,7 +805,7 @@ class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
     def lipsum_allow(self):
-        resp =  requests.get('https://lipsum.com')
+        resp =  requests.get('https://google.com')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
