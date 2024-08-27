@@ -167,8 +167,7 @@ EOF
 cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 {
   "agent": {
-    "metrics_collection_interval": 1,
-    "run_as_user": "cwagent"
+    "metrics_collection_interval": 5
   },
   $([[ ${proxy_log_to_cloudwatch} == true ]] && echo '"logs": {
     "log_stream_name": "{instance_id}",
@@ -188,6 +187,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
     "namespace": "kivera",
     "aggregation_dimensions": [
       ["InstanceId"],
+      ["InstanceName"],
       ["AutoScalingGroupName"]
     ],
     "append_dimensions": {
@@ -200,7 +200,11 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
       "cpu": {
         "measurement": [
           "cpu_usage_active"
-        ]
+        ],
+        "metrics_collection_interval": 5,
+        "append_dimensions": {
+          "InstanceName": "${instance_name}"
+        }
       }
     }
   }

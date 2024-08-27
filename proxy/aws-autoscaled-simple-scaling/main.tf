@@ -81,31 +81,41 @@ resource "aws_secretsmanager_secret_version" "redis_kivera_connection_string_ver
 }
 
 resource "aws_iam_role" "instance_role" {
-  name_prefix = "${var.name_prefix}-instance-"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = [
-            "ec2.amazonaws.com"
-          ]
-        }
-        Action = [
-          "sts:AssumeRole"
-        ]
-      }
-    ]
-  })
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
-    "arn:aws:iam::aws:policy/ReadOnlyAccess"
-  ]
-  inline_policy {
-    name = "${var.name_prefix}-get-secrets"
-    policy = jsonencode({
+  name_prefix        = "${var.name_prefix}-instance-"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ssm-managed" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cw-agent" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "read-only" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+resource "aws_iam_policy" "proxy_instance" {
+  name   = "${var.name_prefix}-default"
+  policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
         {
@@ -129,27 +139,20 @@ resource "aws_iam_role" "instance_role" {
         },
       ]
     })
-  }
 }
 
-resource "aws_iam_role_policy" "instance_default_policies" {
+resource "aws_iam_role_policy_attachment" "proxy_instance" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.proxy_instance.arn
+}
+
+data "aws_iam_policy_document" "datadog_secret" {
   count = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
-
-  name = "${var.name_prefix}-proxy_default_policies-${local.name_suffix}"
-  role = aws_iam_role.instance_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "secretsmanager:GetSecretValue"
-        Effect = "Allow"
-        Resource = [
-          var.datadog_secret_arn
-        ]
-      }
-    ]
-  })
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [var.datadog_secret_arn]
+  }
 
   lifecycle {
     precondition {
@@ -159,24 +162,38 @@ resource "aws_iam_role_policy" "instance_default_policies" {
   }
 }
 
-resource "aws_iam_role_policy" "redis_connection_string_access" {
+resource "aws_iam_policy" "datadog_secret" {
+  count  = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
+  name   = "${var.name_prefix}-get-datadog-secret"
+  policy = data.aws_iam_policy_document.datadog_secret[0].json
+}
+
+resource "aws_iam_role_policy_attachment" "datadog_secret" {
+  count      = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.datadog_secret[0].arn
+}
+
+
+data "aws_iam_policy_document" "redis_conn_string_secret" {
   count = local.redis_enabled ? 1 : 0
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [local.redis_connection_string_secret_arn]
+  }
+}
 
-  name = "${var.name_prefix}-get-redis-connection-secret"
-  role = aws_iam_role.instance_role.id
+resource "aws_iam_policy" "redis_conn_string_secret" {
+  count  = local.redis_enabled ? 1 : 0
+  name   = "${var.name_prefix}-get-redis-connection-secret"
+  policy = data.aws_iam_policy_document.redis_conn_string_secret[0].json
+}
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "secretsmanager:GetSecretValue"
-        Effect = "Allow"
-        Resource = [
-          local.redis_connection_string_secret_arn
-        ]
-      },
-    ]
-  })
+resource "aws_iam_role_policy_attachment" "redis_conn_string_secret" {
+  count      = local.redis_enabled ? 1 : 0
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.redis_conn_string_secret[0].arn
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
@@ -274,6 +291,7 @@ resource "aws_launch_template" "launch_template" {
   ]
   key_name = var.ec2_key_pair
   user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
+    instance_name                = "${var.name_prefix}-proxy"
     proxy_version                = var.proxy_version
     proxy_s3_path                = local.proxy_s3_path
     proxy_cert_type              = var.proxy_cert_type
@@ -543,7 +561,7 @@ resource "aws_elasticache_user" "redis_kivera_user" {
 
   user_id       = var.cache_kivera_username
   user_name     = var.cache_kivera_username
-  access_string = "on -@all +ping +mget +get +set +mset +cluster|slots +cluster|shards +command ~kivera*"
+  access_string = "on ~kivera* -@all +ping +mget +get +set +mset +cluster|slots +cluster|shards +command"
   engine        = "REDIS"
   passwords     = [local.cache_kivera_pass]
 }

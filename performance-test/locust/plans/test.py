@@ -7,6 +7,7 @@ import ddtrace
 from botocore.config import Config
 from locust import User, TaskSet, task, between, events
 from ddtrace.propagation.http import HTTPPropagator
+import requests
 
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
@@ -789,22 +790,22 @@ class AwsSensitiveFieldsTasks(TaskSet):
 class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
-        AwsEc2Tasks: 1,
-        AwsDynamoDBTasks: 1,
-        AwsStsTasks: 1,
-        AwsS3Tasks: 1,
-        AwsApiGatewayTasks: 1,
-        AwsEventBridgeTasks: 1,
-        AwsIamTasks: 1,
-        AwsRdsTasks: 1,
-        AwsCloudFrontTasks: 1,
-        AwsSqsTasks: 1,
-        AwsLambdaTasks: 1,
-        AwsLogsTasks: 1,
-        AwsAutoScalingTasks: 1,
-        AwsBatchTasks: 1,
-        AwsEcsTasks: 1,
-        AwsSnsTasks: 1,
-        AwsCloudFormationTasks: 1,
-        AwsSensitiveFieldsTasks: 1
+        AwsEc2Tasks: 3,
+        AwsDynamoDBTasks: 3,
+        AwsStsTasks: 3,
+        AwsS3Tasks: 3,
+        AwsApiGatewayTasks: 3,
+        AwsEventBridgeTasks: 3,
+        AwsIamTasks: 3,
+        AwsRdsTasks: 3,
+        AwsCloudFrontTasks: 3,
+        AwsSqsTasks: 3,
+        AwsLambdaTasks: 3,
+        AwsLogsTasks: 3,
+        AwsAutoScalingTasks: 3,
+        AwsBatchTasks: 3,
+        AwsEcsTasks: 3,
+        AwsSnsTasks: 3,
+        AwsCloudFormationTasks: 3,
+        AwsSensitiveFieldsTasks: 3
     }

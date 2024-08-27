@@ -36,7 +36,8 @@ fi
 cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
 update-ca-trust extract
 
-echo "export AWS_CA_BUNDLE=\"~/kivera/ca-cert.pem\"" >> ~/kivera/setenv.sh
+echo "export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
+echo "export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
 source ~/kivera/setenv.sh
 
 yum update -y
