@@ -787,43 +787,6 @@ class AwsSensitiveFieldsTasks(TaskSet):
         client = get_client('workmail')
         client.reset_password(OrganizationId='m-d281d0a2fd824be5b6cd3d3ce909fd27', UserId='S-1-1-11-1111111111-2222222222-3333333333-3333', Password='examplePa$$w0rd')
 
-class NonCloudTasks(TaskSet):
-    @task(1)
-    @result_decorator
-    def apple_block(self):
-        resp =  requests.get('https://apple.com')
-        if resp.status_code == 403:
-            raise Exception(resp.text)
-        elif resp.status_code != 200:
-            resp.raise_for_status()
-
-    @task(1)
-    @result_decorator
-    def samsung_block(self):
-        resp =  requests.get('https://samsung.com')
-        if resp.status_code == 403:
-            raise Exception(resp.text)
-        elif resp.status_code != 200:
-            resp.raise_for_status()
-
-    @task(1)
-    @result_decorator
-    def lipsum_allow(self):
-        resp =  requests.head('https://google.com')
-        if resp.status_code == 403:
-            raise Exception(resp.text)
-        elif resp.status_code != 200:
-            resp.raise_for_status()
-
-    @task(1)
-    @result_decorator
-    def wikipedia_allow(self):
-        resp =  requests.head('https://www.wikipedia.org')
-        if resp.status_code == 403:
-            raise Exception(resp.text)
-        elif resp.status_code != 200:
-            resp.raise_for_status()
-
 class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
@@ -844,6 +807,5 @@ class KiveraPerf(User):
         AwsEcsTasks: 3,
         AwsSnsTasks: 3,
         AwsCloudFormationTasks: 3,
-        AwsSensitiveFieldsTasks: 3,
-        NonCloudTasks: 1
+        AwsSensitiveFieldsTasks: 3
     }
