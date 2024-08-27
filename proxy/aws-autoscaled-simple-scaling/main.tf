@@ -291,6 +291,7 @@ resource "aws_launch_template" "launch_template" {
   ]
   key_name = var.ec2_key_pair
   user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
+    instance_name                = "${var.name_prefix}-proxy"
     proxy_version                = var.proxy_version
     proxy_s3_path                = local.proxy_s3_path
     proxy_cert_type              = var.proxy_cert_type

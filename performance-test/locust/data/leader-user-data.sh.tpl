@@ -42,7 +42,7 @@ cd /locust
 sleep 60
 
 if [[ ${proxy_transparent_enabled} == false ]]; then
-    time=360
+    time=180
     echo Polling http://${proxy_host}:8090/version
     while ! curl -s http://${proxy_host}:8090/version; do
         [[ $time == 0 ]] && echo "Failed to get response" && exit 1

@@ -31,7 +31,7 @@ function durationToSeconds () {
   set +f
 }
 
-time=300
+time=500
 
 echo -e "\nWaiting for leader to become ready...\n"
 while true; do

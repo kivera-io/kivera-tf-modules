@@ -203,7 +203,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
         ],
         "metrics_collection_interval": 5,
         "append_dimensions": {
-          "InstanceName": "kivera-proxy"
+          "InstanceName": "${instance_name}"
         }
       },
       "mem": {
@@ -213,7 +213,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
         ],
         "metrics_collection_interval": 5,
         "append_dimensions": {
-          "InstanceName": "kivera-proxy"
+          "InstanceName": "${instance_name}"
         }
       },
       "swap": {
@@ -222,7 +222,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
         ],
         "metrics_collection_interval": 5,
         "append_dimensions": {
-          "InstanceName": "kivera-proxy"
+          "InstanceName": "${instance_name}"
         }
       },
       "net": {
@@ -236,7 +236,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
         ],
         "metrics_collection_interval": 5,
         "append_dimensions": {
-          "InstanceName": "kivera-proxy"
+          "InstanceName": "${instance_name}"
         }
       }
     }
