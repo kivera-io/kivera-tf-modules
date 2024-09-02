@@ -791,7 +791,7 @@ class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
     def apple_block(self):
-        resp =  requests.get('https://apple.com')
+        resp = requests.get('https://app.dev.nonp.kivera.io')
         if resp.status_code == 403:
             raise Exception(resp.text)
         elif resp.status_code != 200:
@@ -800,7 +800,7 @@ class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
     def samsung_block(self):
-        resp =  requests.get('https://samsung.com')
+        resp = requests.get('https://app.stg.nonp.kivera.io')
         if resp.status_code == 403:
             raise Exception(resp.text)
         elif resp.status_code != 200:
@@ -809,7 +809,7 @@ class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
     def kivera_allow(self):
-        resp =  requests.head('https://kivera.io')
+        resp = requests.head('https://kivera.io')
         if resp.status_code == 403:
             raise Exception(resp.text)
         elif resp.status_code != 200:
@@ -818,7 +818,7 @@ class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
     def wikipedia_allow(self):
-        resp =  requests.head('https://www.wikipedia.org')
+        resp = requests.head('https://downloads.kivera.io')
         if resp.status_code == 403:
             raise Exception(resp.text)
         elif resp.status_code != 200:
