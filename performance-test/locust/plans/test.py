@@ -790,7 +790,7 @@ class AwsSensitiveFieldsTasks(TaskSet):
 class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
-    def apple_block(self):
+    def app_dev_block(self):
         resp = requests.get('https://app.dev.nonp.kivera.io')
         if resp.status_code == 403:
             raise Exception(resp.text)
@@ -799,7 +799,7 @@ class NonCloudTasks(TaskSet):
 
     @task(1)
     @result_decorator
-    def samsung_block(self):
+    def app_stg_block(self):
         resp = requests.get('https://app.stg.nonp.kivera.io')
         if resp.status_code == 403:
             raise Exception(resp.text)
@@ -817,8 +817,8 @@ class NonCloudTasks(TaskSet):
 
     @task(1)
     @result_decorator
-    def wikipedia_allow(self):
-        resp = requests.head('https://downloads.kivera.io')
+    def download_allow(self):
+        resp = requests.head('https://download.kivera.io')
         if resp.status_code == 403:
             raise Exception(resp.text)
         elif resp.status_code != 200:
