@@ -425,20 +425,20 @@ class AwsEventBridgeTasks(TaskSet):
 
 ### IAM ###
 class AwsIamTasks(TaskSet):
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_iam_list_users_allow(self):
         client = get_client('iam')
         client.list_users()
 
-    @task(3)
+    @task(1)
     @result_decorator
     def aws_iam_create_role_allow(self):
         client = get_client('iam')
         assume_role='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":["sts:AssumeRole"]}]}'
         client.create_role(RoleName='test-role', AssumeRolePolicyDocument=assume_role)
 
-    @task(3)
+    @task(1)
     @result_decorator
     def aws_iam_create_role_block(self):
         client = get_client('iam')
@@ -470,13 +470,13 @@ class AwsRdsTasks(TaskSet):
 
 ### CLOUDFRONT ###
 class AwsCloudFrontTasks(TaskSet):
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_cloudfront_list_distributions_allow(self):
         client = get_client('cloudfront')
         client.list_distributions()
 
-    @task(2)
+    @task(1)
     @result_decorator
     def aws_cloudfront_create_distribution_block(self):
         client = get_client('cloudfront')
@@ -484,7 +484,7 @@ class AwsCloudFrontTasks(TaskSet):
         tmp['HttpVersion'] = "http1.1"
         client.create_distribution(DistributionConfig=tmp)
 
-    @task(2)
+    @task(1)
     @result_decorator
     def aws_cloudfront_create_distribution_allow(self):
         client = get_client('cloudfront')
@@ -792,37 +792,29 @@ class NonCloudTasks(TaskSet):
     @result_decorator
     def app_dev_block(self):
         resp = requests.get('https://app.dev.nonp.kivera.io')
-        if resp.status_code == 403:
+        if resp.status_code != 200:
             raise Exception(resp.text)
-        elif resp.status_code != 200:
-            resp.raise_for_status()
 
     @task(1)
     @result_decorator
     def app_stg_block(self):
         resp = requests.get('https://app.stg.nonp.kivera.io')
-        if resp.status_code == 403:
+        if resp.status_code != 200:
             raise Exception(resp.text)
-        elif resp.status_code != 200:
-            resp.raise_for_status()
 
     @task(1)
     @result_decorator
-    def kivera_allow(self):
-        resp = requests.head('https://kivera.io')
-        if resp.status_code == 403:
+    def kivera_block(self):
+        resp = requests.get('https://kivera.io')
+        if resp.status_code != 200:
             raise Exception(resp.text)
-        elif resp.status_code != 200:
-            resp.raise_for_status()
 
     @task(1)
     @result_decorator
-    def download_allow(self):
-        resp = requests.head('https://download.kivera.io')
-        if resp.status_code == 403:
+    def download_block(self):
+        resp = requests.get('https://download.kivera.io')
+        if resp.status_code != 200:
             raise Exception(resp.text)
-        elif resp.status_code != 200:
-            resp.raise_for_status()
 
 class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
@@ -833,9 +825,9 @@ class KiveraPerf(User):
         AwsS3Tasks: 3,
         AwsApiGatewayTasks: 3,
         AwsEventBridgeTasks: 3,
-        AwsIamTasks: 3,
+        AwsIamTasks: 2,
         AwsRdsTasks: 3,
-        AwsCloudFrontTasks: 3,
+        AwsCloudFrontTasks: 2,
         AwsSqsTasks: 3,
         AwsLambdaTasks: 3,
         AwsLogsTasks: 3,
