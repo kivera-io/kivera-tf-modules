@@ -729,13 +729,19 @@ class AwsBatchTasks(TaskSet):
 
 ### ECS ###
 class AwsEcsTasks(TaskSet):
-    @task(1)
+    @task(3)
     @result_decorator
     def aws_ecs_list_clusters_allow(self):
         client = get_client('ecs')
         client.list_clusters()
-
+    
     @task(1)
+    @result_decorator
+    def aws_ecs_list_services_block(self):
+        client = get_client('ecs')
+        client.list_services()
+
+    @task(3)
     @result_decorator
     def aws_ecs_list_task_definitions_allow(self):
         client = get_client('ecs')
