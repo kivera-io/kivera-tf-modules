@@ -370,31 +370,38 @@ class AwsS3Tasks(TaskSet):
 ### APIGATEWAY ###
 class AwsApiGatewayTasks(TaskSet):
     ### APIGATEWAY ###
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_apigateway_get_apis_allow(self):
         client = get_client('apigatewayv2')
         client.get_apis()
 
-    @task(2)
+    # Get redis data
+    @task(1)
+    @result_decorator
+    def aws_apigateway_get_vpc_links_allow(self):
+        client = get_client('apigatewayv2')
+        client.get_vpc_links()
+
+    @task(4)
     @result_decorator
     def aws_apigateway_create_api_allow(self):
         client = get_client('apigatewayv2')
         client.create_api(Name='test-api', ProtocolType='HTTP')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_apigateway_create_api_block(self):
         client = get_client('apigatewayv2')
         client.create_api(Name='test-api', ProtocolType='WEBSOCKET')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_apigateway_create_route_allow(self):
         client = get_client('apigatewayv2')
         client.create_route(ApiId='api-123', RouteKey='/api/path', AuthorizerId='auth-123', AuthorizationType='AWS_IAM')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_apigateway_create_route_block(self):
         client = get_client('apigatewayv2')
@@ -425,20 +432,27 @@ class AwsEventBridgeTasks(TaskSet):
 
 ### IAM ###
 class AwsIamTasks(TaskSet):
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_iam_list_users_allow(self):
         client = get_client('iam')
         client.list_users()
-
+    
+    # Get redis data
     @task(1)
+    @result_decorator
+    def aws_iam_list_account_aliases_allow(self):
+        client = get_client('iam')
+        client.list_account_aliases()
+
+    @task(2)
     @result_decorator
     def aws_iam_create_role_allow(self):
         client = get_client('iam')
         assume_role='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":["sts:AssumeRole"]}]}'
         client.create_role(RoleName='test-role', AssumeRolePolicyDocument=assume_role)
 
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_iam_create_role_block(self):
         client = get_client('iam')
@@ -470,13 +484,20 @@ class AwsRdsTasks(TaskSet):
 
 ### CLOUDFRONT ###
 class AwsCloudFrontTasks(TaskSet):
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_cloudfront_list_distributions_allow(self):
         client = get_client('cloudfront')
         client.list_distributions()
-
+    
+    # Get redis data
     @task(1)
+    @result_decorator
+    def aws_cloudfront_list_functions_allow(self):
+        client = get_client('cloudfront')
+        client.list_functions()
+
+    @task(2)
     @result_decorator
     def aws_cloudfront_create_distribution_block(self):
         client = get_client('cloudfront')
@@ -484,7 +505,7 @@ class AwsCloudFrontTasks(TaskSet):
         tmp['HttpVersion'] = "http1.1"
         client.create_distribution(DistributionConfig=tmp)
 
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_cloudfront_create_distribution_allow(self):
         client = get_client('cloudfront')
@@ -492,13 +513,13 @@ class AwsCloudFrontTasks(TaskSet):
         tmp['HttpVersion'] = "http2and3"
         client.create_distribution(DistributionConfig=tmp)
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_cloudfront_associate_alias_block(self):
         client = get_client('cloudfront')
         client.associate_alias(TargetDistributionId='EDFDVBD6EXAMPLE', Alias='my.website.example.com')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_cloudfront_associate_alias_allow(self):
         client = get_client('cloudfront')
@@ -719,23 +740,37 @@ class AwsAutoScalingTasks(TaskSet):
 
 ### BATCH ###
 class AwsBatchTasks(TaskSet):
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_batch_list_jobs_allow(self):
         client = get_client('batch')
         client.list_jobs(jobQueue='my-job-queue')
+    
+    # Get redis data
+    @task(1)
+    @result_decorator
+    def aws_batch_list_scheduling_policies_allow(self):
+        client = get_client('batch')
+        client.list_scheduling_policies()
 
 
 
 ### ECS ###
 class AwsEcsTasks(TaskSet):
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_ecs_list_clusters_allow(self):
         client = get_client('ecs')
         client.list_clusters()
-
+    
+    # Get redis data
     @task(1)
+    @result_decorator
+    def aws_ecs_list_account_settings_allow(self):
+        client = get_client('ecs')
+        client.list_account_settings()
+
+    @task(2)
     @result_decorator
     def aws_ecs_list_task_definitions_allow(self):
         client = get_client('ecs')
