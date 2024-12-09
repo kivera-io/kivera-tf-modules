@@ -1,0 +1,97 @@
+{
+    "variables": [
+        {
+            "type": "pattern",
+            "pattern": "SOURCE_VAR",
+            "inputType": "input",
+            "id": "source",
+            "label": "source",
+            "defaultValue": "${log_group_name}",
+            "visible": false
+        },
+        {
+            "type": "property",
+            "property": "region",
+            "inputType": "input",
+            "id": "region",
+            "label": "region",
+            "defaultValue": "${log_group_region}",
+            "visible": false
+        },
+        {
+            "type": "pattern",
+            "pattern": "XKID_VAR",
+            "inputType": "input",
+            "id": "xkid",
+            "label": "xkid",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "VALID_VAR",
+            "inputType": "input",
+            "id": "valid",
+            "label": "valid",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "PROVIDER_VAR",
+            "inputType": "input",
+            "id": "provider",
+            "label": "provider",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "SERVICE_VAR",
+            "inputType": "input",
+            "id": "service",
+            "label": "service",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "ACTION_VAR",
+            "inputType": "input",
+            "id": "action",
+            "label": "action",
+            "defaultValue": ".*",
+            "visible": true
+        }
+    ],
+    "widgets": [
+        {
+            "height": 23,
+            "width": 17,
+            "y": 0,
+            "x": 0,
+            "type": "log",
+            "properties": {
+                "query": "source 'SOURCE_VAR' | fields replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid, @timestamp as timestamp, xkid, level, msg, data.Provider as provider, data.Service as service, data.Action as action\n| filter msg=\"request\" and xkid =~ /XKID_VAR/ and valid =~ /VALID_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ \n| sort @timestamp desc \n| limit 10000",
+                "region": "",
+                "stacked": false,
+                "title": "Requests",
+                "view": "table"
+            }
+        },
+        {
+            "height": 5,
+            "width": 7,
+            "y": 0,
+            "x": 17,
+            "type": "log",
+            "properties": {
+                "query": "source 'SOURCE_VAR' | fields replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid, data.Provider as provider, data.Service as service, data.Action as action\n| filter msg=\"request\" and valid =~ /VALID_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/\n| stats count() as requests by bin(1m)\n",
+                "region": "",
+                "stacked": false,
+                "title": "Request Count",
+                "view": "bar"
+            }
+        }
+    ]
+}

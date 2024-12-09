@@ -238,3 +238,9 @@ variable "enable_datadog_profiling" {
   type        = bool
   default     = false
 }
+
+variable "enable_cloudwatch_dashboard" {
+  description = "Enable cloudwatch dashboard for Kivera proxy"
+  type        = bool
+  default     = true
+}

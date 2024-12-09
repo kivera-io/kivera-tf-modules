@@ -573,3 +573,16 @@ resource "aws_elasticache_user_group" "redis_kivera_user_group" {
   user_group_id = "kivera"
   user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id]
 }
+
+data "aws_region" "current" {}
+
+resource "aws_cloudwatch_dashboard" "proxy_dashbaord" {
+  count = var.enable_cloudwatch_dashboard ? 1 : 0
+
+  dashboard_name = "${var.name_prefix}-dashboard-${local.name_suffix}"
+
+  dashboard_body = templatefile("${path.module}/data/proxy-cw-dashboard.json", {
+    log_group_name    = "${var.name_prefix}-proxy-${local.name_suffix}"
+    log_group_region = data.aws_region.current.name
+  })
+}
