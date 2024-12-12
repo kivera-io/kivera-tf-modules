@@ -93,10 +93,10 @@ cloudfront_dist_config = {
 
 custom_responses = {
     "CustomResponseTasks": {
-        "aws_xray_create_group_customresponse_block": "aws_xray_create_group",
-        "aws_xray_delete_group_customresponse_block": "aws_xray_delete_group",
-        "aws_xray_update_group_customresponse_block": "aws_xray_update_group",
-        "aws_xray_get_group_customresponse_block": "aws_xray_get_group",
+        "aws_xray_create_group_customresponse_block": '"aws_xray_create_group"',
+        "aws_xray_delete_group_customresponse_block": '"aws_xray_delete_group"',
+        "aws_xray_update_group_customresponse_block": '"aws_xray_update_group"',
+        "aws_xray_get_group_customresponse_block": '"aws_xray_get_group"',
     }
 }
 
