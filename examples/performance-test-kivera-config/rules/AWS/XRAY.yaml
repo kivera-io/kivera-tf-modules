@@ -7,7 +7,7 @@ AWS-XRAY-CreateGroup-CustomResp:
         - CreateGroup
     policy: |
         valid = false
-        block_response = data.ctx.rule.tags.cust_resp
+        block_response := data.ctx.rule.tags.cust_resp
     advanced:
         paths:
             - "*"
@@ -30,7 +30,7 @@ AWS-XRAY-DeleteGroup-CustomResp:
         - DeleteGroup
     policy: |
         valid = false
-        block_response = data.ctx.rule.tags.cust_resp
+        block_response := data.ctx.rule.tags.cust_resp
     advanced:
         paths:
             - "*"
@@ -53,7 +53,7 @@ AWS-XRAY-UpdateGroup-CustomResp:
         - UpdateGroup
     policy: |
         valid = false
-        block_response = data.ctx.rule.tags.cust_resp
+        block_response := data.ctx.rule.tags.cust_resp
     advanced:
         paths:
             - "*"
@@ -76,7 +76,7 @@ AWS-XRAY-GetGroup-CustomResp:
         - GetGroup
     policy: |
         valid = false
-        block_response = data.ctx.rule.tags.cust_resp
+        block_response := data.ctx.rule.tags.cust_resp
     advanced:
         paths:
             - "*"
