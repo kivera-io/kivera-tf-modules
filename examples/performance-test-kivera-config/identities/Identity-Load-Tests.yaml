@@ -21,12 +21,11 @@ Identity-Load-Tests:
         - AWS-SQS
         - AWS-STS
         - Perf-test
-    type:
-        name: APPLICATION
-    auth-mode: CLOUD_TENANT
+        - RedisRegoFunction
+    identity-type: CLOUD_TENANT
     config:
-        authentication:
-            basic-auth: ""
-            cidr-ranges: []
+        cloud-tenant-id: Kivera-org
+        selected:
+            - ou-jccv-7j49mfgg
     tags: {}
 

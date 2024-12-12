@@ -1,11 +1,14 @@
 ---
 AWS-AUTOSCALING-CreateLaunchConfiguration-1:
-    description: AUTOSCALING-CreateLaunchConfiguration-encrypted-volumes
+    description: Encrypted volumns only
     provider: AWS
     service: AUTOSCALING
     actions:
         - CreateLaunchConfiguration
-    policy: valid { input.Body.BlockDeviceMappings[_].Ebs.Encrypted == "true" }
+    policy: |
+        valid {
+            input.Body.BlockDeviceMappings[_].Ebs.Encrypted == "true"
+        }
     advanced:
         paths:
             - '*'
@@ -17,14 +20,18 @@ AWS-AUTOSCALING-CreateLaunchConfiguration-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-AUTOSCALING-CreateLaunchConfiguration-2:
-    description: AUTOSCALING-CreateLaunchConfiguration-approved-ami
+    description: Approved amis only
     provider: AWS
     service: AUTOSCALING
     actions:
         - CreateLaunchConfiguration
-    policy: valid { input.Body.ImageId == approved_amis[_] }
+    policy: |
+        valid {
+            input.Body.ImageId == approved_amis[_]
+        }
     advanced:
         paths:
             - '*'
@@ -36,14 +43,16 @@ AWS-AUTOSCALING-CreateLaunchConfiguration-2:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-AUTOSCALING-DescribeAutoScalingGroups-1:
-    description: AUTOSCALING-DescribeAutoScalingGroups-allow
+    description: Allow DescribeAutoScalingGroups
     provider: AWS
     service: AUTOSCALING
     actions:
         - DescribeAutoScalingGroups
-    policy: valid = true
+    policy: |
+        valid = true
     advanced:
         paths:
             - '*'
@@ -55,4 +64,5 @@ AWS-AUTOSCALING-DescribeAutoScalingGroups-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 

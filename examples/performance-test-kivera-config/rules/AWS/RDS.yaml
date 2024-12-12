@@ -1,11 +1,15 @@
 ---
 AWS-RDS-CreateDBInstance-1:
-    description: RDS-CreateDBInstance-allow
+    description: Require KMS key
     provider: AWS
     service: RDS
     actions:
         - CreateDBInstance
-    policy: valid { input.Body.StorageEncrypted; input.Body.KmsKeyId == "alias/secure-key" }
+    policy: |-
+        valid {
+            input.Body.StorageEncrypted
+            input.Body.KmsKeyId == "alias/secure-key"
+        }
     advanced:
         paths:
             - '*'
@@ -17,14 +21,16 @@ AWS-RDS-CreateDBInstance-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-RDS-DescribeDBInstances-1:
-    description: RDS-DescribeDBInstances-allow
+    description: Allow DescribeDBInstances
     provider: AWS
     service: RDS
     actions:
         - DescribeDBInstances
-    policy: valid = true
+    policy: |
+        valid = true
     advanced:
         paths:
             - '*'
@@ -36,4 +42,5 @@ AWS-RDS-DescribeDBInstances-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 

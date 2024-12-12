@@ -1,30 +1,11 @@
 ---
-AWS-LAMBDA-CreateFunction-1:
-    description: LAMBDA-CreateFunction-approved-runtimes
-    provider: AWS
-    service: LAMBDA
-    actions:
-        - CreateFunction
-    policy: valid { input.Body.Runtime == approved_lambda_runtimes[_] }
-    advanced:
-        paths:
-            - '*'
-        methods:
-            - '*'
-        endpoints:
-            - '*'
-    enforce: true
-    log-request-body: true
-    enable-cfn-scan: false
-    tags: {}
-
 AWS-LAMBDA-CreateFunction-2:
-    description: LAMBDA-CreateFunction-KMS-key
+    description: Restrict LAMBDA runtimes
     provider: AWS
     service: LAMBDA
     actions:
         - CreateFunction
-    policy: valid { input.Body.KMSKeyArn == "arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key" }
+    policy: "valid {\n    input.Body.Runtime == approved_lambda_runtimes[_] \n}"
     advanced:
         paths:
             - '*'
@@ -36,14 +17,15 @@ AWS-LAMBDA-CreateFunction-2:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-LAMBDA-CreateFunction-3:
-    description: LAMBDA-CreateFunction-private
+    description: Require KMS key
     provider: AWS
     service: LAMBDA
     actions:
         - CreateFunction
-    policy: valid { input.Body.VpcConfig }
+    policy: "valid { \n    input.Body.KMSKeyArn == \"arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key\" \n}"
     advanced:
         paths:
             - '*'
@@ -55,4 +37,28 @@ AWS-LAMBDA-CreateFunction-3:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
+
+AWS-LAMBDA-CreateFunction-4:
+    description: Require VPC configuration
+    provider: AWS
+    service: LAMBDA
+    actions:
+        - CreateFunction
+    policy: |-
+        valid {
+            input.Body.VpcConfig
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
 

@@ -1,11 +1,16 @@
 ---
 AWS-BATCH-ListJobs-1:
-    description: BATCH-ListJobs-allow
+    description: kivera.cache.get allow
     provider: AWS
     service: BATCH
     actions:
-        - ListJobs
-    policy: valid = true
+        - ListSchedulingPolicies
+    policy: |
+        valid = true
+        # valid {
+        #   value = kivera.cache.get("kiveradata:perftest:batch")
+        #   value == ""
+        # }
     advanced:
         paths:
             - '*'
@@ -17,4 +22,26 @@ AWS-BATCH-ListJobs-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
+
+AWS-BATCH-ListJobs-2:
+    description: Allow ListJobs
+    provider: AWS
+    service: BATCH
+    actions:
+        - ListJobs
+    policy: |
+        valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
 

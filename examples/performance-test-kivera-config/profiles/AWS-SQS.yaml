@@ -3,8 +3,8 @@ AWS-SQS:
     name: AWS-SQS
     description: AWS SQS rules
     rules:
-        - AWS-SQS-CreateQueue-1
         - AWS-SQS-CreateQueue-2
+        - AWS-SQS-CreateQueue-3
         - AWS-SQS-SendMessage-1
     tags: {}
 
