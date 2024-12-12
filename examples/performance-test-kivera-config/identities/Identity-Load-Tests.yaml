@@ -20,6 +20,7 @@ Identity-Load-Tests:
         - AWS-SNS
         - AWS-SQS
         - AWS-STS
+        - AWS-XRAY
         - Perf-test
         - RedisRegoFunction
     identity-type: CLOUD_TENANT
@@ -28,4 +29,3 @@ Identity-Load-Tests:
         selected:
             - ou-jccv-7j49mfgg
     tags: {}
-

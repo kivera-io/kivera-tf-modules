@@ -1,0 +1,10 @@
+---
+AWS-XRAY:
+    name: AWS-XRAY
+    description: AWS XRAY rules
+    rules:
+        - AWS-XRAY-DeleteGroup-CustomResp
+        - AWS-XRAY-UpdateGroup-CustomResp
+        - AWS-XRAY-GetGroup-CustomResp
+        - AWS-XRAY-CreateGroup-CustomResp
+    tags: {}

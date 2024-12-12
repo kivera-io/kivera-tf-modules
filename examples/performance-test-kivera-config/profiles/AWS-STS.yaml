@@ -7,4 +7,3 @@ AWS-STS:
         - AWS-STS-AssumeRole-2
         - AWS-STS-GetCallerIdentity-2
     tags: {}
-

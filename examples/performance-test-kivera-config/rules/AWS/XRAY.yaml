@@ -1,0 +1,92 @@
+---
+AWS-XRAY-CreateGroup-CustomResp:
+    description: Block CreateGroup Custom Response
+    provider: AWS
+    service: XRAY
+    actions:
+        - CreateGroup
+    policy: |
+        valid = false
+        block_response = data.ctx.rule.tags.cust_resp
+    advanced:
+        paths:
+            - "*"
+        methods:
+            - "*"
+        endpoints:
+            - "*"
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags:
+        cust_resp: aws_xray_create_group
+    compliance-mappings: {}
+
+AWS-XRAY-DeleteGroup-CustomResp:
+    description: Allow DeleteGroup Custom Response
+    provider: AWS
+    service: XRAY
+    actions:
+        - DeleteGroup
+    policy: |
+        valid = false
+        block_response = data.ctx.rule.tags.cust_resp
+    advanced:
+        paths:
+            - "*"
+        methods:
+            - "*"
+        endpoints:
+            - "*"
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags:
+        cust_resp: aws_xray_delete_group
+    compliance-mappings: {}
+
+AWS-XRAY-UpdateGroup-CustomResp:
+    description: Allow UpdateGroup Custom Response
+    provider: AWS
+    service: XRAY
+    actions:
+        - UpdateGroup
+    policy: |
+        valid = false
+        block_response = data.ctx.rule.tags.cust_resp
+    advanced:
+        paths:
+            - "*"
+        methods:
+            - "*"
+        endpoints:
+            - "*"
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags:
+        cust_resp: aws_xray_update_group
+    compliance-mappings: {}
+
+AWS-XRAY-GetGroup-CustomResp:
+    description: Allow GetGroup Custom Response
+    provider: AWS
+    service: XRAY
+    actions:
+        - GetGroup
+    policy: |
+        valid = false
+        block_response = data.ctx.rule.tags.cust_resp
+    advanced:
+        paths:
+            - "*"
+        methods:
+            - "*"
+        endpoints:
+            - "*"
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags:
+        cust_resp: aws_xray_get_group
+    compliance-mappings: {}

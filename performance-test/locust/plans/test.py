@@ -91,6 +91,15 @@ cloudfront_dist_config = {
     "Enabled": True
 }
 
+custom_responses = {
+    "CustomResponseTasks": {
+        "aws_xray_create_group_customresponse_block": "aws_xray_create_group",
+        "aws_xray_delete_group_customresponse_block": "aws_xray_delete_group",
+        "aws_xray_update_group_customresponse_block": "aws_xray_update_group",
+        "aws_xray_get_group_customresponse_block": "aws_xray_get_group",
+    }
+}
+
 boto3.setup_default_session(region_name='ap-southeast-2')
 
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', 4))
@@ -116,11 +125,17 @@ def result_decorator(method):
         class_name = self.__class__.__name__
         method_name = method.__name__
         method_parts = method_name.split('_')
-        validity = method_parts[-1]
-        if validity.isnumeric():
-            validity = method_parts[-2]
-        else:
-            validity = method_parts[-1]
+
+        idx = -1
+        if method_parts[idx].isnumeric():
+            idx = -2
+
+        validity = method_parts[idx]
+
+        custom_resp = False
+        if method_parts[idx-1] == "customresponse":
+            custom_resp = True
+
         if validity == 'allow':
             should_block = False
         elif validity == 'block':
@@ -137,11 +152,11 @@ def result_decorator(method):
             if not should_block and error.response['Error']['Code'] in allowed_errors:
                 return success(class_name, method_name, start_time)
             # otherwise check for Kivera error
-            return check_err_message(should_block, class_name, method_name, start_time, error)
+            return check_err_message(should_block, custom_resp, class_name, method_name, start_time, error)
 
         except Exception as error:
             # check for Kivera error
-            return check_err_message(should_block, class_name, method_name, start_time, error)
+            return check_err_message(should_block, custom_resp, class_name, method_name, start_time, error)
 
         # on successful request
         if should_block:
@@ -150,10 +165,30 @@ def result_decorator(method):
 
     return decorator
 
-def check_err_message(should_block, class_name, method_name, start_time, error):
-    if should_block and "Kivera.Error" in str(error) and "Oops, your request has been blocked." in str(error):
-        return success(class_name, method_name, start_time)
-    return failure(class_name, method_name, start_time, error)
+
+def check_err_message(should_block, custom_resp, class_name, method_name, start_time, error):
+    if should_block and "Kivera.Error" not in str(error) and "Oops, your request has been blocked." not in str(error):
+        error = Exception("Request Not Blocked: " + str(error))
+        return failure(class_name, method_name, start_time, error)
+
+    if custom_resp:
+        expected = custom_responses[class_name][method_name]
+        if not contains_custom_responses(error, expected):
+            error = Exception(f"Missing Custom Response: '{expected}': { str(error)}")
+            return failure(class_name, method_name, start_time, error)
+
+    return success(class_name, method_name, start_time)
+
+
+def contains_custom_responses(error, expected):
+    parts = str(error).split("Errors: ")
+    if len(parts) != 2:
+        return False
+    for resp in parts[1].strip().lstrip("[").rstrip("]").split(","):
+        if resp == expected:
+            return True
+    return False
+
 
 def success(class_name, method_name, s):
     t = int((time.time() - s) * 1000)
@@ -437,7 +472,7 @@ class AwsIamTasks(TaskSet):
     def aws_iam_list_users_allow(self):
         client = get_client('iam')
         client.list_users()
-    
+
     # Get redis data
     @task(1)
     @result_decorator
@@ -489,7 +524,7 @@ class AwsCloudFrontTasks(TaskSet):
     def aws_cloudfront_list_distributions_allow(self):
         client = get_client('cloudfront')
         client.list_distributions()
-    
+
     # Get redis data
     @task(1)
     @result_decorator
@@ -745,7 +780,7 @@ class AwsBatchTasks(TaskSet):
     def aws_batch_list_jobs_allow(self):
         client = get_client('batch')
         client.list_jobs(jobQueue='my-job-queue')
-    
+
     # Get redis data
     @task(1)
     @result_decorator
@@ -762,7 +797,7 @@ class AwsEcsTasks(TaskSet):
     def aws_ecs_list_clusters_allow(self):
         client = get_client('ecs')
         client.list_clusters()
-    
+
     # Get redis data
     @task(1)
     @result_decorator
@@ -850,6 +885,33 @@ class NonCloudTasks(TaskSet):
         resp = requests.get('https://download.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
+
+
+class CustomResponseTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_xray_create_group_customresponse_block(self):
+        client = get_client('xray')
+        client.create_group(GroupName='test')
+
+    @task(1)
+    @result_decorator
+    def aws_xray_delete_group_customresponse_block(self):
+        client = get_client('xray')
+        client.delete_group(GroupName='test')
+
+    @task(1)
+    @result_decorator
+    def aws_xray_update_group_customresponse_block(self):
+        client = get_client('xray')
+        client.update_group(GroupName='test')
+
+    @task(1)
+    @result_decorator
+    def aws_xray_get_group_customresponse_block(self):
+        client = get_client('xray')
+        client.get_group(GroupName='test')
+
 
 class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
