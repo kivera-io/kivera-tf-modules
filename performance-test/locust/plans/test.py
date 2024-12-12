@@ -934,5 +934,6 @@ class KiveraPerf(User):
         AwsSnsTasks: 3,
         AwsCloudFormationTasks: 3,
         AwsSensitiveFieldsTasks: 3,
-        NonCloudTasks: 1
+        NonCloudTasks: 1,
+        CustomResponseTasks: 1,
     }
