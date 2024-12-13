@@ -27,5 +27,5 @@ Identity-Load-Tests:
     config:
         cloud-tenant-id: Kivera-org
         selected:
-            - ou-jccv-7j49mfgg
+            - poc-ou
     tags: {}
