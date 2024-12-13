@@ -23,7 +23,7 @@ AWS-XRAY-CreateGroup-CustomResp:
     compliance-mappings: {}
 
 AWS-XRAY-DeleteGroup-CustomResp:
-    description: Allow DeleteGroup Custom Response
+    description: Block DeleteGroup Custom Response
     provider: AWS
     service: XRAY
     actions:
@@ -46,7 +46,7 @@ AWS-XRAY-DeleteGroup-CustomResp:
     compliance-mappings: {}
 
 AWS-XRAY-UpdateGroup-CustomResp:
-    description: Allow UpdateGroup Custom Response
+    description: Block UpdateGroup Custom Response
     provider: AWS
     service: XRAY
     actions:
@@ -69,7 +69,7 @@ AWS-XRAY-UpdateGroup-CustomResp:
     compliance-mappings: {}
 
 AWS-XRAY-GetGroup-CustomResp:
-    description: Allow GetGroup Custom Response
+    description: Block GetGroup Custom Response
     provider: AWS
     service: XRAY
     actions:
