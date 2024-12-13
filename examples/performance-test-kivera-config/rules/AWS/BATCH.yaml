@@ -1,0 +1,20 @@
+---
+AWS-BATCH-ListJobs-1:
+    description: BATCH-ListJobs-allow
+    provider: AWS
+    service: BATCH
+    actions:
+        - ListJobs
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

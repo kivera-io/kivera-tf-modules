@@ -1,0 +1,80 @@
+---
+AWS-DYNAMODB-ListTables-1:
+    description: DYNAMODB-ListTables-allow
+    provider: AWS
+    service: DYNAMODB
+    actions:
+        - ListTables
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-DYNAMODB-MultiAction-1:
+    description: DYNAMODB-CreateTable-billing-mode
+    provider: AWS
+    service: DYNAMODB
+    actions:
+        - CreateTable
+        - UpdateTable
+    policy: valid { input.Body.BillingMode == "PAY_PER_REQUEST" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-DYNAMODB-MultiAction-2:
+    description: DYNAMODB-CreateTable-table-class
+    provider: AWS
+    service: DYNAMODB
+    actions:
+        - CreateTable
+        - UpdateTable
+    policy: valid { input.Body.TableClass == "STANDARD" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-DYNAMODB-MultiAction-3:
+    description: DYNAMODB-CreateTable-kms-key
+    provider: AWS
+    service: DYNAMODB
+    actions:
+        - CreateTable
+        - UpdateTable
+    policy: valid { input.Body.SSESpecification.KMSMasterKeyId == "alias/secure-key" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

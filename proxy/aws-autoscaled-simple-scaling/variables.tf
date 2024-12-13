@@ -1,3 +1,4 @@
+### Infra variables
 variable "name_prefix" {
   description = "Prefix for resource names"
   type        = string
@@ -9,6 +10,80 @@ variable "name_prefix" {
   }
 }
 
+variable "vpc_id" {
+  description = "Which VPC to deploy the proxy into"
+  type        = string
+}
+
+variable "proxy_subnet_ids" {
+  description = "Which Subnets to deploy the proxy into"
+  type        = list(string)
+}
+
+variable "proxy_allowed_ingress_range" {
+  description = "IP range allowed to connect to proxy"
+  type        = string
+  default     = "10.0.0.0/8"
+}
+
+variable "proxy_allowed_ssh_range" {
+  description = "IP range allowed to SSH to proxy"
+  type        = string
+  default     = "10.0.0.0/8"
+}
+
+variable "proxy_instance_type" {
+  description = "The EC2 Instance Type of the proxy"
+  type        = string
+  default     = "c5d.xlarge"
+}
+
+variable "proxy_min_asg_size" {
+  description = "Minimum number of instances in the Autoscaling Group"
+  type        = number
+  default     = 3
+}
+
+variable "proxy_max_asg_size" {
+  description = "Maximum number of instances in the autoscaling group"
+  type        = number
+  default     = 12
+}
+
+variable "ec2_key_pair" {
+  description = "Name of an existing EC2 KeyPair to enable SSH access to the instances"
+  type        = string
+}
+
+variable "load_balancer_subnet_ids" {
+  description = "Which Subnets to deploy the load balancer into"
+  type        = list(string)
+}
+
+variable "load_balancer_internal" {
+  description = "Enable to use an internal load balancer"
+  type        = bool
+  default     = true
+}
+
+variable "load_balancer_cross_zone" {
+  description = "Enable for cross zone load balancing"
+  type        = bool
+  default     = true
+}
+
+variable "s3_bucket" {
+  description = "The name of the bucket used to upload the tests/files"
+  type        = string
+}
+
+variable "s3_bucket_key" {
+  description = "The key/path to be used to upload the tests/files"
+  type        = string
+  default     = "/kivera/proxy"
+}
+
+### Proxy variables
 variable "proxy_version" {
   description = "The version of the proxy to deploy"
   type        = string
@@ -52,12 +127,6 @@ variable "proxy_cert_type" {
   default     = "ecdsa"
 }
 
-variable "proxy_instance_type" {
-  description = "The EC2 Instance Type of the proxy"
-  type        = string
-  default     = "c5d.xlarge"
-}
-
 variable "proxy_log_to_kivera" {
   description = "Enable to send all logs to Kivera"
   type        = bool
@@ -68,56 +137,6 @@ variable "proxy_log_to_cloudwatch" {
   description = "Enable to send logs to Cloudwatch"
   type        = bool
   default     = true
-}
-
-variable "key_pair_name" {
-  description = "Name of an existing EC2 KeyPair to enable SSH access to the instances"
-  type        = string
-}
-
-variable "vpc_id" {
-  description = "Which VPC to deploy the proxy into"
-  type        = string
-}
-
-variable "load_balancer_subnet_ids" {
-  description = "Which Subnets to deploy the load balancer into"
-  type        = list(string)
-}
-
-variable "proxy_subnet_ids" {
-  description = "Which Subnets to deploy the proxy into"
-  type        = list(string)
-}
-
-variable "load_balancer_internal" {
-  description = "Enable to use an internal load balancer"
-  type        = bool
-  default     = true
-}
-
-variable "proxy_allowed_ingress_range" {
-  description = "IP range allowed to connect to proxy"
-  type        = string
-  default     = "10.0.0.0/8"
-}
-
-variable "proxy_allowed_ssh_range" {
-  description = "IP range allowed to SSH to proxy"
-  type        = string
-  default     = "10.0.0.0/8"
-}
-
-variable "proxy_min_asg_size" {
-  description = "Minimum number of proxy instances"
-  type        = number
-  default     = 3
-}
-
-variable "proxy_max_asg_size" {
-  description = "Maximum number of proxy instances"
-  type        = number
-  default     = 12
 }
 
 variable "proxy_local_path" {
@@ -132,6 +151,7 @@ variable "proxy_log_group_retention" {
   default     = 30
 }
 
+### Cache variables
 variable "cache_enabled" {
   description = "Whether to deploy and use a cache with the proxy"
   type        = bool
@@ -193,21 +213,7 @@ variable "redis_replicas_per_node_group" {
   default     = 2
 }
 
-variable "s3_bucket" {
-  description = "The name of the bucket used to upload the files"
-}
-
-variable "s3_bucket_key" {
-  description = "The key/path to be used to upload the files"
-  default     = "/kivera/proxy"
-}
-
-variable "enable_datadog_agent" {
-  description = "Enable Datadog agent on the proxy instance"
-  type        = bool
-  default     = false
-}
-
+### Datadog agent variables
 variable "datadog_secret_arn" {
   description = "The arn for the Datadog API key secret (required if enabled_datadog_agent is true)"
   type        = string
@@ -231,4 +237,10 @@ variable "enable_datadog_profiling" {
   description = "Enable profile metrics to be sent to Datadog"
   type        = bool
   default     = false
+}
+
+variable "enable_cloudwatch_dashboard" {
+  description = "Enable cloudwatch dashboard for Kivera proxy"
+  type        = bool
+  default     = true
 }

@@ -27,8 +27,13 @@ variable "private_subnet_rt_id" {
   type        = string
 }
 
-variable "instance_key_pair" {
+variable "ec2_key_pair" {
   description = "Name of ec2 key pair"
   type        = string
   default     = ""
+}
+
+variable "proxy_public_cert" {
+  description = "The public certificate associated with the proxies private key"
+  type        = string
 }

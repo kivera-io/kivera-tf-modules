@@ -1,0 +1,723 @@
+---
+AWS:
+    name: AWS
+    services:
+        - name: ACCESS-ANALYZER
+          inspection: enabled
+        - name: ACCOUNT
+          inspection: enabled
+        - name: ACM
+          inspection: enabled
+        - name: ACM-PCA
+          inspection: enabled
+        - name: ALEXAFORBUSINESS
+          inspection: enabled
+        - name: AMPLIFY
+          inspection: enabled
+        - name: AMPLIFYBACKEND
+          inspection: enabled
+        - name: AMPLIFYUIBUILDER
+          inspection: enabled
+        - name: APIGATEWAY
+          inspection: enabled
+        - name: APIGATEWAYMANAGEMENTAPI
+          inspection: enabled
+        - name: APPCONFIG
+          inspection: enabled
+        - name: APPCONFIGDATA
+          inspection: enabled
+        - name: APPFABRIC
+          inspection: enabled
+        - name: APPFLOW
+          inspection: enabled
+        - name: APPINTEGRATIONS
+          inspection: enabled
+        - name: APPLICATION-AUTOSCALING
+          inspection: enabled
+        - name: APPLICATION-INSIGHTS
+          inspection: enabled
+        - name: APPLICATIONCOSTPROFILER
+          inspection: enabled
+        - name: APPMESH
+          inspection: enabled
+        - name: APPREGISTRY
+          inspection: enabled
+        - name: APPRUNNER
+          inspection: enabled
+        - name: APPSTREAM
+          inspection: enabled
+        - name: APPSYNC
+          inspection: enabled
+        - name: APS
+          inspection: enabled
+        - name: ARC-ZONAL-SHIFT
+          inspection: enabled
+        - name: ATHENA
+          inspection: enabled
+        - name: AUDITMANAGER
+          inspection: enabled
+        - name: AUTOSCALING
+          inspection: enabled
+        - name: AUTOSCALING-PLANS
+          inspection: enabled
+        - name: B2BI
+          inspection: enabled
+        - name: BACKUP
+          inspection: enabled
+        - name: BACKUP-GATEWAY
+          inspection: enabled
+        - name: BACKUPSTORAGE
+          inspection: enabled
+        - name: BATCH
+          inspection: enabled
+        - name: BCM-DATA-EXPORTS
+          inspection: enabled
+        - name: BEDROCK
+          inspection: enabled
+        - name: BEDROCK-AGENT
+          inspection: enabled
+        - name: BEDROCK-AGENT-RUNTIME
+          inspection: enabled
+        - name: BEDROCK-RUNTIME
+          inspection: enabled
+        - name: BILLINGCONDUCTOR
+          inspection: enabled
+        - name: BRAKET
+          inspection: enabled
+        - name: BUDGETS
+          inspection: enabled
+        - name: CE
+          inspection: enabled
+        - name: CHIME
+          inspection: enabled
+        - name: CHIME-SDK-IDENTITY
+          inspection: enabled
+        - name: CHIME-SDK-MEDIA-PIPELINES
+          inspection: enabled
+        - name: CHIME-SDK-MEETINGS
+          inspection: enabled
+        - name: CHIME-SDK-MESSAGING
+          inspection: enabled
+        - name: CHIME-SDK-VOICE
+          inspection: enabled
+        - name: CLEANROOMS
+          inspection: enabled
+        - name: CLEANROOMSML
+          inspection: enabled
+        - name: CLOUD9
+          inspection: enabled
+        - name: CLOUDCONTROL
+          inspection: enabled
+        - name: CLOUDDIRECTORY
+          inspection: enabled
+        - name: CLOUDFORMATION
+          inspection: enabled
+        - name: CLOUDFRONT
+          inspection: enabled
+        - name: CLOUDFRONT-KEYVALUESTORE
+          inspection: enabled
+        - name: CLOUDHSM
+          inspection: enabled
+        - name: CLOUDHSMV2
+          inspection: enabled
+        - name: CLOUDSEARCH
+          inspection: enabled
+        - name: CLOUDSEARCHDOMAIN
+          inspection: enabled
+        - name: CLOUDTRAIL
+          inspection: enabled
+        - name: CLOUDTRAIL-DATA
+          inspection: enabled
+        - name: CODEARTIFACT
+          inspection: enabled
+        - name: CODEBUILD
+          inspection: enabled
+        - name: CODECOMMIT
+          inspection: enabled
+        - name: CODEDEPLOY
+          inspection: enabled
+        - name: CODEGURU-PROFILER
+          inspection: enabled
+        - name: CODEGURU-REVIEWER
+          inspection: enabled
+        - name: CODEGURU-SECURITY
+          inspection: enabled
+        - name: CODEPIPELINE
+          inspection: enabled
+        - name: CODESTAR
+          inspection: enabled
+        - name: CODESTAR-CONNECTIONS
+          inspection: enabled
+        - name: CODESTAR-NOTIFICATIONS
+          inspection: enabled
+        - name: COGNITO-IDENTITY
+          inspection: enabled
+        - name: COGNITO-IDP
+          inspection: enabled
+        - name: COGNITO-SYNC
+          inspection: enabled
+        - name: COMPREHEND
+          inspection: enabled
+        - name: COMPREHENDMEDICAL
+          inspection: enabled
+        - name: COMPUTE-OPTIMIZER
+          inspection: enabled
+        - name: CONFIG
+          inspection: enabled
+        - name: CONNECT
+          inspection: enabled
+        - name: CONNECT-CONTACT-LENS
+          inspection: enabled
+        - name: CONNECTCAMPAIGNS
+          inspection: enabled
+        - name: CONNECTCASES
+          inspection: enabled
+        - name: CONNECTPARTICIPANT
+          inspection: enabled
+        - name: CONSOLE
+          inspection: enabled
+        - name: CONTROLTOWER
+          inspection: enabled
+        - name: COST-OPTIMIZATION-HUB
+          inspection: enabled
+        - name: CUR
+          inspection: enabled
+        - name: CUSTOMER-PROFILES
+          inspection: enabled
+        - name: DATABREW
+          inspection: enabled
+        - name: DATAEXCHANGE
+          inspection: enabled
+        - name: DATAPIPELINE
+          inspection: enabled
+        - name: DATASYNC
+          inspection: enabled
+        - name: DATAZONE
+          inspection: enabled
+        - name: DAX
+          inspection: enabled
+        - name: DETECTIVE
+          inspection: enabled
+        - name: DEVICEFARM
+          inspection: enabled
+        - name: DEVOPS-GURU
+          inspection: enabled
+        - name: DIRECTCONNECT
+          inspection: enabled
+        - name: DISCOVERY
+          inspection: enabled
+        - name: DLM
+          inspection: enabled
+        - name: DMS
+          inspection: enabled
+        - name: DOCDB-ELASTIC
+          inspection: enabled
+        - name: DRS
+          inspection: enabled
+        - name: DS
+          inspection: enabled
+        - name: DYNAMODB
+          inspection: enabled
+        - name: EBS
+          inspection: enabled
+        - name: EC2
+          inspection: enabled
+        - name: EC2-INSTANCE-CONNECT
+          inspection: enabled
+        - name: ECR
+          inspection: enabled
+        - name: ECR-PUBLIC
+          inspection: enabled
+        - name: ECS
+          inspection: enabled
+        - name: EKS
+          inspection: enabled
+        - name: EKS-AUTH
+          inspection: enabled
+        - name: ELASTIC-INFERENCE
+          inspection: enabled
+        - name: ELASTICACHE
+          inspection: enabled
+        - name: ELASTICBEANSTALK
+          inspection: enabled
+        - name: ELASTICFILESYSTEM
+          inspection: enabled
+        - name: ELASTICLOADBALANCING
+          inspection: enabled
+        - name: ELASTICLOADBALANCINGV2
+          inspection: enabled
+        - name: ELASTICMAPREDUCE
+          inspection: enabled
+        - name: ELASTICTRANSCODER
+          inspection: enabled
+        - name: EMAIL
+          inspection: enabled
+        - name: EMR-CONTAINERS
+          inspection: enabled
+        - name: EMR-SERVERLESS
+          inspection: enabled
+        - name: ENTITLEMENT.MARKETPLACE
+          inspection: enabled
+        - name: ENTITYRESOLUTION
+          inspection: enabled
+        - name: ES
+          inspection: enabled
+        - name: EVENTBRIDGE
+          inspection: enabled
+        - name: EVENTS
+          inspection: enabled
+        - name: EVIDENTLY
+          inspection: enabled
+        - name: FINSPACE
+          inspection: enabled
+        - name: FIREHOSE
+          inspection: enabled
+        - name: FIS
+          inspection: enabled
+        - name: FMS
+          inspection: enabled
+        - name: FORECAST
+          inspection: enabled
+        - name: FORECASTQUERY
+          inspection: enabled
+        - name: FRAUDDETECTOR
+          inspection: enabled
+        - name: FREETIER
+          inspection: enabled
+        - name: FSX
+          inspection: enabled
+        - name: GAMELIFT
+          inspection: enabled
+        - name: GAMESPARKS
+          inspection: enabled
+        - name: GLACIER
+          inspection: enabled
+        - name: GLOBALACCELERATOR
+          inspection: enabled
+        - name: GLUE
+          inspection: enabled
+        - name: GRAFANA
+          inspection: enabled
+        - name: GREENGRASS
+          inspection: enabled
+        - name: GROUNDSTATION
+          inspection: enabled
+        - name: GUARDDUTY
+          inspection: enabled
+        - name: HEALTH
+          inspection: enabled
+        - name: HEALTHLAKE
+          inspection: enabled
+        - name: HONEYCODE
+          inspection: enabled
+        - name: IAM
+          inspection: enabled
+        - name: IDENTITYSTORE
+          inspection: enabled
+        - name: IMAGEBUILDER
+          inspection: enabled
+        - name: IMPORTEXPORT
+          inspection: enabled
+        - name: INSPECTOR
+          inspection: enabled
+        - name: INSPECTOR2
+          inspection: enabled
+        - name: INTERNETMONITOR
+          inspection: enabled
+        - name: IOT
+          inspection: enabled
+        - name: IOT-JOBS-DATA
+          inspection: enabled
+        - name: IOT-ROBORUNNER
+          inspection: enabled
+        - name: IOT1CLICK
+          inspection: enabled
+        - name: IOTANALYTICS
+          inspection: enabled
+        - name: IOTDATA
+          inspection: enabled
+        - name: IOTDEVICEADVISOR
+          inspection: enabled
+        - name: IOTEVENTS
+          inspection: enabled
+        - name: IOTEVENTSDATA
+          inspection: enabled
+        - name: IOTFLEETHUB
+          inspection: enabled
+        - name: IOTFLEETWISE
+          inspection: enabled
+        - name: IOTSECURETUNNELING
+          inspection: enabled
+        - name: IOTSITEWISE
+          inspection: enabled
+        - name: IOTTHINGSGRAPH
+          inspection: enabled
+        - name: IOTTWINMAKER
+          inspection: enabled
+        - name: IOTWIRELESS
+          inspection: enabled
+        - name: IVS
+          inspection: enabled
+        - name: IVS-REALTIME
+          inspection: enabled
+        - name: IVSCHAT
+          inspection: enabled
+        - name: KAFKA
+          inspection: enabled
+        - name: KAFKACONNECT
+          inspection: enabled
+        - name: KENDRA
+          inspection: enabled
+        - name: KENDRA-RANKING
+          inspection: enabled
+        - name: KEYSPACES
+          inspection: enabled
+        - name: KINESIS
+          inspection: enabled
+        - name: KINESISANALYTICS
+          inspection: enabled
+        - name: KINESISANALYTICSV2
+          inspection: enabled
+        - name: KINESISVIDEO
+          inspection: enabled
+        - name: KMS
+          inspection: enabled
+        - name: LAKEFORMATION
+          inspection: enabled
+        - name: LAMBDA
+          inspection: enabled
+        - name: LAUNCH-WIZARD
+          inspection: enabled
+        - name: LEX
+          inspection: enabled
+        - name: LICENSE-MANAGER
+          inspection: enabled
+        - name: LICENSE-MANAGER-LINUX-SUBSCRIPTIONS
+          inspection: enabled
+        - name: LICENSE-MANAGER-USER-SUBSCRIPTIONS
+          inspection: enabled
+        - name: LIGHTSAIL
+          inspection: enabled
+        - name: LOCATION
+          inspection: enabled
+        - name: LOGS
+          inspection: enabled
+        - name: LOOKOUTEQUIPMENT
+          inspection: enabled
+        - name: LOOKOUTMETRICS
+          inspection: enabled
+        - name: LOOKOUTVISION
+          inspection: enabled
+        - name: M2
+          inspection: enabled
+        - name: MACHINELEARNING
+          inspection: enabled
+        - name: MACIE
+          inspection: enabled
+        - name: MACIE2
+          inspection: enabled
+        - name: MANAGEDBLOCKCHAIN
+          inspection: enabled
+        - name: MANAGEDBLOCKCHAIN-QUERY
+          inspection: enabled
+        - name: MARKETPLACE-AGREEMENT
+          inspection: enabled
+        - name: MARKETPLACE-CATALOG
+          inspection: enabled
+        - name: MARKETPLACE-DEPLOYMENT
+          inspection: enabled
+        - name: MARKETPLACECOMMERCEANALYTICS
+          inspection: enabled
+        - name: MEDIACONNECT
+          inspection: enabled
+        - name: MEDIACONVERT
+          inspection: enabled
+        - name: MEDIALIVE
+          inspection: enabled
+        - name: MEDIAPACKAGE
+          inspection: enabled
+        - name: MEDIAPACKAGE-VOD
+          inspection: enabled
+        - name: MEDIAPACKAGEV2
+          inspection: enabled
+        - name: MEDIASTORE
+          inspection: enabled
+        - name: MEDIATAILOR
+          inspection: enabled
+        - name: MEDICAL-IMAGING
+          inspection: enabled
+        - name: MEMORYDB
+          inspection: enabled
+        - name: METERINGMARKETPLACE
+          inspection: enabled
+        - name: MGN
+          inspection: enabled
+        - name: MIGRATION-HUB-REFACTOR-SPACES
+          inspection: enabled
+        - name: MIGRATIONHUB
+          inspection: enabled
+        - name: MIGRATIONHUB-CONFIG
+          inspection: enabled
+        - name: MIGRATIONHUBORCHESTRATOR
+          inspection: enabled
+        - name: MIGRATIONHUBSTRATEGY
+          inspection: enabled
+        - name: MOBILE
+          inspection: enabled
+        - name: MOBILEANALYTICS
+          inspection: enabled
+        - name: MODELS.LEX.V2
+          inspection: enabled
+        - name: MONITORING
+          inspection: enabled
+        - name: MQ
+          inspection: enabled
+        - name: MTURK-REQUESTER
+          inspection: enabled
+        - name: MWAA
+          inspection: enabled
+        - name: NEPTUNEDATA
+          inspection: enabled
+        - name: NETWORK-FIREWALL
+          inspection: enabled
+        - name: NETWORKMANAGER
+          inspection: enabled
+        - name: NIMBLE
+          inspection: enabled
+        - name: OAM
+          inspection: enabled
+        - name: OMICS
+          inspection: enabled
+        - name: OPENSEARCH
+          inspection: enabled
+        - name: OPENSEARCHSERVERLESS
+          inspection: enabled
+        - name: OPSWORKS
+          inspection: enabled
+        - name: OPSWORKSCM
+          inspection: enabled
+        - name: ORGANIZATIONS
+          inspection: enabled
+        - name: OSIS
+          inspection: enabled
+        - name: OUTPOSTS
+          inspection: enabled
+        - name: PANORAMA
+          inspection: enabled
+        - name: PAYMENT-CRYPTOGRAPHY
+          inspection: enabled
+        - name: PAYMENT-CRYPTOGRAPHY-DATA
+          inspection: enabled
+        - name: PCA-CONNECTOR-AD
+          inspection: enabled
+        - name: PERSONALIZE
+          inspection: enabled
+        - name: PERSONALIZE-EVENTS
+          inspection: enabled
+        - name: PERSONALIZE-RUNTIME
+          inspection: enabled
+        - name: PI
+          inspection: enabled
+        - name: PINPOINT
+          inspection: enabled
+        - name: PINPOINT-SMS-VOICE
+          inspection: enabled
+        - name: PIPES
+          inspection: enabled
+        - name: POLLY
+          inspection: enabled
+        - name: PRICING
+          inspection: enabled
+        - name: PRIVATENETWORKS
+          inspection: enabled
+        - name: PROTON
+          inspection: enabled
+        - name: QBUSINESS
+          inspection: enabled
+        - name: QCONNECT
+          inspection: enabled
+        - name: QLDB
+          inspection: enabled
+        - name: QLDB-SESSION
+          inspection: enabled
+        - name: QUICKSIGHT
+          inspection: enabled
+        - name: RAM
+          inspection: enabled
+        - name: RBIN
+          inspection: enabled
+        - name: RDS
+          inspection: enabled
+        - name: RDS-DATA
+          inspection: enabled
+        - name: REDSHIFT
+          inspection: enabled
+        - name: REDSHIFT-DATA
+          inspection: enabled
+        - name: REDSHIFT-SERVERLESS
+          inspection: enabled
+        - name: REKOGNITION
+          inspection: enabled
+        - name: REPOSTSPACE
+          inspection: enabled
+        - name: RESILIENCEHUB
+          inspection: enabled
+        - name: RESOURCE-EXPLORER
+          inspection: enabled
+        - name: RESOURCE-GROUPS
+          inspection: enabled
+        - name: RESOURCEGROUPSTAGGINGAPI
+          inspection: enabled
+        - name: ROBOMAKER
+          inspection: enabled
+        - name: ROLESANYWHERE
+          inspection: enabled
+        - name: ROUTE53
+          inspection: enabled
+        - name: ROUTE53-RECOVERY-CLUSTER
+          inspection: enabled
+        - name: ROUTE53-RECOVERY-CONTROL-CONFIG
+          inspection: enabled
+        - name: ROUTE53-RECOVERY-READINESS
+          inspection: enabled
+        - name: ROUTE53DOMAINS
+          inspection: enabled
+        - name: ROUTE53RESOLVER
+          inspection: enabled
+        - name: RUM
+          inspection: enabled
+        - name: RUNTIME.LEX
+          inspection: enabled
+        - name: RUNTIME.LEX.V2
+          inspection: enabled
+        - name: S3
+          inspection: enabled
+        - name: S3-CONTROL
+          inspection: enabled
+        - name: S3OUTPOSTS
+          inspection: enabled
+        - name: SAGEMAKER
+          inspection: enabled
+        - name: SAVINGSPLANS
+          inspection: enabled
+        - name: SCHEDULER
+          inspection: enabled
+        - name: SCHEMAS
+          inspection: enabled
+        - name: SDB
+          inspection: enabled
+        - name: SECRETSMANAGER
+          inspection: enabled
+        - name: SECURITYHUB
+          inspection: enabled
+        - name: SECURITYLAKE
+          inspection: enabled
+        - name: SERVERLESSREPO
+          inspection: enabled
+        - name: SERVICE-QUOTAS
+          inspection: enabled
+        - name: SERVICECATALOG
+          inspection: enabled
+        - name: SERVICEDISCOVERY
+          inspection: enabled
+        - name: SES
+          inspection: enabled
+        - name: SESV2
+          inspection: enabled
+        - name: SHIELD
+          inspection: enabled
+        - name: SIGNER
+          inspection: enabled
+        - name: SIMSPACEWEAVER
+          inspection: enabled
+        - name: SMS
+          inspection: enabled
+        - name: SNOW-DEVICE-MANAGEMENT
+          inspection: enabled
+        - name: SNOWBALL
+          inspection: enabled
+        - name: SNS
+          inspection: enabled
+        - name: SQS
+          inspection: enabled
+        - name: SSM
+          inspection: enabled
+        - name: SSM-CONTACTS
+          inspection: enabled
+        - name: SSM-INCIDENTS
+          inspection: enabled
+        - name: SSM-SAP
+          inspection: enabled
+        - name: SSO
+          inspection: enabled
+        - name: SSO-ADMIN
+          inspection: enabled
+        - name: SSO-OIDC
+          inspection: enabled
+        - name: STATES
+          inspection: enabled
+        - name: STORAGEGATEWAY
+          inspection: enabled
+        - name: STREAMS-DYNAMODB
+          inspection: enabled
+        - name: STS
+          inspection: enabled
+        - name: SUPPORT
+          inspection: enabled
+        - name: SUPPORT-APP
+          inspection: enabled
+        - name: SWF
+          inspection: enabled
+        - name: SYNTHETICS
+          inspection: enabled
+        - name: TEXTRACT
+          inspection: enabled
+        - name: TIMESTREAM-QUERY
+          inspection: enabled
+        - name: TIMESTREAM-WRITE
+          inspection: enabled
+        - name: TNB
+          inspection: enabled
+        - name: TRANSCRIBE
+          inspection: enabled
+        - name: TRANSCRIBE-STREAMING
+          inspection: enabled
+        - name: TRANSFER
+          inspection: enabled
+        - name: TRANSLATE
+          inspection: enabled
+        - name: TRUSTEDADVISOR
+          inspection: enabled
+        - name: VERIFIEDPERMISSIONS
+          inspection: enabled
+        - name: VOICE-ID
+          inspection: enabled
+        - name: VPC-LATTICE
+          inspection: enabled
+        - name: WAF
+          inspection: enabled
+        - name: WAF-REGIONAL
+          inspection: enabled
+        - name: WAFV2
+          inspection: enabled
+        - name: WELLARCHITECTED
+          inspection: enabled
+        - name: WISDOM
+          inspection: enabled
+        - name: WORKDOCS
+          inspection: enabled
+        - name: WORKLINK
+          inspection: enabled
+        - name: WORKMAIL
+          inspection: enabled
+        - name: WORKMAILMESSAGEFLOW
+          inspection: enabled
+        - name: WORKSPACES
+          inspection: enabled
+        - name: WORKSPACES-THIN-CLIENT
+          inspection: enabled
+        - name: WORKSPACES-WEB
+          inspection: enabled
+        - name: XRAY
+          inspection: enabled
+

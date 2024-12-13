@@ -64,5 +64,5 @@ nohup locust \
     --spawn-rate=${locust_spawn_rate} \
     --run-time=${locust_run_time} \
     --expect-workers=${nodes_count} \
-    --expect-workers-max-wait 300 \
+    --expect-workers-max-wait 500 \
     --master > locust-leader.out 2>&1 &

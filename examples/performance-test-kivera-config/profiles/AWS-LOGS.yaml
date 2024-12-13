@@ -1,0 +1,10 @@
+---
+AWS-LOGS:
+    name: AWS-LOGS
+    description: AWS LOGS rules
+    rules:
+        - AWS-LOGS-CreateLogGroup-1
+        - AWS-LOGS-PutResourcePolicy-1
+        - AWS-LOGS-PutSubscriptionFilter-1
+    tags: {}
+

@@ -1,0 +1,10 @@
+---
+AWS-LAMBDA:
+    name: AWS-LAMBDA
+    description: AWS LAMBDA rules
+    rules:
+        - AWS-LAMBDA-CreateFunction-1
+        - AWS-LAMBDA-CreateFunction-2
+        - AWS-LAMBDA-CreateFunction-3
+    tags: {}
+

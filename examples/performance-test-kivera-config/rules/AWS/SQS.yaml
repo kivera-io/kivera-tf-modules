@@ -1,0 +1,58 @@
+---
+AWS-SQS-CreateQueue-1:
+    description: SQS-CreateQueue-KMS-key
+    provider: AWS
+    service: SQS
+    actions:
+        - CreateQueue
+    policy: valid { input.Body.Attribute.KmsMasterKeyId == "alias/secure-key" }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-SQS-CreateQueue-2:
+    description: SQS-CreateQueue-data-boundary-key
+    provider: AWS
+    service: SQS
+    actions:
+        - CreateQueue
+    policy: valid { json.unmarshal(input.Body.Attribute.Policy).Statement[_].Principal.AWS == approved_aws_data_boundary[_] }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-SQS-SendMessage-1:
+    description: SQS-SendMessage-data-boundary
+    provider: AWS
+    service: SQS
+    actions:
+        - SendMessage
+    policy: valid { contains(input.Body.QueueUrl, approved_aws_data_boundary[_]) }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

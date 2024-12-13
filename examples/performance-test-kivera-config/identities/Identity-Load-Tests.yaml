@@ -1,0 +1,32 @@
+---
+Identity-Load-Tests:
+    name: Identity-Load-Tests
+    description: Identity for load tests
+    profiles:
+        - AWS-APIGATEWAY
+        - AWS-AUTOSCALING
+        - AWS-BATCH
+        - AWS-CLOUDFORMATION
+        - AWS-CLOUDFRONT
+        - AWS-DYNAMODB
+        - AWS-EC2
+        - AWS-ECS
+        - AWS-EVENTS
+        - AWS-IAM
+        - AWS-LAMBDA
+        - AWS-LOGS
+        - AWS-RDS
+        - AWS-S3
+        - AWS-SNS
+        - AWS-SQS
+        - AWS-STS
+        - Perf-test
+    type:
+        name: APPLICATION
+    auth-mode: CLOUD_TENANT
+    config:
+        authentication:
+            basic-auth: ""
+            cidr-ranges: []
+    tags: {}
+

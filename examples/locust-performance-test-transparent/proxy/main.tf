@@ -14,8 +14,8 @@ module "proxy" {
   proxy_max_asg_size           = var.proxy_max_asg_size
   cache_enabled                = var.cache_enabled
   s3_bucket                    = var.s3_bucket
-  key_pair_name                = var.ec2_key_pair
-  cross_zone_lb                = var.cross_zone_lb
+  ec2_key_pair                 = var.ec2_key_pair
+  load_balancer_cross_zone     = var.load_balancer_cross_zone
   proxy_credentials_secret_arn = var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn = var.proxy_private_key_secret_arn
   proxy_public_cert            = var.proxy_public_cert
@@ -29,5 +29,6 @@ module "network-changes" {
   private_subnet_id    = element(module.network.private_subnet_ids, 0)
   vpc_endpoint_id      = module.proxy.vpc_service_endpoint_id
   private_subnet_rt_id = module.network.private_subnet_rt_id
-  instance_key_pair    = var.ec2_key_pair
+  ec2_key_pair         = var.ec2_key_pair
+  proxy_public_cert    = var.proxy_public_cert
 }

@@ -1,0 +1,39 @@
+---
+AWS-EVENTS-ListRules-1:
+    description: EVENTS-ListRules-allowed
+    provider: AWS
+    service: EVENTS
+    actions:
+        - ListRules
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-EVENTS-PutPermission-1:
+    description: EVENTS-PutPermission-allowed
+    provider: AWS
+    service: EVENTS
+    actions:
+        - PutPermission
+    policy: valid { input.Body.Principal == approved_aws_data_boundary[_] }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

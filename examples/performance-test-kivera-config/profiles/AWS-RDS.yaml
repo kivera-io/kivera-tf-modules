@@ -1,0 +1,9 @@
+---
+AWS-RDS:
+    name: AWS-RDS
+    description: AWS RDS rules
+    rules:
+        - AWS-RDS-CreateDBInstance-1
+        - AWS-RDS-DescribeDBInstances-1
+    tags: {}
+

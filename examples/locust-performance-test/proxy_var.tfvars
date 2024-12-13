@@ -1,19 +1,18 @@
 # Proxy variables
 vpc_id                       = "vpc-id"
 proxy_instance_type          = "c5d.xlarge"
-key_pair_name                = "keypair-name"
+ec2_key_pair                 = "kivera-poc-keypair"
 load_balancer_subnet_ids     = ["subnet-id-1", "subnet-id-2", "subnet-id-3"]
 cache_subnet_ids             = ["subnet-id-1", "subnet-id-2", "subnet-id-3"]
 proxy_subnet_ids             = ["subnet-id-1", "subnet-id-2", "subnet-id-3"]
 proxy_min_asg_size           = 1
 proxy_max_asg_size           = 1
 cache_enabled                = true
-cache_type                   = "redis"
-proxy_log_to_kivera          = true
-proxy_log_to_cloudwatch      = true
-s3_bucket                    = "s3-bucket"
-proxy_credentials_secret_arn = "arn:aws:secretsmanager:arn"
-proxy_private_key_secret_arn = "arn:aws:secretsmanager:arn"
+s3_bucket                    = "kivera-poc-deployment"
+proxy_credentials_secret_arn = "arn:aws:secretsmanager:ap-southeast-2:111111111111:secret:kivera-perf-test-credentials"
+proxy_private_key_secret_arn = "arn:aws:secretsmanager:ap-southeast-2:111111111111:secret:kivera-perf-test-private-key"
 proxy_public_cert            = <<-EOT
-cert-here
+-----BEGIN CERTIFICATE-----
+<<insert certificate contents here>>
+-----END CERTIFICATE-----
 EOT

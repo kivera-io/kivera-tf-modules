@@ -1,0 +1,162 @@
+{
+    "variables": [
+        {
+            "type": "pattern",
+            "pattern": "SOURCE_VAR",
+            "inputType": "input",
+            "id": "cw_logs_source",
+            "label": "cw_logs_source",
+            "defaultValue": "${log_group_name}",
+            "visible": false
+        },
+        {
+            "type": "property",
+            "property": "region",
+            "inputType": "input",
+            "id": "cw_logs_region",
+            "label": "cw_logs_region",
+            "defaultValue": "${log_group_region}",
+            "visible": false
+        },
+        {
+            "type": "pattern",
+            "pattern": "XKID_VAR",
+            "inputType": "input",
+            "id": "xkid",
+            "label": "xkid",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "PROVIDER_VAR",
+            "inputType": "input",
+            "id": "provider",
+            "label": "provider",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "SERVICE_VAR",
+            "inputType": "input",
+            "id": "service",
+            "label": "service",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "ACTION_VAR",
+            "inputType": "input",
+            "id": "action",
+            "label": "action",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "REGION_VAR",
+            "inputType": "input",
+            "id": "region",
+            "label": "region",
+            "defaultValue": ".*",
+            "visible": true
+        },
+        {
+            "type": "pattern",
+            "pattern": "VALID_VAR",
+            "inputType": "input",
+            "id": "valid",
+            "label": "valid",
+            "defaultValue": ".*",
+            "visible": true
+        }
+    ],
+    "widgets": [
+        {
+            "height": 17,
+            "width": 13,
+            "y": 0,
+            "x": 0,
+            "type": "log",
+            "properties": {
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| sort timestamp desc \n| limit 500",
+                "region": "",
+                "stacked": false,
+                "title": "Requests",
+                "view": "table"
+            }
+        },
+        {
+            "height": 5,
+            "width": 11,
+            "y": 0,
+            "x": 13,
+            "type": "log",
+            "properties": {
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count() as requests by bin(1m)\n",
+                "region": "",
+                "stacked": false,
+                "title": "Request Count",
+                "view": "bar"
+            }
+        },
+        {
+            "height": 6,
+            "width": 4,
+            "y": 5,
+            "x": 13,
+            "type": "log",
+            "properties": {
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(provider) as providers by provider\n| sort providers desc\n| limit 10",
+                "region": "",
+                "stacked": false,
+                "view": "pie",
+                "title": "Providers"
+            }
+        },
+        {
+            "height": 6,
+            "width": 4,
+            "y": 11,
+            "x": 13,
+            "type": "log",
+            "properties": {
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(service) as services by service\n| sort services desc\n| limit 10",
+                "region": "",
+                "stacked": false,
+                "title": "Services",
+                "view": "pie"
+            }
+        },
+        {
+            "height": 6,
+            "width": 7,
+            "y": 5,
+            "x": 17,
+            "type": "log",
+            "properties": {
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(action) as total by provider, service, action\n| sort total desc\n| limit 10",
+                "region": "",
+                "stacked": false,
+                "title": "Actions",
+                "view": "table"
+            }
+        },
+        {
+            "height": 6,
+            "width": 7,
+            "y": 11,
+            "x": 17,
+            "type": "log",
+            "properties": {
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(region) as total by provider, region\n| sort total desc\n| limit 10",
+                "region": "",
+                "stacked": false,
+                "title": "Regions",
+                "view": "table"
+            }
+        }
+    ]
+}

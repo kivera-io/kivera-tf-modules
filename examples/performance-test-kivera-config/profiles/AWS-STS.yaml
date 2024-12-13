@@ -1,0 +1,10 @@
+---
+AWS-STS:
+    name: AWS-STS
+    description: AWS STS rules
+    rules:
+        - AWS-STS-AssumeRole-1
+        - AWS-STS-AssumeRole-2
+        - AWS-STS-GetCallerIdentity-1
+    tags: {}
+

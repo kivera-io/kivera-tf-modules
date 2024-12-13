@@ -1,0 +1,8 @@
+---
+AWS-BATCH:
+    name: AWS-BATCH
+    description: AWS BATCH rules
+    rules:
+        - AWS-BATCH-ListJobs-1
+    tags: {}
+

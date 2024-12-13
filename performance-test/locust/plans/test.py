@@ -7,6 +7,7 @@ import ddtrace
 from botocore.config import Config
 from locust import User, TaskSet, task, between, events
 from ddtrace.propagation.http import HTTPPropagator
+import requests
 
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
@@ -369,31 +370,38 @@ class AwsS3Tasks(TaskSet):
 ### APIGATEWAY ###
 class AwsApiGatewayTasks(TaskSet):
     ### APIGATEWAY ###
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_apigateway_get_apis_allow(self):
         client = get_client('apigatewayv2')
         client.get_apis()
 
-    @task(2)
+    # Get redis data
+    @task(1)
+    @result_decorator
+    def aws_apigateway_get_vpc_links_allow(self):
+        client = get_client('apigatewayv2')
+        client.get_vpc_links()
+
+    @task(4)
     @result_decorator
     def aws_apigateway_create_api_allow(self):
         client = get_client('apigatewayv2')
         client.create_api(Name='test-api', ProtocolType='HTTP')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_apigateway_create_api_block(self):
         client = get_client('apigatewayv2')
         client.create_api(Name='test-api', ProtocolType='WEBSOCKET')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_apigateway_create_route_allow(self):
         client = get_client('apigatewayv2')
         client.create_route(ApiId='api-123', RouteKey='/api/path', AuthorizerId='auth-123', AuthorizationType='AWS_IAM')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_apigateway_create_route_block(self):
         client = get_client('apigatewayv2')
@@ -424,20 +432,27 @@ class AwsEventBridgeTasks(TaskSet):
 
 ### IAM ###
 class AwsIamTasks(TaskSet):
-    @task(1)
+    @task(4)
     @result_decorator
     def aws_iam_list_users_allow(self):
         client = get_client('iam')
         client.list_users()
+    
+    # Get redis data
+    @task(1)
+    @result_decorator
+    def aws_iam_list_account_aliases_allow(self):
+        client = get_client('iam')
+        client.list_account_aliases()
 
-    @task(3)
+    @task(2)
     @result_decorator
     def aws_iam_create_role_allow(self):
         client = get_client('iam')
         assume_role='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":["sts:AssumeRole"]}]}'
         client.create_role(RoleName='test-role', AssumeRolePolicyDocument=assume_role)
 
-    @task(3)
+    @task(2)
     @result_decorator
     def aws_iam_create_role_block(self):
         client = get_client('iam')
@@ -469,11 +484,18 @@ class AwsRdsTasks(TaskSet):
 
 ### CLOUDFRONT ###
 class AwsCloudFrontTasks(TaskSet):
-    @task(1)
+    @task(4)
     @result_decorator
     def aws_cloudfront_list_distributions_allow(self):
         client = get_client('cloudfront')
         client.list_distributions()
+    
+    # Get redis data
+    @task(1)
+    @result_decorator
+    def aws_cloudfront_list_functions_allow(self):
+        client = get_client('cloudfront')
+        client.list_functions()
 
     @task(2)
     @result_decorator
@@ -491,13 +513,13 @@ class AwsCloudFrontTasks(TaskSet):
         tmp['HttpVersion'] = "http2and3"
         client.create_distribution(DistributionConfig=tmp)
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_cloudfront_associate_alias_block(self):
         client = get_client('cloudfront')
         client.associate_alias(TargetDistributionId='EDFDVBD6EXAMPLE', Alias='my.website.example.com')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_cloudfront_associate_alias_allow(self):
         client = get_client('cloudfront')
@@ -613,12 +635,6 @@ class AwsLogsTasks(TaskSet):
         client = get_client('logs', 'ap-southeast-2')
         client.create_log_group(logGroupName='test-log-group')
 
-    @task(1)
-    @result_decorator
-    def aws_logs_create_log_group_allow(self):
-        client = get_client('logs', 'ap-southeast-2')
-        client.create_log_group(logGroupName='test-log-group', kmsKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
-
     @task(2)
     @result_decorator
     def aws_logs_put_subscription_filter_block(self):
@@ -724,27 +740,41 @@ class AwsAutoScalingTasks(TaskSet):
 
 ### BATCH ###
 class AwsBatchTasks(TaskSet):
-    @task(1)
+    @task(2)
     @result_decorator
     def aws_batch_list_jobs_allow(self):
         client = get_client('batch')
         client.list_jobs(jobQueue='my-job-queue')
+    
+    # Get redis data
+    @task(1)
+    @result_decorator
+    def aws_batch_list_scheduling_policies_allow(self):
+        client = get_client('batch')
+        client.list_scheduling_policies()
 
 
 
 ### ECS ###
 class AwsEcsTasks(TaskSet):
+    @task(2)
+    @result_decorator
+    def aws_ecs_list_clusters_allow(self):
+        client = get_client('ecs')
+        client.list_clusters()
+    
+    # Get redis data
     @task(1)
     @result_decorator
-    def aws_ecs_list_services_allow(self):
+    def aws_ecs_list_account_settings_allow(self):
         client = get_client('ecs')
-        client.list_services(cluster='test')
+        client.list_account_settings()
 
-    @task(1)
+    @task(2)
     @result_decorator
-    def aws_ecs_list_tasks_allow(self):
+    def aws_ecs_list_task_definitions_allow(self):
         client = get_client('ecs')
-        client.list_tasks(cluster='test')
+        client.list_task_definitions()
 
 
 
@@ -779,25 +809,68 @@ class AwsCloudFormationTasks(TaskSet):
         client = get_client('cloudformation')
         client.describe_type(Type='RESOURCE', TypeName=type_name)
 
+class AwsSensitiveFieldsTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_kms_update_custom_key_store_block(self):
+        client = get_client('kms')
+        client.update_custom_key_store(CustomKeyStoreId='cks-1234567890abcdef0', KeyStorePassword='ExamplePassword')
+
+    @task(1)
+    @result_decorator
+    def aws_workmail_reset_password_block(self):
+        client = get_client('workmail')
+        client.reset_password(OrganizationId='m-d281d0a2fd824be5b6cd3d3ce909fd27', UserId='S-1-1-11-1111111111-2222222222-3333333333-3333', Password='examplePa$$w0rd')
+
+class NonCloudTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def app_dev_block(self):
+        resp = requests.get('https://app.dev.nonp.kivera.io')
+        if resp.status_code != 200:
+            raise Exception(resp.text)
+
+    @task(1)
+    @result_decorator
+    def app_stg_block(self):
+        resp = requests.get('https://app.stg.nonp.kivera.io')
+        if resp.status_code != 200:
+            raise Exception(resp.text)
+
+    @task(1)
+    @result_decorator
+    def kivera_block(self):
+        resp = requests.get('https://kivera.io')
+        if resp.status_code != 200:
+            raise Exception(resp.text)
+
+    @task(1)
+    @result_decorator
+    def download_block(self):
+        resp = requests.get('https://download.kivera.io')
+        if resp.status_code != 200:
+            raise Exception(resp.text)
 
 class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
-        AwsEc2Tasks: 1,
-        AwsDynamoDBTasks: 1,
-        AwsStsTasks: 1,
-        AwsS3Tasks: 1,
-        AwsApiGatewayTasks: 1,
-        AwsEventBridgeTasks: 1,
-        AwsIamTasks: 1,
-        AwsRdsTasks: 1,
-        AwsCloudFrontTasks: 1,
-        AwsSqsTasks: 1,
-        AwsLambdaTasks: 1,
-        AwsLogsTasks: 1,
-        AwsAutoScalingTasks: 1,
-        AwsBatchTasks: 1,
-        AwsEcsTasks: 1,
-        AwsSnsTasks: 1,
-        AwsCloudFormationTasks: 1
+        AwsEc2Tasks: 3,
+        AwsDynamoDBTasks: 3,
+        AwsStsTasks: 3,
+        AwsS3Tasks: 3,
+        AwsApiGatewayTasks: 3,
+        AwsEventBridgeTasks: 3,
+        AwsIamTasks: 2,
+        AwsRdsTasks: 3,
+        AwsCloudFrontTasks: 2,
+        AwsSqsTasks: 3,
+        AwsLambdaTasks: 3,
+        AwsLogsTasks: 3,
+        AwsAutoScalingTasks: 3,
+        AwsBatchTasks: 3,
+        AwsEcsTasks: 3,
+        AwsSnsTasks: 3,
+        AwsCloudFormationTasks: 3,
+        AwsSensitiveFieldsTasks: 3,
+        NonCloudTasks: 1
     }

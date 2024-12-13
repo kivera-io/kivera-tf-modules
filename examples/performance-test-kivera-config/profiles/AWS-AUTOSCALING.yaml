@@ -1,0 +1,10 @@
+---
+AWS-AUTOSCALING:
+    name: AWS-AUTOSCALING
+    description: AWS AUTOSCALING rules
+    rules:
+        - AWS-AUTOSCALING-CreateLaunchConfiguration-1
+        - AWS-AUTOSCALING-CreateLaunchConfiguration-2
+        - AWS-AUTOSCALING-DescribeAutoScalingGroups-1
+    tags: {}
+

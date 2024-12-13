@@ -16,30 +16,6 @@ export KIVERA_CA=/opt/kivera/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
 export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
 
-# log file
-cat << EOF | tee /etc/cron.hourly/kivera-logrotate
-#!/bin/sh
-
-/usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
-EXITVALUE=\$?
-if [ \$EXITVALUE != 0 ]; then
-    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
-fi
-exit 0
-EOF
-
-cat << EOF | tee /etc/klogrotate.conf
-$KIVERA_LOGS_FILE {
-    maxsize 500M
-    hourly
-    missingok
-    rotate 8
-    compress
-    notifempty
-    copytruncate
-}
-EOF
-
 mkdir -p $KIVERA_BIN_PATH /opt/kivera/etc/ /opt/kivera/var/log/
 
 echo '${proxy_public_cert}' > $KIVERA_CA_CERT
@@ -85,7 +61,7 @@ chown -R kivera:kivera /opt/kivera
 
 yum install amazon-cloudwatch-agent -y
 
-if [[ "${enable_datadog_agent}" == true ]]; then
+if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
   DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${datadog_secret_arn}`
   export DD_API_KEY
   DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
@@ -165,12 +141,33 @@ $KIVERA_LOGS_FILE {
 }
 EOF
 
+cat << EOF | tee /etc/cron.hourly/kivera-logrotate
+#!/bin/sh
+/usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
+EXITVALUE=\$?
+if [ \$EXITVALUE != 0 ]; then
+    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
+fi
+exit 0
+EOF
+
+cat << EOF | tee /etc/klogrotate.conf
+$KIVERA_LOGS_FILE {
+    maxsize 500M
+    hourly
+    missingok
+    rotate 8
+    compress
+    notifempty
+    copytruncate
+}
+EOF
+
 # Enable CloudWatch logging/metrics
 cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 {
   "agent": {
-    "metrics_collection_interval": 1,
-    "run_as_user": "cwagent"
+    "metrics_collection_interval": 5
   },
   $([[ ${proxy_log_to_cloudwatch} == true ]] && echo '"logs": {
     "log_stream_name": "{instance_id}",
@@ -190,6 +187,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
     "namespace": "kivera",
     "aggregation_dimensions": [
       ["InstanceId"],
+      ["InstanceName"],
       ["AutoScalingGroupName"]
     ],
     "append_dimensions": {
@@ -202,7 +200,11 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
       "cpu": {
         "measurement": [
           "cpu_usage_active"
-        ]
+        ],
+        "metrics_collection_interval": 5,
+        "append_dimensions": {
+          "InstanceName": "${instance_name}"
+        }
       }
     }
   }
@@ -214,7 +216,7 @@ if [[ ${proxy_log_to_kivera} == true ]]; then
   systemctl enable td-agent.service
   systemctl start td-agent.service
 fi
-if [[ ${enable_datadog_agent} == true ]]; then
+if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
   systemctl enable datadog-agent
   systemctl start datadog-agent
 fi

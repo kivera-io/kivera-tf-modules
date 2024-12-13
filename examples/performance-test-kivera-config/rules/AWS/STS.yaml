@@ -1,0 +1,58 @@
+---
+AWS-STS-AssumeRole-1:
+    description: STS-AssumeRole-valid-role-arn
+    provider: AWS
+    service: STS
+    actions:
+        - AssumeRole
+    policy: valid { startswith(input.Body.RoleArn, "arn:aws:iam::326190351503:") }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-STS-AssumeRole-2:
+    description: STS-AssumeRole-valid-session-name
+    provider: AWS
+    service: STS
+    actions:
+        - AssumeRole
+    policy: valid { regex.match("[a-z0-9]{3}-[a-z0-9]{3}-[a-z0-9]+", input.Body.RoleSessionName) }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+
+AWS-STS-GetCallerIdentity-1:
+    description: STS-GetCallerIdentity-allow
+    provider: AWS
+    service: STS
+    actions:
+        - GetCallerIdentity
+    policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

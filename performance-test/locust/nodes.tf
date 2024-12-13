@@ -14,33 +14,7 @@ resource "aws_instance" "nodes" {
   vpc_security_group_ids = [aws_security_group.locust.id]
 
   iam_instance_profile = aws_iam_instance_profile.locust.name
-  user_data            = data.template_file.node_user_data.rendered
-
-  key_name = var.ec2_key_pair
-
-  ebs_block_device {
-    device_name = "/dev/xvda"
-    volume_size = 32
-  }
-
-  tags = {
-    Name = local.locust_node_instance_name
-    Type = "locust-node"
-    DeploymentName : var.deployment_name
-    DeploymentId : local.deployment_id
-  }
-}
-
-data "template_file" "node_cw_config" {
-  template = file("${path.module}/data/cloudwatch-config.json.tpl")
-  vars = {
-    instance_name = local.locust_node_instance_name
-  }
-}
-
-data "template_file" "node_user_data" {
-  template = file("${path.module}/data/node-user-data.sh.tpl")
-  vars = {
+  user_data = templatefile("${path.module}/data/node-user-data.sh.tpl", {
     proxy_host                = var.proxy_endpoint
     proxy_transparent_enabled = var.proxy_transparent_enabled
     proxy_public_cert         = var.proxy_public_cert
@@ -51,6 +25,17 @@ data "template_file" "node_user_data" {
     s3_bucket_key             = var.s3_bucket_key
     deployment_id             = local.deployment_id
     leader_ip                 = aws_instance.leader.private_ip
-    cw_config                 = data.template_file.node_cw_config.rendered
+    cw_config = templatefile("${path.module}/data/cloudwatch-config.json.tpl", {
+      instance_name = local.locust_node_instance_name
+    })
+  })
+
+  key_name = var.ec2_key_pair
+
+  tags = {
+    Name = local.locust_node_instance_name
+    Type = "locust-node"
+    DeploymentName : var.deployment_name
+    DeploymentId : local.deployment_id
   }
 }

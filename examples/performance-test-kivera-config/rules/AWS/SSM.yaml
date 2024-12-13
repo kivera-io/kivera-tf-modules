@@ -1,0 +1,24 @@
+---
+AWS-SSM-MultiAction-1:
+    description: Used for perf test - locust nodes read from S3
+    provider: AWS
+    service: SSM
+    actions:
+        - RegisterManagedInstance
+        - UpdateInstanceInformation
+    policy: |-
+        valid {
+            true
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+

@@ -9,7 +9,7 @@ data "aws_ami" "latest" {
 }
 
 resource "random_string" "suffix" {
-  length  = 10
+  length  = 5
   special = false
 }
 
@@ -24,7 +24,7 @@ resource "random_password" "kivera_pass" {
 }
 
 locals {
-  suffix                             = random_string.suffix.result
+  name_suffix                        = random_string.suffix.result
   proxy_s3_path                      = var.proxy_local_path != "" ? "s3://${var.s3_bucket}${var.s3_bucket_key}/proxy.zip" : ""
   proxy_credentials_secret_arn       = var.proxy_credentials != "" ? aws_secretsmanager_secret_version.proxy_credentials_version[0].arn : var.proxy_credentials_secret_arn
   proxy_private_key_secret_arn       = var.proxy_private_key != "" ? aws_secretsmanager_secret_version.proxy_private_key_version[0].arn : var.proxy_private_key_secret_arn
@@ -81,63 +81,40 @@ resource "aws_secretsmanager_secret_version" "redis_kivera_connection_string_ver
 }
 
 resource "aws_iam_role" "instance_role" {
-  name_prefix = "${var.name_prefix}-instance-"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = [
-            "ec2.amazonaws.com"
-          ]
-        }
-        Action = [
-          "sts:AssumeRole"
-        ]
-      }
-    ]
-  })
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
-    "arn:aws:iam::aws:policy/ReadOnlyAccess"
-  ]
-  inline_policy {
-    name = "${var.name_prefix}-get-secrets"
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action = "secretsmanager:GetSecretValue"
-          Effect = "Allow"
-          Resource = [
-            local.proxy_credentials_secret_arn,
-            local.proxy_private_key_secret_arn
-          ]
-        },
-        {
-          Action = [
-            "s3:GetObject",
-            "s3:PutObject",
-            "s3:CreateMultipartUpload"
-          ]
-          Effect = "Allow"
-          Resource = [
-            "arn:aws:s3:::${var.s3_bucket}/*"
-          ]
-        },
-      ]
-    })
+  name_prefix        = "${var.name_prefix}-instance-"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
   }
 }
 
-resource "aws_iam_role_policy" "instance_default_policies" {
-  count = var.enable_datadog_agent ? 1 : 0
+resource "aws_iam_role_policy_attachment" "ssm-managed" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
 
-  name = "proxy_default_policies"
-  role = aws_iam_role.instance_role.id
+resource "aws_iam_role_policy_attachment" "cw-agent" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
 
+resource "aws_iam_role_policy_attachment" "read-only" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+resource "aws_iam_policy" "proxy_instance" {
+  name = "${var.name_prefix}-default"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -145,31 +122,78 @@ resource "aws_iam_role_policy" "instance_default_policies" {
         Action = "secretsmanager:GetSecretValue"
         Effect = "Allow"
         Resource = [
-          var.datadog_secret_arn
+          local.proxy_credentials_secret_arn,
+          local.proxy_private_key_secret_arn
         ]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "redis_connection_string_access" {
-  count = local.redis_enabled ? 1 : 0
-
-  name = "${var.name_prefix}-get-redis-connection-secret"
-  role = aws_iam_role.instance_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
+      },
       {
-        Action = "secretsmanager:GetSecretValue"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:CreateMultipartUpload"
+        ]
         Effect = "Allow"
         Resource = [
-          local.redis_connection_string_secret_arn
+          "arn:aws:s3:::${var.s3_bucket}/*"
         ]
       },
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "proxy_instance" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.proxy_instance.arn
+}
+
+data "aws_iam_policy_document" "datadog_secret" {
+  count = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [var.datadog_secret_arn]
+  }
+
+  lifecycle {
+    precondition {
+      condition     = length(var.datadog_secret_arn) > 0
+      error_message = "datadog_secret_arn must be provided if enable_datadog_profiling or enable_datadog_tracing is true"
+    }
+  }
+}
+
+resource "aws_iam_policy" "datadog_secret" {
+  count  = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
+  name   = "${var.name_prefix}-get-datadog-secret"
+  policy = data.aws_iam_policy_document.datadog_secret[0].json
+}
+
+resource "aws_iam_role_policy_attachment" "datadog_secret" {
+  count      = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.datadog_secret[0].arn
+}
+
+
+data "aws_iam_policy_document" "redis_conn_string_secret" {
+  count = local.redis_enabled ? 1 : 0
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [local.redis_connection_string_secret_arn]
+  }
+}
+
+resource "aws_iam_policy" "redis_conn_string_secret" {
+  count  = local.redis_enabled ? 1 : 0
+  name   = "${var.name_prefix}-get-redis-connection-secret"
+  policy = data.aws_iam_policy_document.redis_conn_string_secret[0].json
+}
+
+resource "aws_iam_role_policy_attachment" "redis_conn_string_secret" {
+  count      = local.redis_enabled ? 1 : 0
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.redis_conn_string_secret[0].arn
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
@@ -265,8 +289,9 @@ resource "aws_launch_template" "launch_template" {
   vpc_security_group_ids = [
     aws_security_group.instance_sg.id
   ]
-  key_name = var.key_pair_name
+  key_name = var.ec2_key_pair
   user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
+    instance_name                = "${var.name_prefix}-proxy"
     proxy_version                = var.proxy_version
     proxy_s3_path                = local.proxy_s3_path
     proxy_cert_type              = var.proxy_cert_type
@@ -276,22 +301,14 @@ resource "aws_launch_template" "launch_template" {
     proxy_log_to_kivera          = var.proxy_log_to_kivera
     proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
     redis_connection_string_arn  = local.redis_connection_string_secret_arn
-    log_group_name               = "${var.name_prefix}-proxy-${local.suffix}"
+    log_group_name               = "${var.name_prefix}-proxy-${local.name_suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
-    enable_datadog_agent         = var.enable_datadog_agent
     enable_datadog_tracing       = var.enable_datadog_tracing
     enable_datadog_profiling     = var.enable_datadog_profiling
     cache_enabled                = var.cache_enabled
     datadog_secret_arn           = var.datadog_secret_arn
     datadog_trace_sampling_rate  = var.datadog_trace_sampling_rate
   }))
-
-  lifecycle {
-    precondition {
-      condition     = var.enable_datadog_agent ? length(var.datadog_secret_arn) > 0 : true
-      error_message = "datadog_secret_arn must be provided if enable_datadog_agent is true"
-    }
-  }
 }
 
 resource "aws_autoscaling_group" "auto_scaling_group" {
@@ -325,7 +342,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
 }
 
 resource "aws_lb_target_group" "traffic_target_group" {
-  name = "${var.name_prefix}-traffic-${local.suffix}"
+  name = "${var.name_prefix}-traffic-${local.name_suffix}"
   health_check {
     enabled             = true
     interval            = 10
@@ -351,7 +368,7 @@ resource "aws_lb_listener" "traffic_listener" {
 }
 
 resource "aws_lb_target_group" "management_target_group" {
-  name = "${var.name_prefix}-mgmt-${local.suffix}"
+  name = "${var.name_prefix}-mgmt-${local.name_suffix}"
   health_check {
     enabled             = true
     interval            = 10
@@ -380,14 +397,14 @@ resource "aws_lb_listener" "management_listener" {
 }
 
 resource "aws_lb" "load_balancer" {
-  name               = "${var.name_prefix}-lb-${local.suffix}"
+  name               = "${var.name_prefix}-lb-${local.name_suffix}"
   internal           = var.load_balancer_internal
   subnets            = var.load_balancer_subnet_ids
   load_balancer_type = "network"
   security_groups = [
     aws_security_group.load_balancer_sg.id
   ]
-  enable_cross_zone_load_balancing = true
+  enable_cross_zone_load_balancing = var.load_balancer_cross_zone
 }
 
 resource "aws_autoscaling_policy" "scale_up_policy" {
@@ -467,7 +484,7 @@ resource "aws_s3_object" "proxy_binary" {
 resource "aws_security_group" "redis_sg" {
   count = local.redis_enabled ? 1 : 0
 
-  name_prefix = "${var.name_prefix}-redis-"
+  name        = "${var.name_prefix}-redis-${local.name_suffix}"
   vpc_id      = var.vpc_id
   description = "Access to the Redis cache"
 }
@@ -493,7 +510,7 @@ resource "aws_vpc_security_group_egress_rule" "redis_egress_rule" {
 resource "aws_elasticache_subnet_group" "redis" {
   count = local.redis_enabled ? 1 : 0
 
-  name       = "${var.name_prefix}-subnet-group-${local.suffix}"
+  name       = "${var.name_prefix}-subnet-group-${local.name_suffix}"
   subnet_ids = var.cache_subnet_ids
 
   lifecycle {
@@ -507,7 +524,7 @@ resource "aws_elasticache_subnet_group" "redis" {
 resource "aws_elasticache_replication_group" "redis" {
   count = local.redis_enabled ? 1 : 0
 
-  replication_group_id = "${var.name_prefix}-redis-${local.suffix}"
+  replication_group_id = "${var.name_prefix}-redis-${local.name_suffix}"
   description          = "Redis Cache for Kivera proxy"
 
   node_type            = var.cache_instance_type
@@ -544,7 +561,7 @@ resource "aws_elasticache_user" "redis_kivera_user" {
 
   user_id       = var.cache_kivera_username
   user_name     = var.cache_kivera_username
-  access_string = "on -@all +ping +mget +get +set +mset +cluster|slots +cluster|shards +command ~kivera*"
+  access_string = "on ~kivera* -@all +ping +mget +get +set +mset +strlen +cluster|slots +cluster|shards +command"
   engine        = "REDIS"
   passwords     = [local.cache_kivera_pass]
 }
@@ -555,4 +572,17 @@ resource "aws_elasticache_user_group" "redis_kivera_user_group" {
   engine        = "REDIS"
   user_group_id = "kivera"
   user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id]
+}
+
+data "aws_region" "current" {}
+
+resource "aws_cloudwatch_dashboard" "proxy_dashbaord" {
+  count = var.enable_cloudwatch_dashboard ? 1 : 0
+
+  dashboard_name = "${var.name_prefix}-dashboard-${local.name_suffix}"
+
+  dashboard_body = templatefile("${path.module}/data/proxy-cw-dashboard.json", {
+    log_group_name    = "${var.name_prefix}-proxy-${local.name_suffix}"
+    log_group_region = data.aws_region.current.name
+  })
 }

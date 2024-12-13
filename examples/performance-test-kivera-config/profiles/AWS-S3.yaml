@@ -1,0 +1,12 @@
+---
+AWS-S3:
+    name: AWS-S3
+    description: AWS S3 rules
+    rules:
+        - AWS-S3-CreateBucket-1
+        - AWS-S3-ListObjects-1
+        - AWS-S3-PutObject-1
+        - AWS-S3-PutObject-2
+        - AWS-S3-PutObject-3
+    tags: {}
+
