@@ -141,7 +141,10 @@ def result_decorator(method):
         elif validity == 'block':
             should_block = True
         else:
-            return failure(class_name, method_name, time.time(), Exception("method name must end with '_block' or '_allow'"))
+            return failure(class_name, method_name, time.time(), Exception("invalid_test: method name must end with '_block' or '_allow'"))
+
+        if custom_resp and not should_block:
+            return failure(class_name, method_name, time.time(), Exception("invalid_test: customresponse test must also block"))
 
         start_time = time.time()
         try:
@@ -161,26 +164,29 @@ def result_decorator(method):
         # on successful request
         if should_block:
             return failure(class_name, method_name, start_time, Exception("API call should have been blocked by Kivera"))
+
         return success(class_name, method_name, start_time)
 
     return decorator
 
 
 def check_err_message(should_block, custom_resp, class_name, method_name, start_time, error):
-    if should_block and "Kivera.Error" not in str(error) and "Oops, your request has been blocked." not in str(error):
-        error = Exception("Request Not Blocked: " + str(error))
+
+    if not should_block:
         return failure(class_name, method_name, start_time, error)
+
+    if "Kivera.Error" not in str(error) and "Oops, your request has been blocked." not in str(error):
+        return failure(class_name, method_name, start_time, Exception("Request Not Blocked: " + str(error)))
 
     if custom_resp:
         expected = custom_responses[class_name][method_name]
-        if not contains_custom_responses(error, expected):
-            error = Exception(f"Missing Custom Response: '{expected}': { str(error)}")
-            return failure(class_name, method_name, start_time, error)
+        if not contains_custom_response(error, expected):
+            return failure(class_name, method_name, start_time, Exception(f"Missing Custom Response: '{expected}': {str(error)}"))
 
     return success(class_name, method_name, start_time)
 
 
-def contains_custom_responses(error, expected):
+def contains_custom_response(error, expected):
     parts = str(error).split("Errors: ")
     if len(parts) != 2:
         return False
