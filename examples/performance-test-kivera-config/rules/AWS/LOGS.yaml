@@ -1,11 +1,14 @@
 ---
 AWS-LOGS-CreateLogGroup-1:
-    description: LOGS-CreateLogGroup-KMS-key
+    description: Require KMS key
     provider: AWS
     service: LOGS
     actions:
         - CreateLogGroup
-    policy: valid { input.Body.kmsKeyId == "arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key" }
+    policy: |-
+        valid {
+            input.Body.kmsKeyId == "arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key"
+        }
     advanced:
         paths:
             - '*'
@@ -17,14 +20,18 @@ AWS-LOGS-CreateLogGroup-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-LOGS-PutResourcePolicy-1:
-    description: LOGS-PutResourcePolicy-data-boundary
+    description: Restrict to account
     provider: AWS
     service: LOGS
     actions:
         - PutResourcePolicy
-    policy: valid { json.unmarshal(input.Body.policyDocument).Statement[_].Principal.AWS == approved_aws_data_boundary[_] }
+    policy: |-
+        valid {
+            json.unmarshal(input.Body.policyDocument).Statement[_].Principal.AWS == approved_aws_data_boundary[_]
+        }
     advanced:
         paths:
             - '*'
@@ -36,14 +43,18 @@ AWS-LOGS-PutResourcePolicy-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-LOGS-PutSubscriptionFilter-1:
-    description: LOGS-PutSubscriptionFilter-data-boundary
+    description: Restrict to account
     provider: AWS
     service: LOGS
     actions:
         - PutSubscriptionFilter
-    policy: valid { contains(input.Body.destinationArn, approved_aws_data_boundary[_]) }
+    policy: |-
+        valid {
+            contains(input.Body.destinationArn, approved_aws_data_boundary[_])
+        }
     advanced:
         paths:
             - '*'
@@ -55,4 +66,5 @@ AWS-LOGS-PutSubscriptionFilter-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 

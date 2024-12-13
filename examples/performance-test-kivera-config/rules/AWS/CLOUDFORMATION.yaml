@@ -1,11 +1,12 @@
 ---
 AWS-CLOUDFORMATION-DescribeStacks-1:
-    description: CLOUDFORMATION-DescribeStacks-allow
+    description: Allow DescribeStacks
     provider: AWS
     service: CLOUDFORMATION
     actions:
         - DescribeStacks
-    policy: valid = true
+    policy: |
+        valid = true
     advanced:
         paths:
             - '*'
@@ -17,14 +18,16 @@ AWS-CLOUDFORMATION-DescribeStacks-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-CLOUDFORMATION-DescribeType-1:
-    description: CLOUDFORMATION-DescribeType-allow
+    description: Allow DescribeType
     provider: AWS
     service: CLOUDFORMATION
     actions:
         - DescribeType
-    policy: valid = true
+    policy: |
+        valid = true
     advanced:
         paths:
             - '*'
@@ -36,4 +39,5 @@ AWS-CLOUDFORMATION-DescribeType-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 

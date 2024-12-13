@@ -21,4 +21,5 @@ AWS-SSM-MultiAction-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 

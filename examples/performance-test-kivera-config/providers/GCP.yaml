@@ -1,621 +1,660 @@
 ---
 GCP:
-    name: GCP
     services:
-        - name: ABUSIVEEXPERIENCEREPORT
-          inspection: enabled
-        - name: ACCELERATEDMOBILEPAGEURL
-          inspection: enabled
-        - name: ACCESSAPPROVAL
-          inspection: enabled
-        - name: ACCESSCONTEXTMANAGER
-          inspection: enabled
-        - name: ACMEDNS
-          inspection: enabled
-        - name: ADEXCHANGEBUYER
-          inspection: enabled
-        - name: ADEXCHANGEBUYER2
-          inspection: enabled
-        - name: ADEXCHANGESELLER
-          inspection: enabled
-        - name: ADEXPERIENCEREPORT
-          inspection: enabled
-        - name: ADMIN
-          inspection: enabled
-        - name: ADMOB
-          inspection: enabled
-        - name: ADSENSE
-          inspection: enabled
-        - name: ADSENSEHOST
-          inspection: enabled
-        - name: ADVISORYNOTIFICATIONS
-          inspection: enabled
-        - name: AIPLATFORM
-          inspection: enabled
-        - name: ALERTCENTER
-          inspection: enabled
-        - name: ALLOYDB
-          inspection: enabled
-        - name: ANALYTICS
-          inspection: enabled
-        - name: ANALYTICSADMIN
-          inspection: enabled
-        - name: ANALYTICSDATA
-          inspection: enabled
-        - name: ANALYTICSHUB
-          inspection: enabled
-        - name: ANALYTICSREPORTING
-          inspection: enabled
-        - name: ANDROIDDEVICEPROVISIONING
-          inspection: enabled
-        - name: ANDROIDENTERPRISE
-          inspection: enabled
-        - name: ANDROIDMANAGEMENT
-          inspection: enabled
-        - name: ANDROIDPUBLISHER
-          inspection: enabled
-        - name: APIGATEWAY
-          inspection: enabled
-        - name: APIGEE
-          inspection: enabled
-        - name: APIGEEREGISTRY
-          inspection: enabled
-        - name: APIKEYS
-          inspection: enabled
-        - name: APPENGINE
-          inspection: enabled
-        - name: APPSACTIVITY
-          inspection: enabled
-        - name: APPSTATE
-          inspection: enabled
-        - name: AREA120TABLES
-          inspection: enabled
-        - name: ARTIFACTREGISTRY
-          inspection: enabled
-        - name: ASSUREDWORKLOADS
-          inspection: enabled
-        - name: AUTHORIZEDBUYERSMARKETPLACE
-          inspection: enabled
-        - name: BACKUPDR
-          inspection: enabled
-        - name: BAREMETALSOLUTION
-          inspection: enabled
-        - name: BATCH
-          inspection: enabled
-        - name: BEYONDCORP
-          inspection: enabled
-        - name: BIGLAKE
-          inspection: enabled
-        - name: BIGQUERY
-          inspection: enabled
-        - name: BIGQUERYCONNECTION
-          inspection: enabled
-        - name: BIGQUERYDATAPOLICY
-          inspection: enabled
-        - name: BIGQUERYDATATRANSFER
-          inspection: enabled
-        - name: BIGQUERYRESERVATION
-          inspection: enabled
-        - name: BIGTABLEADMIN
-          inspection: enabled
-        - name: BILLINGBUDGETS
-          inspection: enabled
-        - name: BINARYAUTHORIZATION
-          inspection: enabled
-        - name: BLOCKCHAINNODEENGINE
-          inspection: enabled
-        - name: BLOGGER
-          inspection: enabled
-        - name: BOOKS
-          inspection: enabled
-        - name: BUSINESSPROFILEPERFORMANCE
-          inspection: enabled
-        - name: CALENDAR
-          inspection: enabled
-        - name: CERTIFICATEMANAGER
-          inspection: enabled
-        - name: CHAT
-          inspection: enabled
-        - name: CHECKS
-          inspection: enabled
-        - name: CHROMEMANAGEMENT
-          inspection: enabled
-        - name: CHROMEPOLICY
-          inspection: enabled
-        - name: CHROMEUXREPORT
-          inspection: enabled
-        - name: CIVICINFO
-          inspection: enabled
-        - name: CLASSROOM
-          inspection: enabled
-        - name: CLOUDASSET
-          inspection: enabled
-        - name: CLOUDBILLING
-          inspection: enabled
-        - name: CLOUDBUILD
-          inspection: enabled
-        - name: CLOUDCHANNEL
-          inspection: enabled
-        - name: CLOUDCOMMERCEPROCUREMENT
-          inspection: enabled
-        - name: CLOUDDEBUGGER
-          inspection: enabled
-        - name: CLOUDDEPLOY
-          inspection: enabled
-        - name: CLOUDERRORREPORTING
-          inspection: enabled
-        - name: CLOUDFUNCTIONS
-          inspection: enabled
-        - name: CLOUDIDENTITY
-          inspection: enabled
-        - name: CLOUDIOT
-          inspection: enabled
-        - name: CLOUDKMS
-          inspection: enabled
-        - name: CLOUDPRIVATECATALOG
-          inspection: enabled
-        - name: CLOUDPRIVATECATALOGPRODUCER
-          inspection: enabled
-        - name: CLOUDPROFILER
-          inspection: enabled
-        - name: CLOUDRESOURCEMANAGER
-          inspection: enabled
-        - name: CLOUDSCHEDULER
-          inspection: enabled
-        - name: CLOUDSEARCH
-          inspection: enabled
-        - name: CLOUDSHELL
-          inspection: enabled
-        - name: CLOUDSUPPORT
-          inspection: enabled
-        - name: CLOUDTASKS
-          inspection: enabled
-        - name: CLOUDTRACE
-          inspection: enabled
-        - name: COMMENTANALYZER
-          inspection: enabled
-        - name: COMPOSER
-          inspection: enabled
-        - name: COMPUTE
-          inspection: enabled
-        - name: CONNECTORS
-          inspection: enabled
-        - name: CONSUMERSURVEYS
-          inspection: enabled
-        - name: CONTACTCENTERAIPLATFORM
-          inspection: enabled
-        - name: CONTACTCENTERINSIGHTS
-          inspection: enabled
-        - name: CONTAINER
-          inspection: enabled
-        - name: CONTAINERANALYSIS
-          inspection: enabled
-        - name: CONTENT
-          inspection: enabled
-        - name: CONTENTWAREHOUSE
-          inspection: enabled
-        - name: CUSTOMSEARCH
-          inspection: enabled
-        - name: DATACATALOG
-          inspection: enabled
-        - name: DATAFLOW
-          inspection: enabled
-        - name: DATAFORM
-          inspection: enabled
-        - name: DATAFUSION
-          inspection: enabled
-        - name: DATALABELING
-          inspection: enabled
-        - name: DATALINEAGE
-          inspection: enabled
-        - name: DATAMIGRATION
-          inspection: enabled
-        - name: DATAPIPELINES
-          inspection: enabled
-        - name: DATAPLEX
-          inspection: enabled
-        - name: DATAPROC
-          inspection: enabled
-        - name: DATASTORE
-          inspection: enabled
-        - name: DATASTREAM
-          inspection: enabled
-        - name: DEPLOYMENTMANAGER
-          inspection: enabled
-        - name: DFAREPORTING
-          inspection: enabled
-        - name: DIALOGFLOW
-          inspection: enabled
-        - name: DIGITALASSETLINKS
-          inspection: enabled
-        - name: DISCOVERY
-          inspection: enabled
-        - name: DISCOVERYENGINE
-          inspection: enabled
-        - name: DISPLAYVIDEO
-          inspection: enabled
-        - name: DLP
-          inspection: enabled
-        - name: DNS
-          inspection: enabled
-        - name: DOCS
-          inspection: enabled
-        - name: DOCUMENTAI
-          inspection: enabled
-        - name: DOMAINS
-          inspection: enabled
-        - name: DOMAINSRDAP
-          inspection: enabled
-        - name: DOUBLECLICKBIDMANAGER
-          inspection: enabled
-        - name: DOUBLECLICKSEARCH
-          inspection: enabled
-        - name: DRIVE
-          inspection: enabled
-        - name: DRIVEACTIVITY
-          inspection: enabled
-        - name: DRIVELABELS
-          inspection: enabled
-        - name: ESSENTIALCONTACTS
-          inspection: enabled
-        - name: EVENTARC
-          inspection: enabled
-        - name: FACTCHECKTOOLS
-          inspection: enabled
-        - name: FCM
-          inspection: enabled
-        - name: FCMDATA
-          inspection: enabled
-        - name: FILE
-          inspection: enabled
-        - name: FIREBASE
-          inspection: enabled
-        - name: FIREBASEAPPCHECK
-          inspection: enabled
-        - name: FIREBASEAPPDISTRIBUTION
-          inspection: enabled
-        - name: FIREBASEDATABASE
-          inspection: enabled
-        - name: FIREBASEDYNAMICLINKS
-          inspection: enabled
-        - name: FIREBASEHOSTING
-          inspection: enabled
-        - name: FIREBASEML
-          inspection: enabled
-        - name: FIREBASEREMOTECONFIG
-          inspection: enabled
-        - name: FIREBASERULES
-          inspection: enabled
-        - name: FIREBASESTORAGE
-          inspection: enabled
-        - name: FIRESTORE
-          inspection: enabled
-        - name: FITNESS
-          inspection: enabled
-        - name: FORMS
-          inspection: enabled
-        - name: FUSIONTABLES
-          inspection: enabled
-        - name: GAMES
-          inspection: enabled
-        - name: GAMESCONFIGURATION
-          inspection: enabled
-        - name: GAMESERVICES
-          inspection: enabled
-        - name: GAMESMANAGEMENT
-          inspection: enabled
-        - name: GENOMICS
-          inspection: enabled
-        - name: GKEBACKUP
-          inspection: enabled
-        - name: GKEHUB
-          inspection: enabled
-        - name: GKEONPREM
-          inspection: enabled
-        - name: GMAIL
-          inspection: enabled
-        - name: GMAILPOSTMASTERTOOLS
-          inspection: enabled
-        - name: GROUPSMIGRATION
-          inspection: enabled
-        - name: GROUPSSETTINGS
-          inspection: enabled
-        - name: HEALTHCARE
-          inspection: enabled
-        - name: HOMEGRAPH
-          inspection: enabled
-        - name: IAM
-          inspection: enabled
-        - name: IAMCREDENTIALS
-          inspection: enabled
-        - name: IAP
-          inspection: enabled
-        - name: IDEAHUB
-          inspection: enabled
-        - name: IDENTITYTOOLKIT
-          inspection: enabled
-        - name: IDS
-          inspection: enabled
-        - name: INDEXING
-          inspection: enabled
-        - name: INTEGRATIONS
-          inspection: enabled
-        - name: JOBS
-          inspection: enabled
-        - name: KEEP
-          inspection: enabled
-        - name: KGSEARCH
-          inspection: enabled
-        - name: KMSINVENTORY
-          inspection: enabled
-        - name: LANGUAGE
-          inspection: enabled
-        - name: LIBRARYAGENT
-          inspection: enabled
-        - name: LICENSING
-          inspection: enabled
-        - name: LIFESCIENCES
-          inspection: enabled
-        - name: LOCALSERVICES
-          inspection: enabled
-        - name: LOGGING
-          inspection: enabled
-        - name: LOOKER
-          inspection: enabled
-        - name: MANAGEDIDENTITIES
-          inspection: enabled
-        - name: MANUFACTURERS
-          inspection: enabled
-        - name: MEMCACHE
-          inspection: enabled
-        - name: METASTORE
-          inspection: enabled
-        - name: MIGRATIONCENTER
-          inspection: enabled
-        - name: MIRROR
-          inspection: enabled
-        - name: ML
-          inspection: enabled
-        - name: MONITORING
-          inspection: enabled
-        - name: MYBUSINESSACCOUNTMANAGEMENT
-          inspection: enabled
-        - name: MYBUSINESSBUSINESSCALLS
-          inspection: enabled
-        - name: MYBUSINESSBUSINESSINFORMATION
-          inspection: enabled
-        - name: MYBUSINESSLODGING
-          inspection: enabled
-        - name: MYBUSINESSNOTIFICATIONS
-          inspection: enabled
-        - name: MYBUSINESSPLACEACTIONS
-          inspection: enabled
-        - name: MYBUSINESSQANDA
-          inspection: enabled
-        - name: MYBUSINESSVERIFICATIONS
-          inspection: enabled
-        - name: NETWORKCONNECTIVITY
-          inspection: enabled
-        - name: NETWORKMANAGEMENT
-          inspection: enabled
-        - name: NETWORKSECURITY
-          inspection: enabled
-        - name: NETWORKSERVICES
-          inspection: enabled
-        - name: NOTEBOOKS
-          inspection: enabled
-        - name: OAUTH2
-          inspection: enabled
-        - name: ONDEMANDSCANNING
-          inspection: enabled
-        - name: ORGPOLICY
-          inspection: enabled
-        - name: OSCONFIG
-          inspection: enabled
-        - name: OSLOGIN
-          inspection: enabled
-        - name: PAGESPEEDONLINE
-          inspection: enabled
-        - name: PARTNERS
-          inspection: enabled
-        - name: PAYMENTSRESELLERSUBSCRIPTION
-          inspection: enabled
-        - name: PEOPLE
-          inspection: enabled
-        - name: PLACES
-          inspection: enabled
-        - name: PLAYABLELOCATIONS
-          inspection: enabled
-        - name: PLAYCUSTOMAPP
-          inspection: enabled
-        - name: PLAYDEVELOPERREPORTING
-          inspection: enabled
-        - name: PLAYGROUPING
-          inspection: enabled
-        - name: PLAYINTEGRITY
-          inspection: enabled
-        - name: PLAYMOVIESPARTNER
-          inspection: enabled
-        - name: PLUS
-          inspection: enabled
-        - name: PLUSDOMAINS
-          inspection: enabled
-        - name: POLICYANALYZER
-          inspection: enabled
-        - name: POLICYSIMULATOR
-          inspection: enabled
-        - name: POLICYTROUBLESHOOTER
-          inspection: enabled
-        - name: POLY
-          inspection: enabled
-        - name: PRIVATECA
-          inspection: enabled
-        - name: PROD_TT_SASPORTAL
-          inspection: enabled
-        - name: PROXIMITYBEACON
-          inspection: enabled
-        - name: PUBLICCA
-          inspection: enabled
-        - name: PUBSUB
-          inspection: enabled
-        - name: PUBSUBLITE
-          inspection: enabled
-        - name: QPXEXPRESS
-          inspection: enabled
-        - name: RAPIDMIGRATIONASSESSMENT
-          inspection: enabled
-        - name: READERREVENUESUBSCRIPTIONLINKING
-          inspection: enabled
-        - name: REALTIMEBIDDING
-          inspection: enabled
-        - name: RECAPTCHAENTERPRISE
-          inspection: enabled
-        - name: RECOMMENDATIONENGINE
-          inspection: enabled
-        - name: RECOMMENDER
-          inspection: enabled
-        - name: REDIS
-          inspection: enabled
-        - name: REMOTEBUILDEXECUTION
-          inspection: enabled
-        - name: REPLICAPOOL
-          inspection: enabled
-        - name: REPLICAPOOLUPDATER
-          inspection: enabled
-        - name: RESELLER
-          inspection: enabled
-        - name: RESOURCESETTINGS
-          inspection: enabled
-        - name: RETAIL
-          inspection: enabled
-        - name: RUN
-          inspection: enabled
-        - name: RUNTIMECONFIG
-          inspection: enabled
-        - name: SAFEBROWSING
-          inspection: enabled
-        - name: SASPORTAL
-          inspection: enabled
-        - name: SCRIPT
-          inspection: enabled
-        - name: SEARCHADS360
-          inspection: enabled
-        - name: SEARCHCONSOLE
-          inspection: enabled
-        - name: SECRETMANAGER
-          inspection: enabled
-        - name: SECURITYCENTER
-          inspection: enabled
-        - name: SERVICEBROKER
-          inspection: enabled
-        - name: SERVICECONSUMERMANAGEMENT
-          inspection: enabled
-        - name: SERVICECONTROL
-          inspection: enabled
-        - name: SERVICEDIRECTORY
-          inspection: enabled
-        - name: SERVICEMANAGEMENT
-          inspection: enabled
-        - name: SERVICENETWORKING
-          inspection: enabled
-        - name: SERVICEUSAGE
-          inspection: enabled
-        - name: SERVICEUSER
-          inspection: enabled
-        - name: SHEETS
-          inspection: enabled
-        - name: SITEVERIFICATION
-          inspection: enabled
-        - name: SLIDES
-          inspection: enabled
-        - name: SMARTDEVICEMANAGEMENT
-          inspection: enabled
-        - name: SOURCEREPO
-          inspection: enabled
-        - name: SPANNER
-          inspection: enabled
-        - name: SPECTRUM
-          inspection: enabled
-        - name: SPEECH
-          inspection: enabled
-        - name: SQL
-          inspection: enabled
-        - name: SQLADMIN
-          inspection: enabled
-        - name: STORAGE
-          inspection: enabled
-        - name: STORAGETRANSFER
-          inspection: enabled
-        - name: STREETVIEWPUBLISH
-          inspection: enabled
-        - name: STS
-          inspection: enabled
-        - name: SURVEYS
-          inspection: enabled
-        - name: TAGMANAGER
-          inspection: enabled
-        - name: TASKS
-          inspection: enabled
-        - name: TESTING
-          inspection: enabled
-        - name: TEXTTOSPEECH
-          inspection: enabled
-        - name: TOOLRESULTS
-          inspection: enabled
-        - name: TPU
-          inspection: enabled
-        - name: TRACING
-          inspection: enabled
-        - name: TRAFFICDIRECTOR
-          inspection: enabled
-        - name: TRANSCODER
-          inspection: enabled
-        - name: TRANSLATE
-          inspection: enabled
-        - name: TRAVELIMPACTMODEL
-          inspection: enabled
-        - name: URLSHORTENER
-          inspection: enabled
-        - name: VAULT
-          inspection: enabled
-        - name: VECTORTILE
-          inspection: enabled
-        - name: VERIFIEDACCESS
-          inspection: enabled
-        - name: VERSIONHISTORY
-          inspection: enabled
-        - name: VIDEOINTELLIGENCE
-          inspection: enabled
-        - name: VISION
-          inspection: enabled
-        - name: VMMIGRATION
-          inspection: enabled
-        - name: VMWAREENGINE
-          inspection: enabled
-        - name: VPCACCESS
-          inspection: enabled
-        - name: WALLETOBJECTS
-          inspection: enabled
-        - name: WEBFONTS
-          inspection: enabled
-        - name: WEBMASTERS
-          inspection: enabled
-        - name: WEBRISK
-          inspection: enabled
-        - name: WEBSECURITYSCANNER
-          inspection: enabled
-        - name: WORKFLOWEXECUTIONS
-          inspection: enabled
-        - name: WORKFLOWS
-          inspection: enabled
-        - name: WORKLOADMANAGER
-          inspection: enabled
-        - name: WORKSTATIONS
-          inspection: enabled
-        - name: YOUTUBE
-          inspection: enabled
-        - name: YOUTUBEANALYTICS
-          inspection: enabled
-        - name: YOUTUBEREPORTING
-          inspection: enabled
+        ABUSIVEEXPERIENCEREPORT:
+            inspection: enabled
+        ACCELERATEDMOBILEPAGEURL:
+            inspection: enabled
+        ACCESSAPPROVAL:
+            inspection: enabled
+        ACCESSCONTEXTMANAGER:
+            inspection: enabled
+        ACMEDNS:
+            inspection: enabled
+        ADDRESSVALIDATION:
+            inspection: disabled
+        ADEXCHANGEBUYER:
+            inspection: enabled
+        ADEXCHANGEBUYER2:
+            inspection: enabled
+        ADEXCHANGESELLER:
+            inspection: enabled
+        ADEXPERIENCEREPORT:
+            inspection: enabled
+        ADMIN:
+            inspection: enabled
+        ADMOB:
+            inspection: enabled
+        ADSENSE:
+            inspection: enabled
+        ADSENSEHOST:
+            inspection: enabled
+        ADSENSEPLATFORM:
+            inspection: disabled
+        ADVISORYNOTIFICATIONS:
+            inspection: enabled
+        AIPLATFORM:
+            inspection: enabled
+        AIRQUALITY:
+            inspection: disabled
+        ALERTCENTER:
+            inspection: enabled
+        ALLOYDB:
+            inspection: enabled
+        ANALYTICS:
+            inspection: enabled
+        ANALYTICSADMIN:
+            inspection: enabled
+        ANALYTICSDATA:
+            inspection: enabled
+        ANALYTICSHUB:
+            inspection: enabled
+        ANALYTICSREPORTING:
+            inspection: enabled
+        ANDROIDDEVICEPROVISIONING:
+            inspection: enabled
+        ANDROIDENTERPRISE:
+            inspection: enabled
+        ANDROIDMANAGEMENT:
+            inspection: enabled
+        ANDROIDPUBLISHER:
+            inspection: enabled
+        APIGATEWAY:
+            inspection: enabled
+        APIGEE:
+            inspection: enabled
+        APIGEEREGISTRY:
+            inspection: enabled
+        APIKEYS:
+            inspection: enabled
+        APIM:
+            inspection: disabled
+        APPENGINE:
+            inspection: enabled
+        APPHUB:
+            inspection: disabled
+        APPSACTIVITY:
+            inspection: enabled
+        APPSTATE:
+            inspection: enabled
+        AREA120TABLES:
+            inspection: enabled
+        ARTIFACTREGISTRY:
+            inspection: enabled
+        ASSUREDWORKLOADS:
+            inspection: enabled
+        AUTHORIZEDBUYERSMARKETPLACE:
+            inspection: enabled
+        BACKUPDR:
+            inspection: enabled
+        BAREMETALSOLUTION:
+            inspection: enabled
+        BATCH:
+            inspection: enabled
+        BEYONDCORP:
+            inspection: enabled
+        BIGLAKE:
+            inspection: enabled
+        BIGQUERY:
+            inspection: enabled
+        BIGQUERYCONNECTION:
+            inspection: enabled
+        BIGQUERYDATAPOLICY:
+            inspection: enabled
+        BIGQUERYDATATRANSFER:
+            inspection: enabled
+        BIGQUERYRESERVATION:
+            inspection: enabled
+        BIGTABLEADMIN:
+            inspection: enabled
+        BILLINGBUDGETS:
+            inspection: enabled
+        BINARYAUTHORIZATION:
+            inspection: enabled
+        BLOCKCHAINNODEENGINE:
+            inspection: enabled
+        BLOGGER:
+            inspection: enabled
+        BOOKS:
+            inspection: enabled
+        BUSINESSPROFILEPERFORMANCE:
+            inspection: enabled
+        CALENDAR:
+            inspection: enabled
+        CERTIFICATEMANAGER:
+            inspection: enabled
+        CHAT:
+            inspection: enabled
+        CHECKS:
+            inspection: enabled
+        CHROMEMANAGEMENT:
+            inspection: enabled
+        CHROMEPOLICY:
+            inspection: enabled
+        CHROMEUXREPORT:
+            inspection: enabled
+        CIVICINFO:
+            inspection: enabled
+        CLASSROOM:
+            inspection: enabled
+        CLOUDASSET:
+            inspection: enabled
+        CLOUDBILLING:
+            inspection: enabled
+        CLOUDBUILD:
+            inspection: enabled
+        CLOUDCHANNEL:
+            inspection: enabled
+        CLOUDCOMMERCEPROCUREMENT:
+            inspection: enabled
+        CLOUDCONTROLSPARTNER:
+            inspection: disabled
+        CLOUDDEBUGGER:
+            inspection: enabled
+        CLOUDDEPLOY:
+            inspection: enabled
+        CLOUDERRORREPORTING:
+            inspection: enabled
+        CLOUDFUNCTIONS:
+            inspection: enabled
+        CLOUDIDENTITY:
+            inspection: enabled
+        CLOUDIOT:
+            inspection: enabled
+        CLOUDKMS:
+            inspection: enabled
+        CLOUDPRIVATECATALOG:
+            inspection: enabled
+        CLOUDPRIVATECATALOGPRODUCER:
+            inspection: enabled
+        CLOUDPROFILER:
+            inspection: enabled
+        CLOUDRESOURCEMANAGER:
+            inspection: enabled
+        CLOUDSCHEDULER:
+            inspection: enabled
+        CLOUDSEARCH:
+            inspection: enabled
+        CLOUDSHELL:
+            inspection: enabled
+        CLOUDSUPPORT:
+            inspection: enabled
+        CLOUDTASKS:
+            inspection: enabled
+        CLOUDTRACE:
+            inspection: enabled
+        COMMENTANALYZER:
+            inspection: enabled
+        COMPOSER:
+            inspection: enabled
+        COMPUTE:
+            inspection: enabled
+        CONFIG:
+            inspection: disabled
+        CONNECTORS:
+            inspection: enabled
+        CONSUMERSURVEYS:
+            inspection: enabled
+        CONTACTCENTERAIPLATFORM:
+            inspection: enabled
+        CONTACTCENTERINSIGHTS:
+            inspection: enabled
+        CONTAINER:
+            inspection: enabled
+        CONTAINERANALYSIS:
+            inspection: enabled
+        CONTENT:
+            inspection: enabled
+        CONTENTWAREHOUSE:
+            inspection: enabled
+        CSS:
+            inspection: disabled
+        CUSTOMSEARCH:
+            inspection: enabled
+        DATACATALOG:
+            inspection: enabled
+        DATAFLOW:
+            inspection: enabled
+        DATAFORM:
+            inspection: enabled
+        DATAFUSION:
+            inspection: enabled
+        DATALABELING:
+            inspection: enabled
+        DATALINEAGE:
+            inspection: enabled
+        DATAMIGRATION:
+            inspection: enabled
+        DATAPIPELINES:
+            inspection: enabled
+        DATAPLEX:
+            inspection: enabled
+        DATAPORTABILITY:
+            inspection: disabled
+        DATAPROC:
+            inspection: enabled
+        DATASTORE:
+            inspection: enabled
+        DATASTREAM:
+            inspection: enabled
+        DEPLOYMENTMANAGER:
+            inspection: enabled
+        DEVELOPERCONNECT:
+            inspection: disabled
+        DFAREPORTING:
+            inspection: enabled
+        DIALOGFLOW:
+            inspection: enabled
+        DIGITALASSETLINKS:
+            inspection: enabled
+        DISCOVERY:
+            inspection: enabled
+        DISCOVERYENGINE:
+            inspection: enabled
+        DISPLAYVIDEO:
+            inspection: enabled
+        DLP:
+            inspection: enabled
+        DNS:
+            inspection: enabled
+        DOCS:
+            inspection: enabled
+        DOCUMENTAI:
+            inspection: enabled
+        DOMAINS:
+            inspection: enabled
+        DOMAINSRDAP:
+            inspection: enabled
+        DOUBLECLICKBIDMANAGER:
+            inspection: enabled
+        DOUBLECLICKSEARCH:
+            inspection: enabled
+        DRIVE:
+            inspection: enabled
+        DRIVEACTIVITY:
+            inspection: enabled
+        DRIVELABELS:
+            inspection: enabled
+        ESSENTIALCONTACTS:
+            inspection: enabled
+        EVENTARC:
+            inspection: enabled
+        FACTCHECKTOOLS:
+            inspection: enabled
+        FCM:
+            inspection: enabled
+        FCMDATA:
+            inspection: enabled
+        FILE:
+            inspection: enabled
+        FIREBASE:
+            inspection: enabled
+        FIREBASEAPPCHECK:
+            inspection: enabled
+        FIREBASEAPPDISTRIBUTION:
+            inspection: enabled
+        FIREBASEDATABASE:
+            inspection: enabled
+        FIREBASEDATACONNECT:
+            inspection: disabled
+        FIREBASEDYNAMICLINKS:
+            inspection: enabled
+        FIREBASEHOSTING:
+            inspection: enabled
+        FIREBASEML:
+            inspection: enabled
+        FIREBASEREMOTECONFIG:
+            inspection: enabled
+        FIREBASERULES:
+            inspection: enabled
+        FIREBASESTORAGE:
+            inspection: enabled
+        FIRESTORE:
+            inspection: enabled
+        FITNESS:
+            inspection: enabled
+        FORMS:
+            inspection: enabled
+        FUSIONTABLES:
+            inspection: enabled
+        GAMES:
+            inspection: enabled
+        GAMESCONFIGURATION:
+            inspection: enabled
+        GAMESERVICES:
+            inspection: enabled
+        GAMESMANAGEMENT:
+            inspection: enabled
+        GENOMICS:
+            inspection: enabled
+        GKEBACKUP:
+            inspection: enabled
+        GKEHUB:
+            inspection: enabled
+        GKEONPREM:
+            inspection: enabled
+        GMAIL:
+            inspection: enabled
+        GMAILPOSTMASTERTOOLS:
+            inspection: enabled
+        GROUPSMIGRATION:
+            inspection: enabled
+        GROUPSSETTINGS:
+            inspection: enabled
+        HEALTHCARE:
+            inspection: enabled
+        HOMEGRAPH:
+            inspection: enabled
+        IAM:
+            inspection: enabled
+        IAMCREDENTIALS:
+            inspection: enabled
+        IAP:
+            inspection: enabled
+        IDEAHUB:
+            inspection: enabled
+        IDENTITYTOOLKIT:
+            inspection: enabled
+        IDS:
+            inspection: enabled
+        INDEXING:
+            inspection: enabled
+        INTEGRATIONS:
+            inspection: enabled
+        JOBS:
+            inspection: enabled
+        KEEP:
+            inspection: enabled
+        KGSEARCH:
+            inspection: enabled
+        KMSINVENTORY:
+            inspection: enabled
+        LANGUAGE:
+            inspection: enabled
+        LIBRARYAGENT:
+            inspection: enabled
+        LICENSING:
+            inspection: enabled
+        LIFESCIENCES:
+            inspection: enabled
+        LOCALSERVICES:
+            inspection: enabled
+        LOGGING:
+            inspection: enabled
+        LOOKER:
+            inspection: enabled
+        MANAGEDIDENTITIES:
+            inspection: enabled
+        MANUFACTURERS:
+            inspection: enabled
+        MARKETINGPLATFORMADMIN:
+            inspection: disabled
+        MEET:
+            inspection: disabled
+        MEMCACHE:
+            inspection: enabled
+        MERCHANTAPI:
+            inspection: disabled
+        METASTORE:
+            inspection: enabled
+        MIGRATIONCENTER:
+            inspection: enabled
+        MIRROR:
+            inspection: enabled
+        ML:
+            inspection: enabled
+        MONITORING:
+            inspection: enabled
+        MYBUSINESSACCOUNTMANAGEMENT:
+            inspection: enabled
+        MYBUSINESSBUSINESSCALLS:
+            inspection: enabled
+        MYBUSINESSBUSINESSINFORMATION:
+            inspection: enabled
+        MYBUSINESSLODGING:
+            inspection: enabled
+        MYBUSINESSNOTIFICATIONS:
+            inspection: enabled
+        MYBUSINESSPLACEACTIONS:
+            inspection: enabled
+        MYBUSINESSQANDA:
+            inspection: enabled
+        MYBUSINESSVERIFICATIONS:
+            inspection: enabled
+        NETAPP:
+            inspection: disabled
+        NETWORKCONNECTIVITY:
+            inspection: enabled
+        NETWORKMANAGEMENT:
+            inspection: enabled
+        NETWORKSECURITY:
+            inspection: enabled
+        NETWORKSERVICES:
+            inspection: enabled
+        NOTEBOOKS:
+            inspection: enabled
+        OAUTH2:
+            inspection: enabled
+        ONDEMANDSCANNING:
+            inspection: enabled
+        ORACLEDATABASE:
+            inspection: disabled
+        ORGPOLICY:
+            inspection: enabled
+        OSCONFIG:
+            inspection: enabled
+        OSLOGIN:
+            inspection: enabled
+        PAGESPEEDONLINE:
+            inspection: enabled
+        PARALLELSTORE:
+            inspection: disabled
+        PARTNERS:
+            inspection: enabled
+        PAYMENTSRESELLERSUBSCRIPTION:
+            inspection: enabled
+        PEOPLE:
+            inspection: enabled
+        PLACES:
+            inspection: enabled
+        PLAYABLELOCATIONS:
+            inspection: enabled
+        PLAYCUSTOMAPP:
+            inspection: enabled
+        PLAYDEVELOPERREPORTING:
+            inspection: enabled
+        PLAYGROUPING:
+            inspection: enabled
+        PLAYINTEGRITY:
+            inspection: enabled
+        PLAYMOVIESPARTNER:
+            inspection: enabled
+        PLUS:
+            inspection: enabled
+        PLUSDOMAINS:
+            inspection: enabled
+        POLICYANALYZER:
+            inspection: enabled
+        POLICYSIMULATOR:
+            inspection: enabled
+        POLICYTROUBLESHOOTER:
+            inspection: enabled
+        POLLEN:
+            inspection: disabled
+        POLY:
+            inspection: enabled
+        PRIVATECA:
+            inspection: enabled
+        PROD_TT_SASPORTAL:
+            inspection: enabled
+        PROXIMITYBEACON:
+            inspection: enabled
+        PUBLICCA:
+            inspection: enabled
+        PUBSUB:
+            inspection: enabled
+        PUBSUBLITE:
+            inspection: enabled
+        QPXEXPRESS:
+            inspection: enabled
+        RAPIDMIGRATIONASSESSMENT:
+            inspection: enabled
+        READERREVENUESUBSCRIPTIONLINKING:
+            inspection: enabled
+        REALTIMEBIDDING:
+            inspection: enabled
+        RECAPTCHAENTERPRISE:
+            inspection: enabled
+        RECOMMENDATIONENGINE:
+            inspection: enabled
+        RECOMMENDER:
+            inspection: enabled
+        REDIS:
+            inspection: enabled
+        REMOTEBUILDEXECUTION:
+            inspection: enabled
+        REPLICAPOOL:
+            inspection: enabled
+        REPLICAPOOLUPDATER:
+            inspection: enabled
+        RESELLER:
+            inspection: enabled
+        RESOURCESETTINGS:
+            inspection: enabled
+        RETAIL:
+            inspection: enabled
+        RUN:
+            inspection: enabled
+        RUNTIMECONFIG:
+            inspection: enabled
+        SAFEBROWSING:
+            inspection: enabled
+        SASPORTAL:
+            inspection: enabled
+        SCRIPT:
+            inspection: enabled
+        SEARCHADS360:
+            inspection: enabled
+        SEARCHCONSOLE:
+            inspection: enabled
+        SECRETMANAGER:
+            inspection: enabled
+        SECURITYCENTER:
+            inspection: enabled
+        SERVICEBROKER:
+            inspection: enabled
+        SERVICECONSUMERMANAGEMENT:
+            inspection: enabled
+        SERVICECONTROL:
+            inspection: enabled
+        SERVICEDIRECTORY:
+            inspection: enabled
+        SERVICEMANAGEMENT:
+            inspection: enabled
+        SERVICENETWORKING:
+            inspection: enabled
+        SERVICEUSAGE:
+            inspection: enabled
+        SERVICEUSER:
+            inspection: enabled
+        SHEETS:
+            inspection: enabled
+        SITEVERIFICATION:
+            inspection: enabled
+        SLIDES:
+            inspection: enabled
+        SMARTDEVICEMANAGEMENT:
+            inspection: enabled
+        SOLAR:
+            inspection: disabled
+        SOURCEREPO:
+            inspection: enabled
+        SPANNER:
+            inspection: enabled
+        SPECTRUM:
+            inspection: enabled
+        SPEECH:
+            inspection: enabled
+        SQL:
+            inspection: enabled
+        SQLADMIN:
+            inspection: enabled
+        STORAGE:
+            inspection: enabled
+        STORAGETRANSFER:
+            inspection: enabled
+        STREETVIEWPUBLISH:
+            inspection: enabled
+        STS:
+            inspection: enabled
+        SURVEYS:
+            inspection: enabled
+        TAGMANAGER:
+            inspection: enabled
+        TASKS:
+            inspection: enabled
+        TESTING:
+            inspection: enabled
+        TEXTTOSPEECH:
+            inspection: enabled
+        TOOLRESULTS:
+            inspection: enabled
+        TPU:
+            inspection: enabled
+        TRACING:
+            inspection: enabled
+        TRAFFICDIRECTOR:
+            inspection: enabled
+        TRANSCODER:
+            inspection: enabled
+        TRANSLATE:
+            inspection: enabled
+        TRAVELIMPACTMODEL:
+            inspection: enabled
+        URLSHORTENER:
+            inspection: enabled
+        VAULT:
+            inspection: enabled
+        VECTORTILE:
+            inspection: enabled
+        VERIFIEDACCESS:
+            inspection: enabled
+        VERSIONHISTORY:
+            inspection: enabled
+        VIDEOINTELLIGENCE:
+            inspection: enabled
+        VISION:
+            inspection: enabled
+        VMMIGRATION:
+            inspection: enabled
+        VMWAREENGINE:
+            inspection: enabled
+        VPCACCESS:
+            inspection: enabled
+        WALLETOBJECTS:
+            inspection: enabled
+        WEBFONTS:
+            inspection: enabled
+        WEBMASTERS:
+            inspection: enabled
+        WEBRISK:
+            inspection: enabled
+        WEBSECURITYSCANNER:
+            inspection: enabled
+        WORKFLOWEXECUTIONS:
+            inspection: enabled
+        WORKFLOWS:
+            inspection: enabled
+        WORKLOADMANAGER:
+            inspection: enabled
+        WORKSPACEEVENTS:
+            inspection: disabled
+        WORKSTATIONS:
+            inspection: enabled
+        YOUTUBE:
+            inspection: enabled
+        YOUTUBEANALYTICS:
+            inspection: enabled
+        YOUTUBEREPORTING:
+            inspection: enabled
 

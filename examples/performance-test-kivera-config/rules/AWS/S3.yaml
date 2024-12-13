@@ -1,11 +1,14 @@
 ---
 AWS-S3-CreateBucket-1:
-    description: S3-CreateBucket-private
+    description: Restrict bucket to private
     provider: AWS
     service: S3
     actions:
         - CreateBucket
-    policy: valid { input.Headers["X-Amz-Acl"][_] == "private" }
+    policy: |-
+        valid {
+            input.Headers["X-Amz-Acl"][_] == "private"
+        }
     advanced:
         paths:
             - '*'
@@ -17,14 +20,18 @@ AWS-S3-CreateBucket-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
-AWS-S3-ListObjects-1:
-    description: S3-ListObjects-max-items
+AWS-S3-ListObjects-2:
+    description: Limit number of results to 10
     provider: AWS
     service: S3
     actions:
         - ListObjects
-    policy: valid { to_number(input.Qs["max-keys"]) <= 10 }
+    policy: |-
+        valid {
+            to_number(input.Qs["max-keys"]) <= 10
+        }
     advanced:
         paths:
             - '*'
@@ -36,6 +43,7 @@ AWS-S3-ListObjects-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-S3-MultiAction-1:
     description: Used for perf test - locust nodes read from S3
@@ -60,14 +68,18 @@ AWS-S3-MultiAction-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-S3-PutObject-1:
-    description: S3-PutObject-allow-1
+    description: Restrict PutObject path
     provider: AWS
     service: S3
     actions:
         - PutObject
-    policy: valid { input.Path == "/test/key" }
+    policy: |-
+        valid {
+            input.Path == "/test/key"
+        }
     advanced:
         paths:
             - '*'
@@ -79,14 +91,19 @@ AWS-S3-PutObject-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-S3-PutObject-2:
-    description: S3-PutObject-allow-2
+    description: Require KMS key
     provider: AWS
     service: S3
     actions:
         - PutObject
-    policy: valid { startswith(input.Host, "test-bucket.") }
+    policy: |-
+        valid {
+            input.Headers["X-Amz-Server-Side-Encryption-Aws-Kms-Key-Id"][_] == "arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key"
+            # input.Headers["X-Amz-Server-Side-Encryption-Aws-Kms-Key-Id"][_] == "arn:aws:kms:us-east-2:343403323223:alias/kivera-test-key"
+        }
     advanced:
         paths:
             - '*'
@@ -98,14 +115,19 @@ AWS-S3-PutObject-2:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-S3-PutObject-3:
-    description: S3-PutObject-KMS-key
+    description: Restrict host
     provider: AWS
     service: S3
     actions:
         - PutObject
-    policy: valid { input.Headers["X-Amz-Server-Side-Encryption-Aws-Kms-Key-Id"][_] == "arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key" }
+    policy: |-
+        valid {
+            startswith(input.Host, "test-bucket.")
+            # startswith(input.Host, "kivera-poc-alpha-load-test.")
+        }
     advanced:
         paths:
             - '*'
@@ -117,4 +139,5 @@ AWS-S3-PutObject-3:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 

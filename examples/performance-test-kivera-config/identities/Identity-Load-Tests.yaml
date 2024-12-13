@@ -20,13 +20,12 @@ Identity-Load-Tests:
         - AWS-SNS
         - AWS-SQS
         - AWS-STS
+        - AWS-XRAY
         - Perf-test
-    type:
-        name: APPLICATION
-    auth-mode: CLOUD_TENANT
+        - RedisRegoFunction
+    identity-type: CLOUD_TENANT
     config:
-        authentication:
-            basic-auth: ""
-            cidr-ranges: []
+        cloud-tenant-id: Kivera-org
+        selected:
+            - poc-ou
     tags: {}
-

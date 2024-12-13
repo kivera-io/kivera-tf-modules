@@ -7,6 +7,6 @@ AWS-EC2:
         - AWS-EC2-AuthorizeSecurityGroupIngress-2
         - AWS-EC2-CreateKeyPair-1
         - AWS-EC2-CreateVolume-1
-        - AWS-EC2-DescribeInstances-1
+        - AWS-EC2-DescribeInstances-2
     tags: {}
 

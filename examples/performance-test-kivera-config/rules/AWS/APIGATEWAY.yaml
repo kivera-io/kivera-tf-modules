@@ -1,11 +1,14 @@
 ---
 AWS-APIGATEWAY-CreateApi-1:
-    description: APIGATEWAY-CreateApi-only-http
+    description: Only allow http
     provider: AWS
     service: APIGATEWAY
     actions:
         - CreateApi
-    policy: valid { input.Body.protocolType == "HTTP" }
+    policy: |-
+        valid {
+          input.Body.protocolType == "HTTP"
+        }
     advanced:
         paths:
             - '*'
@@ -17,14 +20,19 @@ AWS-APIGATEWAY-CreateApi-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-APIGATEWAY-CreateRoute-1:
-    description: APIGATEWAY-CreateRoute-must-have-auth
+    description: Must have auth
     provider: AWS
     service: APIGATEWAY
     actions:
         - CreateRoute
-    policy: valid { input.Body.authorizationType; input.Body.authorizationType != "NONE" }
+    policy: |-
+        valid {
+          input.Body.authorizationType
+          input.Body.authorizationType != "NONE"
+        }
     advanced:
         paths:
             - '*'
@@ -36,14 +44,18 @@ AWS-APIGATEWAY-CreateRoute-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-APIGATEWAY-GetApis-1:
-    description: APIGATEWAY-GetApis-allowed
+    description: Allow GetApis
     provider: AWS
     service: APIGATEWAY
     actions:
         - GetApis
-    policy: valid = true
+    policy: |-
+        valid {
+          true
+        }
     advanced:
         paths:
             - '*'
@@ -55,4 +67,30 @@ AWS-APIGATEWAY-GetApis-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
+
+AWS-APIGATEWAY-GetApis-2:
+    description: kivara.cache.get allow
+    provider: AWS
+    service: APIGATEWAY
+    actions:
+        - GetVpcLinks
+    policy: |-
+        valid = true
+        # valid {
+        #     value = kivera.cache.get("kiveradata:perftest:apigateway");
+        #     value == ""
+        # }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
 

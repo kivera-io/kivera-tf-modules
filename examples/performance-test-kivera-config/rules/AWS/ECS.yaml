@@ -1,11 +1,32 @@
 ---
+AWS-ECS-ListClusters-1:
+    description: Allow ListClusters
+    provider: AWS
+    service: ECS
+    actions:
+        - ListClusters
+    policy: |
+        valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
 AWS-ECS-ListServices-1:
-    description: ECS-ListServices-allow
+    description: Test http.send and print functions
     provider: AWS
     service: ECS
     actions:
         - ListServices
-    policy: valid = true
+    policy: "valid {\n    res = http.send({\n        \"method\": \"get\",\n        \"url\": \"https://api.kivera.io/healthz\"\n    })\n    \n    res[\"status_code\"] == 200\n    print(res)\n    false\n}"
     advanced:
         paths:
             - '*'
@@ -17,14 +38,20 @@ AWS-ECS-ListServices-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
-AWS-ECS-ListTasks-1:
-    description: ECS-ListTasks-allow
+AWS-ECS-ListTaskDefinitions-1:
+    description: kivera.cache.get allow
     provider: AWS
     service: ECS
     actions:
-        - ListTasks
-    policy: valid = true
+        - ListAccountSettings
+    policy: |-
+        valid = true
+        # valid {
+        #     value = kivera.cache.get("kiveradata:perftest:ecs");
+        #     value == ""
+        # }
     advanced:
         paths:
             - '*'
@@ -36,4 +63,26 @@ AWS-ECS-ListTasks-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
+
+AWS-ECS-ListTaskDefinitions-2:
+    description: Allow ListTaskDefinitions
+    provider: AWS
+    service: ECS
+    actions:
+        - ListTaskDefinitions
+    policy: |
+        valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
 

@@ -1,11 +1,14 @@
 ---
 AWS-STS-AssumeRole-1:
-    description: STS-AssumeRole-valid-role-arn
+    description: Restrict role Arn
     provider: AWS
     service: STS
     actions:
         - AssumeRole
-    policy: valid { startswith(input.Body.RoleArn, "arn:aws:iam::326190351503:") }
+    policy: |-
+        valid {
+            startswith(input.Body.RoleArn, "arn:aws:iam::326190351503:")
+        }
     advanced:
         paths:
             - '*'
@@ -17,14 +20,18 @@ AWS-STS-AssumeRole-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-STS-AssumeRole-2:
-    description: STS-AssumeRole-valid-session-name
+    description: Restrict role session name
     provider: AWS
     service: STS
     actions:
         - AssumeRole
-    policy: valid { regex.match("[a-z0-9]{3}-[a-z0-9]{3}-[a-z0-9]+", input.Body.RoleSessionName) }
+    policy: |-
+        valid {
+            regex.match("[a-z0-9]{3}-[a-z0-9]{3}-[a-z0-9]+", input.Body.RoleSessionName)
+        }
     advanced:
         paths:
             - '*'
@@ -36,14 +43,16 @@ AWS-STS-AssumeRole-2:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
-AWS-STS-GetCallerIdentity-1:
-    description: STS-GetCallerIdentity-allow
+AWS-STS-GetCallerIdentity-2:
+    description: Allow GetCallerIdentity
     provider: AWS
     service: STS
     actions:
         - GetCallerIdentity
-    policy: valid = true
+    policy: |
+        valid = true
     advanced:
         paths:
             - '*'
@@ -55,4 +64,5 @@ AWS-STS-GetCallerIdentity-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 

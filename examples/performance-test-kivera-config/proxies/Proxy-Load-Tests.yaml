@@ -2,16 +2,17 @@
 Proxy-Load-Tests:
     name: Proxy-Load-Tests
     description: Proxy for load tests
-    identities: []
+    identities:
+        - Identity-Load-Tests
     settings:
-        debug: true
-        default-mode: blacklist
-        allow-non-cloud-traffic: true
-        default-identity: ""
+        log-level: debug
+        default-mode: block
+        allow-non-provider-traffic: true
         learning-mode: false
+        domain-acl: perf-test-acls
+        rego-raise-error: true
+        on-error-action: use-default-mode
     providers:
         - AWS
-        - AZURE
-        - GCP
     tags: {}
 
