@@ -81,7 +81,7 @@
             "x": 0,
             "type": "log",
             "properties": {
-                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| sort timestamp desc \n| limit 1000",
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| sort timestamp desc \n| limit 500",
                 "region": "",
                 "stacked": false,
                 "title": "Requests",
@@ -109,7 +109,7 @@
             "x": 13,
             "type": "log",
             "properties": {
-                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(provider) as Providers by provider",
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(provider) as providers by provider\n| sort providers desc\n| limit 10",
                 "region": "",
                 "stacked": false,
                 "view": "pie",
@@ -123,7 +123,7 @@
             "x": 13,
             "type": "log",
             "properties": {
-                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(service) as Services by service",
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(service) as services by service\n| sort services desc\n| limit 10",
                 "region": "",
                 "stacked": false,
                 "title": "Services",
@@ -137,7 +137,7 @@
             "x": 16,
             "type": "log",
             "properties": {
-                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(action) as total by provider, service, action\n| sort total desc\n| limit 20",
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(action) as total by provider, service, action\n| sort total desc\n| limit 10",
                 "region": "",
                 "stacked": false,
                 "title": "Actions",
@@ -151,7 +151,7 @@
             "x": 16,
             "type": "log",
             "properties": {
-                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(region) as total by provider, region\n| sort total desc\n| limit 20",
+                "query": "source 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(region) as total by provider, region\n| sort total desc\n| limit 10",
                 "region": "",
                 "stacked": false,
                 "title": "Regions",
@@ -165,7 +165,7 @@
             "x": 16,
             "type": "log",
             "properties": {
-                "query": "SOURCE 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid, data.ProviderMetadata.Account as aws_account, data.ProviderMetadata.ProjectId as gcp_project, data.ProviderMetadata.SubscriptionId as azure_subscription\n| fields coalesce(aws_account, gcp_project, azure_subscription) as tenant\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(tenant) as total by provider, tenant\n| sort total desc\n| limit 20",
+                "query": "SOURCE 'SOURCE_VAR' | fields @timestamp as timestamp, xkid, data.ProviderMetadata.Region as region, data.Provider as provider, data.Service as service, data.Action as action, replace(replace(data.Valid , \"1\", \"true\"), \"0\", \"false\") as valid, data.ProviderMetadata.Account as aws_account, data.ProviderMetadata.ProjectId as gcp_project, data.ProviderMetadata.SubscriptionId as azure_subscription\n| fields coalesce(aws_account, gcp_project, azure_subscription) as tenant\n| filter msg=\"request\" and region =~ /REGION_VAR/ and provider =~ /PROVIDER_VAR/ and service =~ /SERVICE_VAR/ and action =~ /ACTION_VAR/ and valid =~ /VALID_VAR/ and xkid =~ /XKID_VAR/ \n| stats count(tenant) as total by provider, tenant\n| sort total desc\n| limit 10",
                 "region": "",
                 "stacked": false,
                 "title": "Tenants",
