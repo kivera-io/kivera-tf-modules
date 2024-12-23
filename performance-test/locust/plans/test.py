@@ -1,6 +1,7 @@
 import secrets
 import os
 import time
+import random
 import boto3
 import botocore
 import ddtrace
@@ -9,8 +10,11 @@ from locust import User, TaskSet, task, between, events
 from ddtrace.propagation.http import HTTPPropagator
 import requests
 
+
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
+
+MAX_CLIENT_REUSE = 100
 
 client_config = Config(
    retries = {
@@ -119,9 +123,10 @@ def get_client(service, region=""):
     if region == "":
         region = secrets.choice(aws_regions)
 
-    client = all_clients.get(service, {}).get(region)
-    if client:
-        return client
+    c = all_clients.get(service, {}).get(region)
+    if c and c['count'] > 0:
+        all_clients[service][region]['count'] -= 1
+        return c['client']
 
     client = boto3.client(service, region_name=region, config=client_config)
     client.meta.events.register_first('before-sign.*.*', add_trace_headers)
@@ -129,7 +134,10 @@ def get_client(service, region=""):
     if service not in all_clients:
         all_clients[service] = {}
 
-    all_clients[service][region] = client
+    all_clients[service][region] = {
+        'client': client,
+        'count': random.randrange(MAX_CLIENT_REUSE)
+    }
     return client
 
 def result_decorator(method):
