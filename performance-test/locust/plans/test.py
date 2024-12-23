@@ -113,20 +113,23 @@ def add_trace_headers(request, **kwargs):
     for h, v in headers.items():
         request.headers.add_header(h, v)
 
-clients = {}
+all_clients = {}
 
 def get_client(service, region=""):
     if region == "":
         region = secrets.choice(aws_regions)
 
-    client = clients.get(service, {}).get(region)
+    client = all_clients.get(service, {}).get(region)
     if client:
         return client
 
     client = boto3.client(service, region_name=region, config=client_config)
     client.meta.events.register_first('before-sign.*.*', add_trace_headers)
-    clients[service][region] = client
 
+    if service not in all_clients:
+        all_clients[service] = {}
+
+    all_clients[service][region] = client
     return client
 
 def result_decorator(method):
