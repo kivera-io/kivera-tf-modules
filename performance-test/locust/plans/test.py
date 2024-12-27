@@ -17,10 +17,12 @@ ddtrace.config.botocore['distributed_tracing'] = False
 MAX_CLIENT_REUSE = 100
 
 client_config = Config(
-   retries = {
-      'max_attempts': 1,
-      'mode': 'standard'
-   }
+    connect_timeout = 10,
+    read_timeout = 30,
+    retries = {
+        'total_max_attempts': 1,
+        'mode': 'standard'
+    }
 )
 
 aws_regions = [
