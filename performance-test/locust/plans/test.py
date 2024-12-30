@@ -2,6 +2,7 @@ import secrets
 import os
 import time
 import random
+import concurrent.futures
 import boto3
 import botocore
 import ddtrace
@@ -10,6 +11,8 @@ from locust import User, TaskSet, task, between, events
 from ddtrace.propagation.http import HTTPPropagator
 import requests
 
+class TimeoutException(Exception):
+    pass
 
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
@@ -109,6 +112,7 @@ boto3.setup_default_session(region_name='ap-southeast-2')
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', 4))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', 6))
 MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', 10))
+DEFAULT_TEST_TIMEOUT = int(os.getenv('DEFAULT_TEST_TIMEOUT', 60))
 
 def add_trace_headers(request, **kwargs):
     span = ddtrace.tracer.current_span()
@@ -169,7 +173,12 @@ def result_decorator(method):
 
         start_time = time.time()
         try:
-            method(self)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(method, self)
+                future.result(timeout=DEFAULT_TEST_TIMEOUT)
+
+        except concurrent.futures.TimeoutError as e:
+            raise TimeoutException(f"Timeout ({DEFAULT_TEST_TIMEOUT}s) exceeded") from e
 
         except botocore.exceptions.ClientError as error:
             # If error code is allowed, treat as a successful request
