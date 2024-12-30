@@ -173,7 +173,7 @@ def result_decorator(method):
             idx = idx-1
 
         provider = method_parts[0].upper()
-        if provider == "noncloud":
+        if provider == "NONCLOUD":
             should_contain = "Host:"
         else:
             service = method_parts[1].upper()
@@ -226,7 +226,7 @@ def check_err_message(should_block, should_contain, custom_resp, class_name, met
     if "Kivera.Error" not in str(error) and "Oops, your request has been blocked." not in str(error):
         return failure(class_name, method_name, start_time, Exception("Request Not Blocked: got" + str(error)))
 
-    if should_contain not in str(error):
+    if should_contain.lower() not in str(error).lower():
         return failure(class_name, method_name, start_time, Exception(f"Incorrect Response: {should_contain}: got {str(error)}"))
 
     if custom_resp:
@@ -501,22 +501,22 @@ class AwsApiGatewayTasks(TaskSet):
 
 
 ### EVENTBRIDGE ###
-class AwsEventBridgeTasks(TaskSet):
+class AwsEventsTasks(TaskSet):
     @task(1)
     @result_decorator
-    def aws_eventbridge_list_rules_allow(self):
+    def aws_events_list_rules_allow(self):
         client = get_client('events')
         client.list_rules()
 
     @task(3)
     @result_decorator
-    def aws_eventbridge_put_permission_allow(self):
+    def aws_events_put_permission_allow(self):
         client = get_client('events')
         client.put_permission(Action='events:PutRule', Principal='326190351503')
 
     @task(3)
     @result_decorator
-    def aws_eventbridge_put_permission_block(self):
+    def aws_events_put_permission_block(self):
         client = get_client('events')
         client.put_permission(Action='events:PutRule', Principal='000000000000')
 
@@ -978,7 +978,7 @@ class KiveraPerf(User):
         AwsStsTasks: 3,
         AwsS3Tasks: 3,
         AwsApiGatewayTasks: 3,
-        AwsEventBridgeTasks: 3,
+        AwsEventsTasks: 3,
         AwsIamTasks: 2,
         AwsRdsTasks: 3,
         AwsCloudFrontTasks: 2,
