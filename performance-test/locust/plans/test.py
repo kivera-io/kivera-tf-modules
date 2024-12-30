@@ -149,10 +149,9 @@ def get_client(service, region=""):
         client = boto3.client(service, region_name=region, config=client_config)
         client.meta.events.register_first('before-sign.*.*', add_trace_headers)
 
-        all_clients[service][region] = {
-            'client': client,
-            'count': random.randrange(MAX_CLIENT_REUSE)
-        }
+        all_clients[service][region]['client'] = client
+        all_clients[service][region]['count'] = random.randrange(MAX_CLIENT_REUSE)
+
         return client
 
 def result_decorator(method):
