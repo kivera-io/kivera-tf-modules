@@ -14,8 +14,6 @@ import requests
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
 
-MAX_CLIENT_REUSE = 100
-
 client_config = Config(
     connect_timeout = 10,
     read_timeout = 30,
@@ -110,6 +108,7 @@ boto3.setup_default_session(region_name='ap-southeast-2')
 
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', 4))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', 6))
+MAX_CLIENT_REUSE = int(os.getenv('USER_WAIT_MAX', 10))
 
 def add_trace_headers(request, **kwargs):
     span = ddtrace.tracer.current_span()
