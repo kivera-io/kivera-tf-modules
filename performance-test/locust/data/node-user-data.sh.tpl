@@ -72,6 +72,7 @@ cd /locust
 
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
+export MAX_CLIENT_REUSE=${max_client_reuse}
 
 fallocate -l 50M test.data
 

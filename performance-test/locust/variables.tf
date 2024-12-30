@@ -118,3 +118,9 @@ variable "proxy_public_cert" {
   description = "Public cert used by the proxy"
   default     = ""
 }
+
+variable "max_client_reuse" {
+  description = "The maximum amount of times a client will be re-used in tests (0-n)"
+  type        = number
+  default     = 10
+}
