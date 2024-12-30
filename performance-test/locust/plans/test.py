@@ -2,6 +2,7 @@ import secrets
 import os
 import time
 import random
+import threading
 import concurrent.futures
 import boto3
 import botocore
@@ -123,27 +124,36 @@ def add_trace_headers(request, **kwargs):
         request.headers.add_header(h, v)
 
 all_clients = {}
+all_clients_lock = threading.Lock()
 
 def get_client(service, region=""):
     if region == "":
         region = secrets.choice(aws_regions)
 
-    c = all_clients.get(service, {}).get(region)
-    if c and c['count'] > 0:
-        all_clients[service][region]['count'] -= 1
-        return c['client']
+    with all_clients_lock:
+        if service not in all_clients:
+            all_clients[service] = {}
+        if region not in all_clients[service]:
+            all_clients[service][region] = {
+                'count': 0,
+                'lock': threading.Lock()
+            }
 
-    client = boto3.client(service, region_name=region, config=client_config)
-    client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+    c = all_clients[service][region]
 
-    if service not in all_clients:
-        all_clients[service] = {}
+    with c['lock']:
+        if c and c['count'] > 0:
+            all_clients[service][region]['count'] -= 1
+            return c['client']
 
-    all_clients[service][region] = {
-        'client': client,
-        'count': random.randrange(MAX_CLIENT_REUSE)
-    }
-    return client
+        client = boto3.client(service, region_name=region, config=client_config)
+        client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+
+        all_clients[service][region] = {
+            'client': client,
+            'count': random.randrange(MAX_CLIENT_REUSE)
+        }
+        return client
 
 def result_decorator(method):
     def decorator(self):
