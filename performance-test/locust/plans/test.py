@@ -149,6 +149,12 @@ def get_client(service, region=""):
         }
         return client
 
+def action_name(parts):
+    action = ""
+    for p in parts:
+        action += p.title()
+    return action
+
 def result_decorator(method):
     def decorator(self):
         class_name = self.__class__.__name__
@@ -164,6 +170,15 @@ def result_decorator(method):
         custom_resp = False
         if method_parts[idx-1] == "customresponse":
             custom_resp = True
+            idx = idx-1
+
+        provider = method_parts[0].upper()
+        if provider == "noncloud":
+            should_contain = "Host:"
+        else:
+            service = method_parts[1].upper()
+            action = action_name(method_parts[2:idx])
+            should_contain = f"Provider:{provider}, Service:{service}, Action:{action}"
 
         if validity == 'allow':
             should_block = False
@@ -189,11 +204,11 @@ def result_decorator(method):
             if not should_block and error.response['Error']['Code'] in allowed_errors:
                 return success(class_name, method_name, start_time)
             # otherwise check for Kivera error
-            return check_err_message(should_block, custom_resp, class_name, method_name, start_time, error)
+            return check_err_message(should_block, should_contain, custom_resp, class_name, method_name, start_time, error)
 
         except Exception as error:
             # check for Kivera error
-            return check_err_message(should_block, custom_resp, class_name, method_name, start_time, error)
+            return check_err_message(should_block, should_contain, custom_resp, class_name, method_name, start_time, error)
 
         # on successful request
         if should_block:
@@ -203,19 +218,21 @@ def result_decorator(method):
 
     return decorator
 
-
-def check_err_message(should_block, custom_resp, class_name, method_name, start_time, error):
+def check_err_message(should_block, should_contain, custom_resp, class_name, method_name, start_time, error):
 
     if not should_block:
         return failure(class_name, method_name, start_time, error)
 
     if "Kivera.Error" not in str(error) and "Oops, your request has been blocked." not in str(error):
-        return failure(class_name, method_name, start_time, Exception("Request Not Blocked: " + str(error)))
+        return failure(class_name, method_name, start_time, Exception("Request Not Blocked: got" + str(error)))
+
+    if should_contain not in str(error):
+        return failure(class_name, method_name, start_time, Exception(f"Incorrect Response: {should_contain}: got {str(error)}"))
 
     if custom_resp:
         expected = custom_responses[class_name][method_name]
         if not contains_custom_response(error, expected):
-            return failure(class_name, method_name, start_time, Exception(f"Missing Custom Response: '{expected}': {str(error)}"))
+            return failure(class_name, method_name, start_time, Exception(f"Missing Custom Response: '{expected}': got {str(error)}"))
 
     return success(class_name, method_name, start_time)
 
@@ -900,28 +917,28 @@ class AwsSensitiveFieldsTasks(TaskSet):
 class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
-    def app_dev_block(self):
+    def noncloud_app_dev_block(self):
         resp = requests.get('https://app.dev.nonp.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
-    def app_stg_block(self):
+    def noncloud_app_stg_block(self):
         resp = requests.get('https://app.stg.nonp.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
-    def kivera_block(self):
+    def noncloud_kivera_block(self):
         resp = requests.get('https://kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
-    def download_block(self):
+    def noncloud_download_block(self):
         resp = requests.get('https://download.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
