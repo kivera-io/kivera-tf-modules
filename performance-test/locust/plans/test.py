@@ -134,24 +134,19 @@ def get_client(service, region=""):
         if service not in all_clients:
             all_clients[service] = {}
         if region not in all_clients[service]:
-            all_clients[service][region] = {
-                'count': 0,
-                'lock': threading.Lock()
-            }
+            all_clients[service][region] = {}
 
-    c = all_clients[service][region]
-
-    with c['lock']:
-        if c and c['count'] > 0:
+        if all_clients[service][region].get('count', 0) > 0:
             all_clients[service][region]['count'] -= 1
-            return c['client']
+            return all_clients[service][region]['client']
 
         client = boto3.client(service, region_name=region, config=client_config)
         client.meta.events.register_first('before-sign.*.*', add_trace_headers)
 
-        all_clients[service][region]['client'] = client
-        all_clients[service][region]['count'] = random.randrange(MAX_CLIENT_REUSE)
-
+        all_clients[service][region] = {
+            'client': client,
+            'count': random.randrange(MAX_CLIENT_REUSE),
+        }
         return client
 
 def result_decorator(method):
