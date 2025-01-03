@@ -21,6 +21,8 @@ ddtrace.config.botocore['distributed_tracing'] = False
 client_config = Config(
     connect_timeout = 10,
     read_timeout = 30,
+    tcp_keepalive = True,
+    max_pool_connections = int(os.getenv('MAX_CLIENT_REUSE', 10)),
     retries = {
         'total_max_attempts': 1,
         'mode': 'standard'
