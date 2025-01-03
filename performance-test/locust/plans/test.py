@@ -15,6 +15,11 @@ import requests
 class TimeoutException(Exception):
     pass
 
+USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
+USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
+MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '10'))
+DEFAULT_TEST_TIMEOUT = int(os.getenv('DEFAULT_TEST_TIMEOUT', '60'))
+
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
 
@@ -22,7 +27,7 @@ client_config = Config(
     connect_timeout = 10,
     read_timeout = 30,
     tcp_keepalive = True,
-    max_pool_connections = int(os.getenv('MAX_CLIENT_REUSE', 10)),
+    max_pool_connections = MAX_CLIENT_REUSE,
     retries = {
         'total_max_attempts': 1,
         'mode': 'standard'
@@ -112,11 +117,6 @@ custom_responses = {
 
 boto3.setup_default_session(region_name='ap-southeast-2')
 
-USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', 4))
-USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', 6))
-MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', 10))
-DEFAULT_TEST_TIMEOUT = int(os.getenv('DEFAULT_TEST_TIMEOUT', 60))
-
 def add_trace_headers(request, **kwargs):
     span = ddtrace.tracer.current_span()
     span.service = "locust"
@@ -145,9 +145,13 @@ def get_client(service, region=""):
         client = boto3.client(service, region_name=region, config=client_config)
         client.meta.events.register_first('before-sign.*.*', add_trace_headers)
 
+        reuse = MAX_CLIENT_REUSE
+        if reuse > 0:
+            reuse = random.randrange(MAX_CLIENT_REUSE)
+
         all_clients[service][region] = {
             'client': client,
-            'count': random.randrange(MAX_CLIENT_REUSE),
+            'count': reuse,
         }
         return client
 
