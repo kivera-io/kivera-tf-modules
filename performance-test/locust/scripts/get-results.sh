@@ -11,7 +11,13 @@ echo "Password: ${LEADER_PASSWORD}"
 
 function durationToSeconds () {
   set -f
-  normalize () { echo $1 | tr '[:upper:]' '[:lower:]' | tr -d "\"\\\'" | sed 's/years\{0,1\}/y/g; s/months\{0,1\}/m/g; s/days\{0,1\}/d/g; s/hours\{0,1\}/h/g; s/minutes\{0,1\}/m/g; s/min/m/g; s/seconds\{0,1\}/s/g; s/sec/s/g;  s/ //g;'; }
+  normalize () {
+    if [ $(uname) == "Darwin" ]; then
+      echo $1 | tr '[:upper:]' '[:lower:]' | tr -d "\"\\\'" | gsed 's/years\{0,1\}/y/g; s/months\{0,1\}/m/g; s/days\{0,1\}/d/g; s/hours\{0,1\}/h/g; s/minutes\{0,1\}/m/g; s/min/m/g; s/seconds\{0,1\}/s/g; s/sec/s/g;  s/ //g;';
+    else
+      echo $1 | tr '[:upper:]' '[:lower:]' | tr -d "\"\\\'" | sed 's/years\{0,1\}/y/g; s/months\{0,1\}/m/g; s/days\{0,1\}/d/g; s/hours\{0,1\}/h/g; s/minutes\{0,1\}/m/g; s/min/m/g; s/seconds\{0,1\}/s/g; s/sec/s/g;  s/ //g;';
+    fi
+  }
   local value=$(normalize "$1")
   local fallback=$(normalize "$2")
 
@@ -25,7 +31,11 @@ function durationToSeconds () {
     else
       sedtmpl () { echo "s/\([0-9]\+\)$1/(0\1 * $2)/g;"; }
       local template="$(sedtmpl '\( \|$\)' 1) $(sedtmpl y '365 * 86400') $(sedtmpl d 86400) $(sedtmpl h 3600) $(sedtmpl m 60) $(sedtmpl s 1) s/) *(/) + (/g;"
-      echo $value | sed "$template" | bc
+      if [ $(uname) == "Darwin" ]; then
+        echo $value | gsed "$template" | bc
+      else
+        echo $value | sed "$template" | bc
+      fi
     fi
   fi
   set +f
