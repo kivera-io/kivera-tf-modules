@@ -12,11 +12,7 @@ echo "Password: ${LEADER_PASSWORD}"
 function durationToSeconds () {
   set -f
   normalize () {
-    if [ $(uname) == "Darwin" ]; then
-      echo $1 | tr '[:upper:]' '[:lower:]' | tr -d "\"\\\'" | gsed 's/years\{0,1\}/y/g; s/months\{0,1\}/m/g; s/days\{0,1\}/d/g; s/hours\{0,1\}/h/g; s/minutes\{0,1\}/m/g; s/min/m/g; s/seconds\{0,1\}/s/g; s/sec/s/g;  s/ //g;';
-    else
-      echo $1 | tr '[:upper:]' '[:lower:]' | tr -d "\"\\\'" | sed 's/years\{0,1\}/y/g; s/months\{0,1\}/m/g; s/days\{0,1\}/d/g; s/hours\{0,1\}/h/g; s/minutes\{0,1\}/m/g; s/min/m/g; s/seconds\{0,1\}/s/g; s/sec/s/g;  s/ //g;';
-    fi
+    echo $1 | tr '[:upper:]' '[:lower:]' | tr -d "\"\\\'" | awk '{ gsub(/days?/, "d"); gsub(/hours?/, "h"); gsub(/minutes?/, "m"); gsub(/min/, "m"); gsub(/seconds?/, "s"); gsub(/sec/, "s"); gsub(/ /, ""); print $0; }';
   }
   local value=$(normalize "$1")
   local fallback=$(normalize "$2")
