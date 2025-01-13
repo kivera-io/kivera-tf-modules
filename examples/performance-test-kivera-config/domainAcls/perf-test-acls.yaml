@@ -1,0 +1,12 @@
+---
+perf-test-acls:
+    name: perf-test-acls
+    default-action: ALLOW
+    domains:
+        - domain: .nonp.kivera.io
+          action: BLOCK
+        - domain: kivera.io
+          action: BLOCK
+        - domain: .kivera.io
+          action: BLOCK
+

@@ -1,4 +1,8 @@
 ---
 orgPolicyFunction:
-    function: "required_tags := {\"Environment\",\"CostCentre\",\"Owner\"}\r\napproved_aws_data_boundary := {\"326190351503\",\"466907168333\",\"799150603744\"}\r\napproved_lambda_runtimes := {\"nodejs20.x\",\"java21\",\"python3.12\",\"go1.x\"}\r\napproved_amis := {\"ami-0361bbf2b99f46c1d\",\"ami-0df4b2961410d4cff\"}\r\n"
+    function: |
+        required_tags := {"Environment","CostCentre","Owner"}
+        approved_aws_data_boundary := {"326190351503","466907168333","799150603744"}
+        approved_lambda_runtimes := {"nodejs20.x","java21","python3.12","go1.x"}
+        approved_amis := {"ami-0361bbf2b99f46c1d","ami-0df4b2961410d4cff"}
 

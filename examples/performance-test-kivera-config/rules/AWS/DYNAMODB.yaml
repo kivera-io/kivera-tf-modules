@@ -1,11 +1,12 @@
 ---
 AWS-DYNAMODB-ListTables-1:
-    description: DYNAMODB-ListTables-allow
+    description: Allow ListTables
     provider: AWS
     service: DYNAMODB
     actions:
         - ListTables
-    policy: valid = true
+    policy: |
+        valid = true
     advanced:
         paths:
             - '*'
@@ -17,15 +18,19 @@ AWS-DYNAMODB-ListTables-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-DYNAMODB-MultiAction-1:
-    description: DYNAMODB-CreateTable-billing-mode
+    description: Restrict billing mode to PAY_PER_REQUEST
     provider: AWS
     service: DYNAMODB
     actions:
         - CreateTable
         - UpdateTable
-    policy: valid { input.Body.BillingMode == "PAY_PER_REQUEST" }
+    policy: |
+        valid {
+            input.Body.BillingMode == "PAY_PER_REQUEST"
+        }
     advanced:
         paths:
             - '*'
@@ -37,15 +42,19 @@ AWS-DYNAMODB-MultiAction-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-DYNAMODB-MultiAction-2:
-    description: DYNAMODB-CreateTable-table-class
+    description: Restrict TableClass to STANDARD
     provider: AWS
     service: DYNAMODB
     actions:
         - CreateTable
         - UpdateTable
-    policy: valid { input.Body.TableClass == "STANDARD" }
+    policy: |
+        valid {
+            input.Body.TableClass == "STANDARD"
+        }
     advanced:
         paths:
             - '*'
@@ -57,15 +66,19 @@ AWS-DYNAMODB-MultiAction-2:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-DYNAMODB-MultiAction-3:
-    description: DYNAMODB-CreateTable-kms-key
+    description: Require KMS key
     provider: AWS
     service: DYNAMODB
     actions:
         - CreateTable
         - UpdateTable
-    policy: valid { input.Body.SSESpecification.KMSMasterKeyId == "alias/secure-key" }
+    policy: |
+        valid {
+            input.Body.SSESpecification.KMSMasterKeyId == "alias/secure-key"
+        }
     advanced:
         paths:
             - '*'
@@ -77,4 +90,5 @@ AWS-DYNAMODB-MultiAction-3:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 

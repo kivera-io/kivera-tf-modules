@@ -1,0 +1,12 @@
+---
+RedisRegoFunction:
+    name: RedisRegoFunction
+    description: Rules that use rego function with redis
+    rules:
+        - AWS-APIGATEWAY-GetApis-2
+        - AWS-BATCH-ListJobs-1
+        - AWS-CLOUDFRONT-ListDistributions-2
+        - AWS-ECS-ListTaskDefinitions-1
+        - AWS-IAM-ListUsers-2
+    tags: {}
+

@@ -3,7 +3,8 @@ AWS-ECS:
     name: AWS-ECS
     description: AWS ECS rules
     rules:
+        - AWS-ECS-ListClusters-1
         - AWS-ECS-ListServices-1
-        - AWS-ECS-ListTasks-1
+        - AWS-ECS-ListTaskDefinitions-2
     tags: {}
 

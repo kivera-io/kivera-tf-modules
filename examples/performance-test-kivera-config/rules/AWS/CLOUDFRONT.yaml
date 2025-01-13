@@ -1,11 +1,14 @@
 ---
 AWS-CLOUDFRONT-AssociateAlias-1:
-    description: CLOUDFRONT-AssociateAlias-valid-domain
+    description: Valid domains only
     provider: AWS
     service: CLOUDFRONT
     actions:
         - AssociateAlias
-    policy: valid { endswith(input.Qs.Alias[_], ".kivera.io") }
+    policy: |-
+        valid {
+            endswith(input.Qs.Alias[_], ".kivera.io")
+        }
     advanced:
         paths:
             - '*'
@@ -17,14 +20,18 @@ AWS-CLOUDFRONT-AssociateAlias-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-CLOUDFRONT-CreateDistribution-1:
-    description: CLOUDFRONT-CreateDistribution-disallow-http1.1
+    description: Block http1.1
     provider: AWS
     service: CLOUDFRONT
     actions:
         - CreateDistribution
-    policy: valid { input.Body.DistributionConfig.HttpVersion != "http1.1" }
+    policy: |
+        valid {
+            input.Body.DistributionConfig.HttpVersion != "http1.1"
+        }
     advanced:
         paths:
             - '*'
@@ -36,14 +43,16 @@ AWS-CLOUDFRONT-CreateDistribution-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-CLOUDFRONT-ListDistributions-1:
-    description: CLOUDFRONT-ListDistributions-allow
+    description: Allow ListDistributions
     provider: AWS
     service: CLOUDFRONT
     actions:
         - ListDistributions
-    policy: valid = true
+    policy: |
+        valid = true
     advanced:
         paths:
             - '*'
@@ -55,4 +64,30 @@ AWS-CLOUDFRONT-ListDistributions-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
+
+AWS-CLOUDFRONT-ListDistributions-2:
+    description: kivera.cache.get allow
+    provider: AWS
+    service: CLOUDFRONT
+    actions:
+        - ListFunctions
+    policy: |-
+        valid = true
+        # valid {
+        #     value = kivera.cache.get("kiveradata:perftest:cloudfront");
+        #     value == ""
+        # }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
 

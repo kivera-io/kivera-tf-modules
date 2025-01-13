@@ -1,521 +1,534 @@
 ---
 AZURE:
-    name: AZURE
     services:
-        - name: ASTRONOMER.ASTRO
-          inspection: enabled
-        - name: DYNATRACE.OBSERVABILITY
-          inspection: enabled
-        - name: MICROSOFT.AAD
-          inspection: enabled
-        - name: MICROSOFT.AADIAM
-          inspection: enabled
-        - name: MICROSOFT.ADDONS
-          inspection: enabled
-        - name: MICROSOFT.ADHYBRIDHEALTHSERVICE
-          inspection: enabled
-        - name: MICROSOFT.ADVISOR
-          inspection: enabled
-        - name: MICROSOFT.AGFOODPLATFORM
-          inspection: enabled
-        - name: MICROSOFT.ALERTSMANAGEMENT
-          inspection: enabled
-        - name: MICROSOFT.ANALYSISSERVICES
-          inspection: enabled
-        - name: MICROSOFT.APICENTER
-          inspection: enabled
-        - name: MICROSOFT.APIMANAGEMENT
-          inspection: enabled
-        - name: MICROSOFT.APP
-          inspection: enabled
-        - name: MICROSOFT.APPCOMPLIANCEAUTOMATION
-          inspection: enabled
-        - name: MICROSOFT.APPCONFIGURATION
-          inspection: enabled
-        - name: MICROSOFT.APPPLATFORM
-          inspection: enabled
-        - name: MICROSOFT.ATTESTATION
-          inspection: enabled
-        - name: MICROSOFT.AUTHORIZATION
-          inspection: enabled
-        - name: MICROSOFT.AUTOMANAGE
-          inspection: enabled
-        - name: MICROSOFT.AUTOMATION
-          inspection: enabled
-        - name: MICROSOFT.AUTONOMOUSDEVELOPMENTPLATFORM
-          inspection: enabled
-        - name: MICROSOFT.AVS
-          inspection: enabled
-        - name: MICROSOFT.AZUREACTIVEDIRECTORY
-          inspection: enabled
-        - name: MICROSOFT.AZUREARCDATA
-          inspection: enabled
-        - name: MICROSOFT.AZUREBRIDGE.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.AZUREDATA
-          inspection: enabled
-        - name: MICROSOFT.AZURELARGEINSTANCE
-          inspection: enabled
-        - name: MICROSOFT.AZUREPLAYWRIGHTSERVICE
-          inspection: enabled
-        - name: MICROSOFT.AZURESPHERE
-          inspection: enabled
-        - name: MICROSOFT.AZURESTACK
-          inspection: enabled
-        - name: MICROSOFT.AZURESTACKHCI
-          inspection: enabled
-        - name: MICROSOFT.BACKUP.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.BAREMETALINFRASTRUCTURE
-          inspection: enabled
-        - name: MICROSOFT.BATCH
-          inspection: enabled
-        - name: MICROSOFT.BILLING
-          inspection: enabled
-        - name: MICROSOFT.BILLINGBENEFITS
-          inspection: enabled
-        - name: MICROSOFT.BLOCKCHAIN
-          inspection: enabled
-        - name: MICROSOFT.BLUEPRINT
-          inspection: enabled
-        - name: MICROSOFT.BOTSERVICE
-          inspection: enabled
-        - name: MICROSOFT.CACHE
-          inspection: enabled
-        - name: MICROSOFT.CAPACITY
-          inspection: enabled
-        - name: MICROSOFT.CDN
-          inspection: enabled
-        - name: MICROSOFT.CERTIFICATEREGISTRATION
-          inspection: enabled
-        - name: MICROSOFT.CHANGEANALYSIS
-          inspection: enabled
-        - name: MICROSOFT.CHAOS
-          inspection: enabled
-        - name: MICROSOFT.COGNITIVESERVICES
-          inspection: enabled
-        - name: MICROSOFT.COMMERCE
-          inspection: enabled
-        - name: MICROSOFT.COMMERCE.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.COMMUNICATION
-          inspection: enabled
-        - name: MICROSOFT.COMMUNITY
-          inspection: enabled
-        - name: MICROSOFT.COMPUTE
-          inspection: enabled
-        - name: MICROSOFT.COMPUTE.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.CONFIDENTIALLEDGER
-          inspection: enabled
-        - name: MICROSOFT.CONFLUENT
-          inspection: enabled
-        - name: MICROSOFT.CONNECTEDVMWAREVSPHERE
-          inspection: enabled
-        - name: MICROSOFT.CONSUMPTION
-          inspection: enabled
-        - name: MICROSOFT.CONTAINERINSTANCE
-          inspection: enabled
-        - name: MICROSOFT.CONTAINERREGISTRY
-          inspection: enabled
-        - name: MICROSOFT.CONTAINERREGISTRY.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.CONTAINERSERVICE
-          inspection: enabled
-        - name: MICROSOFT.CONTAINERSERVICE.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.CONTAINERSTORAGE
-          inspection: enabled
-        - name: MICROSOFT.COSTMANAGEMENT
-          inspection: enabled
-        - name: MICROSOFT.CUSTOMERINSIGHTS
-          inspection: enabled
-        - name: MICROSOFT.CUSTOMERLOCKBOX
-          inspection: enabled
-        - name: MICROSOFT.CUSTOMPROVIDERS
-          inspection: enabled
-        - name: MICROSOFT.DASHBOARD
-          inspection: enabled
-        - name: MICROSOFT.DATABOX
-          inspection: enabled
-        - name: MICROSOFT.DATABOXEDGE
-          inspection: enabled
-        - name: MICROSOFT.DATABRICKS
-          inspection: enabled
-        - name: MICROSOFT.DATACATALOG
-          inspection: enabled
-        - name: MICROSOFT.DATADOG
-          inspection: enabled
-        - name: MICROSOFT.DATAFACTORY
-          inspection: enabled
-        - name: MICROSOFT.DATALAKEANALYTICS
-          inspection: enabled
-        - name: MICROSOFT.DATALAKESTORE
-          inspection: enabled
-        - name: MICROSOFT.DATAMIGRATION
-          inspection: enabled
-        - name: MICROSOFT.DATAPROTECTION
-          inspection: enabled
-        - name: MICROSOFT.DATAREPLICATION
-          inspection: enabled
-        - name: MICROSOFT.DATASHARE
-          inspection: enabled
-        - name: MICROSOFT.DBFORMARIADB
-          inspection: enabled
-        - name: MICROSOFT.DBFORMYSQL
-          inspection: enabled
-        - name: MICROSOFT.DBFORPOSTGRESQL
-          inspection: enabled
-        - name: MICROSOFT.DELEGATEDNETWORK
-          inspection: enabled
-        - name: MICROSOFT.DEPLOYMENT.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.DEPLOYMENTMANAGER
-          inspection: enabled
-        - name: MICROSOFT.DESKTOPVIRTUALIZATION
-          inspection: enabled
-        - name: MICROSOFT.DEVCENTER
-          inspection: enabled
-        - name: MICROSOFT.DEVHUB
-          inspection: enabled
-        - name: MICROSOFT.DEVICEREGISTRY
-          inspection: enabled
-        - name: MICROSOFT.DEVICES
-          inspection: enabled
-        - name: MICROSOFT.DEVICEUPDATE
-          inspection: enabled
-        - name: MICROSOFT.DEVOPS
-          inspection: enabled
-        - name: MICROSOFT.DEVOPSINFRASTRUCTURE
-          inspection: enabled
-        - name: MICROSOFT.DEVSPACES
-          inspection: enabled
-        - name: MICROSOFT.DEVTESTLAB
-          inspection: enabled
-        - name: MICROSOFT.DIGITALTWINS
-          inspection: enabled
-        - name: MICROSOFT.DOCUMENTDB
-          inspection: enabled
-        - name: MICROSOFT.DOMAINREGISTRATION
-          inspection: enabled
-        - name: MICROSOFT.DYNAMICS365FRAUDPROTECTION
-          inspection: enabled
-        - name: MICROSOFT.DYNAMICSTELEMETRY
-          inspection: enabled
-        - name: MICROSOFT.EASM
-          inspection: enabled
-        - name: MICROSOFT.EDGEMARKETPLACE
-          inspection: enabled
-        - name: MICROSOFT.EDGEORDER
-          inspection: enabled
-        - name: MICROSOFT.EDGEORDERPARTNER
-          inspection: enabled
-        - name: MICROSOFT.EDUCATION
-          inspection: enabled
-        - name: MICROSOFT.ELASTIC
-          inspection: enabled
-        - name: MICROSOFT.ELASTICSAN
-          inspection: enabled
-        - name: MICROSOFT.ENGAGEMENTFABRIC
-          inspection: enabled
-        - name: MICROSOFT.ENTERPRISEKNOWLEDGEGRAPH
-          inspection: enabled
-        - name: MICROSOFT.EVENTGRID
-          inspection: enabled
-        - name: MICROSOFT.EVENTHUB
-          inspection: enabled
-        - name: MICROSOFT.EXTENDEDLOCATION
-          inspection: enabled
-        - name: MICROSOFT.FABRIC.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.FEATURES
-          inspection: enabled
-        - name: MICROSOFT.FLUIDRELAY
-          inspection: enabled
-        - name: MICROSOFT.GALLERY.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.GRAPHSERVICES
-          inspection: enabled
-        - name: MICROSOFT.GUESTCONFIGURATION
-          inspection: enabled
-        - name: MICROSOFT.HANAONAZURE
-          inspection: enabled
-        - name: MICROSOFT.HARDWARESECURITYMODULES
-          inspection: enabled
-        - name: MICROSOFT.HDINSIGHT
-          inspection: enabled
-        - name: MICROSOFT.HEALTHBOT
-          inspection: enabled
-        - name: MICROSOFT.HEALTHCAREAPIS
-          inspection: enabled
-        - name: MICROSOFT.HELP
-          inspection: enabled
-        - name: MICROSOFT.HYBRIDCLOUD
-          inspection: enabled
-        - name: MICROSOFT.HYBRIDCOMPUTE
-          inspection: enabled
-        - name: MICROSOFT.HYBRIDCONNECTIVITY
-          inspection: enabled
-        - name: MICROSOFT.HYBRIDCONTAINERSERVICE
-          inspection: enabled
-        - name: MICROSOFT.HYBRIDDATA
-          inspection: enabled
-        - name: MICROSOFT.HYBRIDNETWORK
-          inspection: enabled
-        - name: MICROSOFT.IMPORTEXPORT
-          inspection: enabled
-        - name: MICROSOFT.INFRASTRUCTUREINSIGHTS.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.INSIGHTS
-          inspection: enabled
-        - name: MICROSOFT.INTEGRATIONSPACES
-          inspection: enabled
-        - name: MICROSOFT.INTUNE
-          inspection: enabled
-        - name: MICROSOFT.IOTCENTRAL
-          inspection: enabled
-        - name: MICROSOFT.IOTFIRMWAREDEFENSE
-          inspection: enabled
-        - name: MICROSOFT.IOTOPERATIONSDATAPROCESSOR
-          inspection: enabled
-        - name: MICROSOFT.IOTOPERATIONSMQ
-          inspection: enabled
-        - name: MICROSOFT.IOTOPERATIONSORCHESTRATOR
-          inspection: enabled
-        - name: MICROSOFT.IOTSECURITY
-          inspection: enabled
-        - name: MICROSOFT.KEYVAULT
-          inspection: enabled
-        - name: MICROSOFT.KEYVAULT.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.KUBERNETES
-          inspection: enabled
-        - name: MICROSOFT.KUBERNETESCONFIGURATION
-          inspection: enabled
-        - name: MICROSOFT.KUSTO
-          inspection: enabled
-        - name: MICROSOFT.LABSERVICES
-          inspection: enabled
-        - name: MICROSOFT.LOADTESTSERVICE
-          inspection: enabled
-        - name: MICROSOFT.LOGIC
-          inspection: enabled
-        - name: MICROSOFT.LOGZ
-          inspection: enabled
-        - name: MICROSOFT.M365SECURITYANDCOMPLIANCE
-          inspection: enabled
-        - name: MICROSOFT.MACHINELEARNING
-          inspection: enabled
-        - name: MICROSOFT.MACHINELEARNINGCOMPUTE
-          inspection: enabled
-        - name: MICROSOFT.MACHINELEARNINGEXPERIMENTATION
-          inspection: enabled
-        - name: MICROSOFT.MACHINELEARNINGSERVICES
-          inspection: enabled
-        - name: MICROSOFT.MAINTENANCE
-          inspection: enabled
-        - name: MICROSOFT.MANAGEDIDENTITY
-          inspection: enabled
-        - name: MICROSOFT.MANAGEDNETWORK
-          inspection: enabled
-        - name: MICROSOFT.MANAGEDNETWORKFABRIC
-          inspection: enabled
-        - name: MICROSOFT.MANAGEDSERVICES
-          inspection: enabled
-        - name: MICROSOFT.MANAGEMENT
-          inspection: enabled
-        - name: MICROSOFT.MANAGEMENTPARTNER
-          inspection: enabled
-        - name: MICROSOFT.MAPS
-          inspection: enabled
-        - name: MICROSOFT.MARKETPLACE
-          inspection: enabled
-        - name: MICROSOFT.MARKETPLACENOTIFICATIONS
-          inspection: enabled
-        - name: MICROSOFT.MARKETPLACEORDERING
-          inspection: enabled
-        - name: MICROSOFT.MEDIA
-          inspection: enabled
-        - name: MICROSOFT.MIGRATE
-          inspection: enabled
-        - name: MICROSOFT.MIXEDREALITY
-          inspection: enabled
-        - name: MICROSOFT.MOBILENETWORK
-          inspection: enabled
-        - name: MICROSOFT.MOBILEPACKETCORE
-          inspection: enabled
-        - name: MICROSOFT.MONITOR
-          inspection: enabled
-        - name: MICROSOFT.NETAPP
-          inspection: enabled
-        - name: MICROSOFT.NETWORK
-          inspection: enabled
-        - name: MICROSOFT.NETWORK.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.NETWORKANALYTICS
-          inspection: enabled
-        - name: MICROSOFT.NETWORKCLOUD
-          inspection: enabled
-        - name: MICROSOFT.NETWORKFUNCTION
-          inspection: enabled
-        - name: MICROSOFT.NOTIFICATIONHUBS
-          inspection: enabled
-        - name: MICROSOFT.OFFAZURE
-          inspection: enabled
-        - name: MICROSOFT.OFFAZURESPRINGBOOT
-          inspection: enabled
-        - name: MICROSOFT.OPENENERGYPLATFORM
-          inspection: enabled
-        - name: MICROSOFT.OPERATIONALINSIGHTS
-          inspection: enabled
-        - name: MICROSOFT.OPERATIONSMANAGEMENT
-          inspection: enabled
-        - name: MICROSOFT.ORBITAL
-          inspection: enabled
-        - name: MICROSOFT.PEERING
-          inspection: enabled
-        - name: MICROSOFT.POLICYINSIGHTS
-          inspection: enabled
-        - name: MICROSOFT.PORTAL
-          inspection: enabled
-        - name: MICROSOFT.PORTALSERVICES
-          inspection: enabled
-        - name: MICROSOFT.POWERBI
-          inspection: enabled
-        - name: MICROSOFT.POWERBIDEDICATED
-          inspection: enabled
-        - name: MICROSOFT.POWERPLATFORM
-          inspection: enabled
-        - name: MICROSOFT.PROFESSIONALSERVICE
-          inspection: enabled
-        - name: MICROSOFT.PROVIDERHUB
-          inspection: enabled
-        - name: MICROSOFT.PURVIEW
-          inspection: enabled
-        - name: MICROSOFT.QUANTUM
-          inspection: enabled
-        - name: MICROSOFT.QUOTA
-          inspection: enabled
-        - name: MICROSOFT.RECOMMENDATIONSSERVICE
-          inspection: enabled
-        - name: MICROSOFT.RECOVERYSERVICES
-          inspection: enabled
-        - name: MICROSOFT.REDHATOPENSHIFT
-          inspection: enabled
-        - name: MICROSOFT.RELAY
-          inspection: enabled
-        - name: MICROSOFT.RESOURCECONNECTOR
-          inspection: enabled
-        - name: MICROSOFT.RESOURCEGRAPH
-          inspection: enabled
-        - name: MICROSOFT.RESOURCEHEALTH
-          inspection: enabled
-        - name: MICROSOFT.RESOURCES
-          inspection: enabled
-        - name: MICROSOFT.SAAS
-          inspection: enabled
-        - name: MICROSOFT.SCHEDULER
-          inspection: enabled
-        - name: MICROSOFT.SCOM
-          inspection: enabled
-        - name: MICROSOFT.SCVMM
-          inspection: enabled
-        - name: MICROSOFT.SEARCH
-          inspection: enabled
-        - name: MICROSOFT.SECURITY
-          inspection: enabled
-        - name: MICROSOFT.SECURITYANDCOMPLIANCE
-          inspection: enabled
-        - name: MICROSOFT.SECURITYDEVOPS
-          inspection: enabled
-        - name: MICROSOFT.SECURITYINSIGHTS
-          inspection: enabled
-        - name: MICROSOFT.SERIALCONSOLE
-          inspection: enabled
-        - name: MICROSOFT.SERVICEBUS
-          inspection: enabled
-        - name: MICROSOFT.SERVICEFABRIC
-          inspection: enabled
-        - name: MICROSOFT.SERVICEFABRICMESH
-          inspection: enabled
-        - name: MICROSOFT.SERVICELINKER
-          inspection: enabled
-        - name: MICROSOFT.SERVICENETWORKING
-          inspection: enabled
-        - name: MICROSOFT.SIGNALRSERVICE
-          inspection: enabled
-        - name: MICROSOFT.SOFTWAREPLAN
-          inspection: enabled
-        - name: MICROSOFT.SOLUTIONS
-          inspection: enabled
-        - name: MICROSOFT.SQL
-          inspection: enabled
-        - name: MICROSOFT.SQLVIRTUALMACHINE
-          inspection: enabled
-        - name: MICROSOFT.STORAGE
-          inspection: enabled
-        - name: MICROSOFT.STORAGE.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.STORAGEACTIONS
-          inspection: enabled
-        - name: MICROSOFT.STORAGECACHE
-          inspection: enabled
-        - name: MICROSOFT.STORAGEMOVER
-          inspection: enabled
-        - name: MICROSOFT.STORAGEPOOL
-          inspection: enabled
-        - name: MICROSOFT.STORAGESYNC
-          inspection: enabled
-        - name: MICROSOFT.STORAGETASKS
-          inspection: enabled
-        - name: MICROSOFT.STORSIMPLE
-          inspection: enabled
-        - name: MICROSOFT.STREAMANALYTICS
-          inspection: enabled
-        - name: MICROSOFT.SUBSCRIPTION
-          inspection: enabled
-        - name: MICROSOFT.SUBSCRIPTIONS
-          inspection: enabled
-        - name: MICROSOFT.SUBSCRIPTIONS.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.SUPPORT
-          inspection: enabled
-        - name: MICROSOFT.SYNAPSE
-          inspection: enabled
-        - name: MICROSOFT.SYNTEX
-          inspection: enabled
-        - name: MICROSOFT.TESTBASE
-          inspection: enabled
-        - name: MICROSOFT.TIMESERIESINSIGHTS
-          inspection: enabled
-        - name: MICROSOFT.UPDATE.ADMIN
-          inspection: enabled
-        - name: MICROSOFT.VIDEOINDEXER
-          inspection: enabled
-        - name: MICROSOFT.VIRTUALMACHINEIMAGES
-          inspection: enabled
-        - name: MICROSOFT.VISUALSTUDIO
-          inspection: enabled
-        - name: MICROSOFT.VMWARECLOUDSIMPLE
-          inspection: enabled
-        - name: MICROSOFT.VOICESERVICES
-          inspection: enabled
-        - name: MICROSOFT.WEB
-          inspection: enabled
-        - name: MICROSOFT.WINDOWSESU
-          inspection: enabled
-        - name: MICROSOFT.WINDOWSIOT
-          inspection: enabled
-        - name: MICROSOFT.WORKLOADMONITOR
-          inspection: enabled
-        - name: MICROSOFT.WORKLOADS
-          inspection: enabled
-        - name: NEWRELIC.OBSERVABILITY
-          inspection: enabled
-        - name: NGINX.NGINXPLUS
-          inspection: enabled
-        - name: PALOALTONETWORKS.CLOUDNGFW
-          inspection: enabled
-        - name: QUMULO.STORAGE
-          inspection: enabled
+        ASTRONOMER.ASTRO:
+            inspection: enabled
+        DYNATRACE.OBSERVABILITY:
+            inspection: enabled
+        MICROSOFT.AAD:
+            inspection: enabled
+        MICROSOFT.AADIAM:
+            inspection: enabled
+        MICROSOFT.ADDONS:
+            inspection: enabled
+        MICROSOFT.ADHYBRIDHEALTHSERVICE:
+            inspection: enabled
+        MICROSOFT.ADVISOR:
+            inspection: enabled
+        MICROSOFT.AGFOODPLATFORM:
+            inspection: enabled
+        MICROSOFT.ALERTSMANAGEMENT:
+            inspection: enabled
+        MICROSOFT.ANALYSISSERVICES:
+            inspection: enabled
+        MICROSOFT.APICENTER:
+            inspection: enabled
+        MICROSOFT.APIMANAGEMENT:
+            inspection: enabled
+        MICROSOFT.APP:
+            inspection: enabled
+        MICROSOFT.APPCOMPLIANCEAUTOMATION:
+            inspection: enabled
+        MICROSOFT.APPCONFIGURATION:
+            inspection: enabled
+        MICROSOFT.APPPLATFORM:
+            inspection: enabled
+        MICROSOFT.ATTESTATION:
+            inspection: enabled
+        MICROSOFT.AUTHORIZATION:
+            inspection: enabled
+        MICROSOFT.AUTOMANAGE:
+            inspection: enabled
+        MICROSOFT.AUTOMATION:
+            inspection: enabled
+        MICROSOFT.AUTONOMOUSDEVELOPMENTPLATFORM:
+            inspection: enabled
+        MICROSOFT.AVS:
+            inspection: enabled
+        MICROSOFT.AZUREACTIVEDIRECTORY:
+            inspection: enabled
+        MICROSOFT.AZUREARCDATA:
+            inspection: enabled
+        MICROSOFT.AZUREBRIDGE.ADMIN:
+            inspection: enabled
+        MICROSOFT.AZUREDATA:
+            inspection: enabled
+        MICROSOFT.AZUREDATATRANSFER:
+            inspection: disabled
+        MICROSOFT.AZURELARGEINSTANCE:
+            inspection: enabled
+        MICROSOFT.AZUREPLAYWRIGHTSERVICE:
+            inspection: enabled
+        MICROSOFT.AZURESPHERE:
+            inspection: enabled
+        MICROSOFT.AZURESTACK:
+            inspection: enabled
+        MICROSOFT.AZURESTACKHCI:
+            inspection: enabled
+        MICROSOFT.BACKUP.ADMIN:
+            inspection: enabled
+        MICROSOFT.BAREMETALINFRASTRUCTURE:
+            inspection: enabled
+        MICROSOFT.BATCH:
+            inspection: enabled
+        MICROSOFT.BILLING:
+            inspection: enabled
+        MICROSOFT.BILLINGBENEFITS:
+            inspection: enabled
+        MICROSOFT.BLOCKCHAIN:
+            inspection: enabled
+        MICROSOFT.BLUEPRINT:
+            inspection: enabled
+        MICROSOFT.BOTSERVICE:
+            inspection: enabled
+        MICROSOFT.CACHE:
+            inspection: enabled
+        MICROSOFT.CAPACITY:
+            inspection: enabled
+        MICROSOFT.CARBON:
+            inspection: disabled
+        MICROSOFT.CDN:
+            inspection: enabled
+        MICROSOFT.CERTIFICATEREGISTRATION:
+            inspection: enabled
+        MICROSOFT.CHANGEANALYSIS:
+            inspection: enabled
+        MICROSOFT.CHAOS:
+            inspection: enabled
+        MICROSOFT.CODESIGNING:
+            inspection: disabled
+        MICROSOFT.COGNITIVESERVICES:
+            inspection: enabled
+        MICROSOFT.COMMERCE:
+            inspection: enabled
+        MICROSOFT.COMMERCE.ADMIN:
+            inspection: enabled
+        MICROSOFT.COMMUNICATION:
+            inspection: enabled
+        MICROSOFT.COMMUNITY:
+            inspection: enabled
+        MICROSOFT.COMPUTE:
+            inspection: enabled
+        MICROSOFT.COMPUTE.ADMIN:
+            inspection: enabled
+        MICROSOFT.CONFIDENTIALLEDGER:
+            inspection: enabled
+        MICROSOFT.CONFLUENT:
+            inspection: enabled
+        MICROSOFT.CONNECTEDVMWAREVSPHERE:
+            inspection: enabled
+        MICROSOFT.CONSUMPTION:
+            inspection: enabled
+        MICROSOFT.CONTAINERINSTANCE:
+            inspection: enabled
+        MICROSOFT.CONTAINERREGISTRY:
+            inspection: enabled
+        MICROSOFT.CONTAINERREGISTRY.ADMIN:
+            inspection: enabled
+        MICROSOFT.CONTAINERSERVICE:
+            inspection: enabled
+        MICROSOFT.CONTAINERSERVICE.ADMIN:
+            inspection: enabled
+        MICROSOFT.CONTAINERSTORAGE:
+            inspection: enabled
+        MICROSOFT.COSTMANAGEMENT:
+            inspection: enabled
+        MICROSOFT.CUSTOMERINSIGHTS:
+            inspection: enabled
+        MICROSOFT.CUSTOMERLOCKBOX:
+            inspection: enabled
+        MICROSOFT.CUSTOMPROVIDERS:
+            inspection: enabled
+        MICROSOFT.DASHBOARD:
+            inspection: enabled
+        MICROSOFT.DATABASEWATCHER:
+            inspection: disabled
+        MICROSOFT.DATABOX:
+            inspection: enabled
+        MICROSOFT.DATABOXEDGE:
+            inspection: enabled
+        MICROSOFT.DATABRICKS:
+            inspection: enabled
+        MICROSOFT.DATACATALOG:
+            inspection: enabled
+        MICROSOFT.DATADOG:
+            inspection: enabled
+        MICROSOFT.DATAFACTORY:
+            inspection: enabled
+        MICROSOFT.DATALAKEANALYTICS:
+            inspection: enabled
+        MICROSOFT.DATALAKESTORE:
+            inspection: enabled
+        MICROSOFT.DATAMIGRATION:
+            inspection: enabled
+        MICROSOFT.DATAPROTECTION:
+            inspection: enabled
+        MICROSOFT.DATAREPLICATION:
+            inspection: enabled
+        MICROSOFT.DATASHARE:
+            inspection: enabled
+        MICROSOFT.DBFORMARIADB:
+            inspection: enabled
+        MICROSOFT.DBFORMYSQL:
+            inspection: enabled
+        MICROSOFT.DBFORPOSTGRESQL:
+            inspection: enabled
+        MICROSOFT.DELEGATEDNETWORK:
+            inspection: enabled
+        MICROSOFT.DEPLOYMENT.ADMIN:
+            inspection: enabled
+        MICROSOFT.DEPLOYMENTMANAGER:
+            inspection: enabled
+        MICROSOFT.DESKTOPVIRTUALIZATION:
+            inspection: enabled
+        MICROSOFT.DEVCENTER:
+            inspection: enabled
+        MICROSOFT.DEVHUB:
+            inspection: enabled
+        MICROSOFT.DEVICEREGISTRY:
+            inspection: enabled
+        MICROSOFT.DEVICES:
+            inspection: enabled
+        MICROSOFT.DEVICEUPDATE:
+            inspection: enabled
+        MICROSOFT.DEVOPS:
+            inspection: enabled
+        MICROSOFT.DEVOPSINFRASTRUCTURE:
+            inspection: enabled
+        MICROSOFT.DEVSPACES:
+            inspection: enabled
+        MICROSOFT.DEVTESTLAB:
+            inspection: enabled
+        MICROSOFT.DIGITALTWINS:
+            inspection: enabled
+        MICROSOFT.DOCUMENTDB:
+            inspection: enabled
+        MICROSOFT.DOMAINREGISTRATION:
+            inspection: enabled
+        MICROSOFT.DYNAMICS365FRAUDPROTECTION:
+            inspection: enabled
+        MICROSOFT.DYNAMICSTELEMETRY:
+            inspection: enabled
+        MICROSOFT.EASM:
+            inspection: enabled
+        MICROSOFT.EDGEMARKETPLACE:
+            inspection: enabled
+        MICROSOFT.EDGEORDER:
+            inspection: enabled
+        MICROSOFT.EDGEORDERPARTNER:
+            inspection: enabled
+        MICROSOFT.EDGEZONES:
+            inspection: disabled
+        MICROSOFT.EDUCATION:
+            inspection: enabled
+        MICROSOFT.ELASTIC:
+            inspection: enabled
+        MICROSOFT.ELASTICSAN:
+            inspection: enabled
+        MICROSOFT.ENGAGEMENTFABRIC:
+            inspection: enabled
+        MICROSOFT.ENTERPRISEKNOWLEDGEGRAPH:
+            inspection: enabled
+        MICROSOFT.EVENTGRID:
+            inspection: enabled
+        MICROSOFT.EVENTHUB:
+            inspection: enabled
+        MICROSOFT.EXTENDEDLOCATION:
+            inspection: enabled
+        MICROSOFT.FABRIC.ADMIN:
+            inspection: enabled
+        MICROSOFT.FEATURES:
+            inspection: enabled
+        MICROSOFT.FLUIDRELAY:
+            inspection: enabled
+        MICROSOFT.GALLERY.ADMIN:
+            inspection: enabled
+        MICROSOFT.GRAPHSERVICES:
+            inspection: enabled
+        MICROSOFT.GUESTCONFIGURATION:
+            inspection: enabled
+        MICROSOFT.HANAONAZURE:
+            inspection: enabled
+        MICROSOFT.HARDWARESECURITYMODULES:
+            inspection: enabled
+        MICROSOFT.HDINSIGHT:
+            inspection: enabled
+        MICROSOFT.HEALTHBOT:
+            inspection: enabled
+        MICROSOFT.HEALTHCAREAPIS:
+            inspection: enabled
+        MICROSOFT.HELP:
+            inspection: enabled
+        MICROSOFT.HYBRIDCLOUD:
+            inspection: enabled
+        MICROSOFT.HYBRIDCOMPUTE:
+            inspection: enabled
+        MICROSOFT.HYBRIDCONNECTIVITY:
+            inspection: enabled
+        MICROSOFT.HYBRIDCONTAINERSERVICE:
+            inspection: enabled
+        MICROSOFT.HYBRIDDATA:
+            inspection: enabled
+        MICROSOFT.HYBRIDNETWORK:
+            inspection: enabled
+        MICROSOFT.IMPORTEXPORT:
+            inspection: enabled
+        MICROSOFT.INFRASTRUCTUREINSIGHTS.ADMIN:
+            inspection: enabled
+        MICROSOFT.INSIGHTS:
+            inspection: enabled
+        MICROSOFT.INTEGRATIONSPACES:
+            inspection: enabled
+        MICROSOFT.INTUNE:
+            inspection: enabled
+        MICROSOFT.IOTCENTRAL:
+            inspection: enabled
+        MICROSOFT.IOTFIRMWAREDEFENSE:
+            inspection: enabled
+        MICROSOFT.IOTOPERATIONSDATAPROCESSOR:
+            inspection: enabled
+        MICROSOFT.IOTOPERATIONSMQ:
+            inspection: enabled
+        MICROSOFT.IOTOPERATIONSORCHESTRATOR:
+            inspection: enabled
+        MICROSOFT.IOTSECURITY:
+            inspection: enabled
+        MICROSOFT.KEYVAULT:
+            inspection: enabled
+        MICROSOFT.KEYVAULT.ADMIN:
+            inspection: enabled
+        MICROSOFT.KUBERNETES:
+            inspection: enabled
+        MICROSOFT.KUBERNETESCONFIGURATION:
+            inspection: enabled
+        MICROSOFT.KUBERNETESRUNTIME:
+            inspection: disabled
+        MICROSOFT.KUSTO:
+            inspection: enabled
+        MICROSOFT.LABSERVICES:
+            inspection: enabled
+        MICROSOFT.LOADTESTSERVICE:
+            inspection: enabled
+        MICROSOFT.LOGIC:
+            inspection: enabled
+        MICROSOFT.LOGZ:
+            inspection: enabled
+        MICROSOFT.M365SECURITYANDCOMPLIANCE:
+            inspection: enabled
+        MICROSOFT.MACHINELEARNING:
+            inspection: enabled
+        MICROSOFT.MACHINELEARNINGCOMPUTE:
+            inspection: enabled
+        MICROSOFT.MACHINELEARNINGEXPERIMENTATION:
+            inspection: enabled
+        MICROSOFT.MACHINELEARNINGSERVICES:
+            inspection: enabled
+        MICROSOFT.MAINTENANCE:
+            inspection: enabled
+        MICROSOFT.MANAGEDIDENTITY:
+            inspection: enabled
+        MICROSOFT.MANAGEDNETWORK:
+            inspection: enabled
+        MICROSOFT.MANAGEDNETWORKFABRIC:
+            inspection: enabled
+        MICROSOFT.MANAGEDSERVICES:
+            inspection: enabled
+        MICROSOFT.MANAGEMENT:
+            inspection: enabled
+        MICROSOFT.MANAGEMENTPARTNER:
+            inspection: enabled
+        MICROSOFT.MAPS:
+            inspection: enabled
+        MICROSOFT.MARKETPLACE:
+            inspection: enabled
+        MICROSOFT.MARKETPLACENOTIFICATIONS:
+            inspection: enabled
+        MICROSOFT.MARKETPLACEORDERING:
+            inspection: enabled
+        MICROSOFT.MEDIA:
+            inspection: enabled
+        MICROSOFT.MIGRATE:
+            inspection: enabled
+        MICROSOFT.MIXEDREALITY:
+            inspection: enabled
+        MICROSOFT.MOBILENETWORK:
+            inspection: enabled
+        MICROSOFT.MOBILEPACKETCORE:
+            inspection: enabled
+        MICROSOFT.MONITOR:
+            inspection: enabled
+        MICROSOFT.NETAPP:
+            inspection: enabled
+        MICROSOFT.NETWORK:
+            inspection: enabled
+        MICROSOFT.NETWORK.ADMIN:
+            inspection: enabled
+        MICROSOFT.NETWORKANALYTICS:
+            inspection: enabled
+        MICROSOFT.NETWORKCLOUD:
+            inspection: enabled
+        MICROSOFT.NETWORKFUNCTION:
+            inspection: enabled
+        MICROSOFT.NOTIFICATIONHUBS:
+            inspection: enabled
+        MICROSOFT.OFFAZURE:
+            inspection: enabled
+        MICROSOFT.OFFAZURESPRINGBOOT:
+            inspection: enabled
+        MICROSOFT.OPENENERGYPLATFORM:
+            inspection: enabled
+        MICROSOFT.OPERATIONALINSIGHTS:
+            inspection: enabled
+        MICROSOFT.OPERATIONSMANAGEMENT:
+            inspection: enabled
+        MICROSOFT.ORBITAL:
+            inspection: enabled
+        MICROSOFT.PEERING:
+            inspection: enabled
+        MICROSOFT.POLICYINSIGHTS:
+            inspection: enabled
+        MICROSOFT.PORTAL:
+            inspection: enabled
+        MICROSOFT.PORTALSERVICES:
+            inspection: enabled
+        MICROSOFT.POWERBI:
+            inspection: enabled
+        MICROSOFT.POWERBIDEDICATED:
+            inspection: enabled
+        MICROSOFT.POWERPLATFORM:
+            inspection: enabled
+        MICROSOFT.PROFESSIONALSERVICE:
+            inspection: enabled
+        MICROSOFT.PROVIDERHUB:
+            inspection: enabled
+        MICROSOFT.PURVIEW:
+            inspection: enabled
+        MICROSOFT.QUANTUM:
+            inspection: enabled
+        MICROSOFT.QUOTA:
+            inspection: enabled
+        MICROSOFT.RECOMMENDATIONSSERVICE:
+            inspection: enabled
+        MICROSOFT.RECOVERYSERVICES:
+            inspection: enabled
+        MICROSOFT.REDHATOPENSHIFT:
+            inspection: enabled
+        MICROSOFT.RELAY:
+            inspection: enabled
+        MICROSOFT.RESOURCECONNECTOR:
+            inspection: enabled
+        MICROSOFT.RESOURCEGRAPH:
+            inspection: enabled
+        MICROSOFT.RESOURCEHEALTH:
+            inspection: enabled
+        MICROSOFT.RESOURCES:
+            inspection: enabled
+        MICROSOFT.SAAS:
+            inspection: enabled
+        MICROSOFT.SCHEDULER:
+            inspection: enabled
+        MICROSOFT.SCOM:
+            inspection: enabled
+        MICROSOFT.SCVMM:
+            inspection: enabled
+        MICROSOFT.SEARCH:
+            inspection: enabled
+        MICROSOFT.SECURITY:
+            inspection: enabled
+        MICROSOFT.SECURITYANDCOMPLIANCE:
+            inspection: enabled
+        MICROSOFT.SECURITYDEVOPS:
+            inspection: enabled
+        MICROSOFT.SECURITYINSIGHTS:
+            inspection: enabled
+        MICROSOFT.SERIALCONSOLE:
+            inspection: enabled
+        MICROSOFT.SERVICEBUS:
+            inspection: enabled
+        MICROSOFT.SERVICEFABRIC:
+            inspection: enabled
+        MICROSOFT.SERVICEFABRICMESH:
+            inspection: enabled
+        MICROSOFT.SERVICELINKER:
+            inspection: enabled
+        MICROSOFT.SERVICENETWORKING:
+            inspection: enabled
+        MICROSOFT.SIGNALRSERVICE:
+            inspection: enabled
+        MICROSOFT.SOFTWAREPLAN:
+            inspection: enabled
+        MICROSOFT.SOLUTIONS:
+            inspection: enabled
+        MICROSOFT.SQL:
+            inspection: enabled
+        MICROSOFT.SQLVIRTUALMACHINE:
+            inspection: enabled
+        MICROSOFT.STANDBYPOOL:
+            inspection: disabled
+        MICROSOFT.STORAGE:
+            inspection: enabled
+        MICROSOFT.STORAGE.ADMIN:
+            inspection: enabled
+        MICROSOFT.STORAGEACTIONS:
+            inspection: enabled
+        MICROSOFT.STORAGECACHE:
+            inspection: enabled
+        MICROSOFT.STORAGEMOVER:
+            inspection: enabled
+        MICROSOFT.STORAGEPOOL:
+            inspection: enabled
+        MICROSOFT.STORAGESYNC:
+            inspection: enabled
+        MICROSOFT.STORAGETASKS:
+            inspection: enabled
+        MICROSOFT.STORSIMPLE:
+            inspection: enabled
+        MICROSOFT.STREAMANALYTICS:
+            inspection: enabled
+        MICROSOFT.SUBSCRIPTION:
+            inspection: enabled
+        MICROSOFT.SUBSCRIPTIONS:
+            inspection: enabled
+        MICROSOFT.SUBSCRIPTIONS.ADMIN:
+            inspection: enabled
+        MICROSOFT.SUPPORT:
+            inspection: enabled
+        MICROSOFT.SYNAPSE:
+            inspection: enabled
+        MICROSOFT.SYNTEX:
+            inspection: enabled
+        MICROSOFT.TESTBASE:
+            inspection: enabled
+        MICROSOFT.TIMESERIESINSIGHTS:
+            inspection: enabled
+        MICROSOFT.UPDATE.ADMIN:
+            inspection: enabled
+        MICROSOFT.VIDEOINDEXER:
+            inspection: enabled
+        MICROSOFT.VIRTUALMACHINEIMAGES:
+            inspection: enabled
+        MICROSOFT.VISUALSTUDIO:
+            inspection: enabled
+        MICROSOFT.VMWARECLOUDSIMPLE:
+            inspection: enabled
+        MICROSOFT.VOICESERVICES:
+            inspection: enabled
+        MICROSOFT.WEB:
+            inspection: enabled
+        MICROSOFT.WINDOWSESU:
+            inspection: enabled
+        MICROSOFT.WINDOWSIOT:
+            inspection: enabled
+        MICROSOFT.WORKLOADMONITOR:
+            inspection: enabled
+        MICROSOFT.WORKLOADS:
+            inspection: enabled
+        NEWRELIC.OBSERVABILITY:
+            inspection: enabled
+        NGINX.NGINXPLUS:
+            inspection: enabled
+        PALOALTONETWORKS.CLOUDNGFW:
+            inspection: enabled
+        QUMULO.STORAGE:
+            inspection: enabled
 

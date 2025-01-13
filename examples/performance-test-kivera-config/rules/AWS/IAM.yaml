@@ -1,11 +1,11 @@
 ---
 AWS-IAM-CreateRole-1:
-    description: IAM-CreateRole-allow
+    description: Restrict IAM account
     provider: AWS
     service: IAM
     actions:
         - CreateRole
-    policy: valid { json.unmarshal(input.Body.AssumeRolePolicyDocument).Statement[_].Principal.AWS == approved_aws_data_boundary[_] }
+    policy: "valid {\n    json.unmarshal(input.Body.AssumeRolePolicyDocument).Statement[_].Principal.AWS == approved_aws_data_boundary[_] \n}\n"
     advanced:
         paths:
             - '*'
@@ -17,14 +17,16 @@ AWS-IAM-CreateRole-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
 
 AWS-IAM-ListUsers-1:
-    description: IAM-ListUsers-allow
+    description: Allow ListUsers
     provider: AWS
     service: IAM
     actions:
         - ListUsers
-    policy: valid = true
+    policy: |
+        valid = true
     advanced:
         paths:
             - '*'
@@ -36,4 +38,30 @@ AWS-IAM-ListUsers-1:
     log-request-body: true
     enable-cfn-scan: false
     tags: {}
+    compliance-mappings: {}
+
+AWS-IAM-ListUsers-2:
+    description: kivera.cahce.get allow
+    provider: AWS
+    service: IAM
+    actions:
+        - ListAccountAliases
+    policy: |-
+        valid = true
+        # valid {
+        #   value = kivera.cache.get("kiveradata:perftest:iam")
+        #   value == ""
+        # }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
 
