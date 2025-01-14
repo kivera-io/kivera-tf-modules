@@ -98,8 +98,9 @@ variable "locust_spawn_rate" {
 }
 
 variable "locust_run_time" {
-  description = "Duration of the Locust test"
-  default     = "10m"
+  description = "Duration of the Locust test (minutes)"
+  type        = number
+  default     = 10
 }
 
 variable "user_wait_min" {

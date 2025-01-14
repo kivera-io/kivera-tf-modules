@@ -56,7 +56,7 @@ output "leader_password" {
 
 output "locust_run_time" {
   value       = var.locust_run_time
-  description = "The locust test run time."
+  description = "The locust test run time in minutes."
 }
 
 output "s3_bucket" {

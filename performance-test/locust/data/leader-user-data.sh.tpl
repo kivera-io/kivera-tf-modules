@@ -62,7 +62,7 @@ nohup locust \
     --web-auth ${leader_username}:${leader_password} \
     --users=${locust_max_users} \
     --spawn-rate=${locust_spawn_rate} \
-    --run-time=${locust_run_time} \
+    --run-time=${locust_run_time}m \
     --expect-workers=${nodes_count} \
     --expect-workers-max-wait 500 \
     --master > locust-leader.out 2>&1 &
