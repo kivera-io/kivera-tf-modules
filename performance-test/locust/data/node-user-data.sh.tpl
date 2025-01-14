@@ -78,7 +78,8 @@ fallocate -l 50M test.data
 export S3_TEST_BUCKET=${s3_bucket}
 export S3_TEST_PATH=${s3_bucket_key}${deployment_id}
 
-test_file=$([[ ${proxy_transparent_enabled} == true ]] && echo "test_transparent.py" || echo "test.py")
+# test_file=$([[ ${proxy_transparent_enabled} == true ]] && echo "test_transparent.py" || echo "test.py")
+test_file=$([[ ${proxy_transparent_enabled} == true ]] && echo "test_transparent.py" || echo "test_throughput.py")
 
 nohup locust \
     -f $test_file \
