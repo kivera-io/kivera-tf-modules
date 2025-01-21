@@ -1,6 +1,9 @@
 import secrets
 import os
 import time
+import random
+import threading
+import concurrent.futures
 import boto3
 import botocore
 import ddtrace
@@ -9,14 +12,26 @@ from locust import User, TaskSet, task, between, events
 from ddtrace.propagation.http import HTTPPropagator
 import requests
 
+class TimeoutException(Exception):
+    pass
+
+USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
+USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
+MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '10'))
+DEFAULT_TEST_TIMEOUT = int(os.getenv('DEFAULT_TEST_TIMEOUT', '60'))
+
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
 
 client_config = Config(
-   retries = {
-      'max_attempts': 1,
-      'mode': 'standard'
-   }
+    connect_timeout = 10,
+    read_timeout = 30,
+    tcp_keepalive = True,
+    max_pool_connections = MAX_CLIENT_REUSE,
+    retries = {
+        'total_max_attempts': 1,
+        'mode': 'standard'
+    }
 )
 
 aws_regions = [
@@ -102,9 +117,6 @@ custom_responses = {
 
 boto3.setup_default_session(region_name='ap-southeast-2')
 
-USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', 4))
-USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', 6))
-
 def add_trace_headers(request, **kwargs):
     span = ddtrace.tracer.current_span()
     span.service = "locust"
@@ -113,12 +125,41 @@ def add_trace_headers(request, **kwargs):
     for h, v in headers.items():
         request.headers.add_header(h, v)
 
+all_clients = {}
+all_clients_lock = threading.Lock()
+
 def get_client(service, region=""):
     if region == "":
         region = secrets.choice(aws_regions)
-    client = boto3.client(service, region_name=region, config=client_config)
-    client.meta.events.register_first('before-sign.*.*', add_trace_headers)
-    return client
+
+    with all_clients_lock:
+        if service not in all_clients:
+            all_clients[service] = {}
+        if region not in all_clients[service]:
+            all_clients[service][region] = {}
+
+        if all_clients[service][region].get('count', 0) > 0:
+            all_clients[service][region]['count'] -= 1
+            return all_clients[service][region]['client']
+
+        client = boto3.client(service, region_name=region, config=client_config)
+        client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+
+        reuse = MAX_CLIENT_REUSE
+        if reuse > 0:
+            reuse = random.randrange(MAX_CLIENT_REUSE)
+
+        all_clients[service][region] = {
+            'client': client,
+            'count': reuse,
+        }
+        return client
+
+def action_name(parts):
+    action = ""
+    for p in parts:
+        action += p.title()
+    return action
 
 def result_decorator(method):
     def decorator(self):
@@ -135,6 +176,15 @@ def result_decorator(method):
         custom_resp = False
         if method_parts[idx-1] == "customresponse":
             custom_resp = True
+            idx = idx-1
+
+        provider = method_parts[0].upper()
+        if provider == "NONCLOUD":
+            should_contain = "Host:"
+        else:
+            service = method_parts[1].upper()
+            action = action_name(method_parts[2:idx])
+            should_contain = f"Provider:{provider}, Service:{service}, Action:{action}"
 
         if validity == 'allow':
             should_block = False
@@ -148,18 +198,23 @@ def result_decorator(method):
 
         start_time = time.time()
         try:
-            method(self)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(method, self)
+                future.result(timeout=DEFAULT_TEST_TIMEOUT)
+
+        except concurrent.futures.TimeoutError as e:
+            raise TimeoutException(f"Timeout ({DEFAULT_TEST_TIMEOUT}s) exceeded") from e
 
         except botocore.exceptions.ClientError as error:
             # If error code is allowed, treat as a successful request
             if not should_block and error.response['Error']['Code'] in allowed_errors:
                 return success(class_name, method_name, start_time)
             # otherwise check for Kivera error
-            return check_err_message(should_block, custom_resp, class_name, method_name, start_time, error)
+            return check_err_message(should_block, should_contain, custom_resp, class_name, method_name, start_time, error)
 
         except Exception as error:
             # check for Kivera error
-            return check_err_message(should_block, custom_resp, class_name, method_name, start_time, error)
+            return check_err_message(should_block, should_contain, custom_resp, class_name, method_name, start_time, error)
 
         # on successful request
         if should_block:
@@ -169,19 +224,21 @@ def result_decorator(method):
 
     return decorator
 
-
-def check_err_message(should_block, custom_resp, class_name, method_name, start_time, error):
+def check_err_message(should_block, should_contain, custom_resp, class_name, method_name, start_time, error):
 
     if not should_block:
         return failure(class_name, method_name, start_time, error)
 
     if "Kivera.Error" not in str(error) and "Oops, your request has been blocked." not in str(error):
-        return failure(class_name, method_name, start_time, Exception("Request Not Blocked: " + str(error)))
+        return failure(class_name, method_name, start_time, Exception("Request Not Blocked: got" + str(error)))
+
+    if should_contain.lower() not in str(error).lower():
+        return failure(class_name, method_name, start_time, Exception(f"Incorrect Response: {should_contain}: got {str(error)}"))
 
     if custom_resp:
         expected = custom_responses[class_name][method_name]
         if not contains_custom_response(error, expected):
-            return failure(class_name, method_name, start_time, Exception(f"Missing Custom Response: '{expected}': {str(error)}"))
+            return failure(class_name, method_name, start_time, Exception(f"Missing Custom Response: '{expected}': got {str(error)}"))
 
     return success(class_name, method_name, start_time)
 
@@ -450,22 +507,22 @@ class AwsApiGatewayTasks(TaskSet):
 
 
 ### EVENTBRIDGE ###
-class AwsEventBridgeTasks(TaskSet):
+class AwsEventsTasks(TaskSet):
     @task(1)
     @result_decorator
-    def aws_eventbridge_list_rules_allow(self):
+    def aws_events_list_rules_allow(self):
         client = get_client('events')
         client.list_rules()
 
     @task(3)
     @result_decorator
-    def aws_eventbridge_put_permission_allow(self):
+    def aws_events_put_permission_allow(self):
         client = get_client('events')
         client.put_permission(Action='events:PutRule', Principal='326190351503')
 
     @task(3)
     @result_decorator
-    def aws_eventbridge_put_permission_block(self):
+    def aws_events_put_permission_block(self):
         client = get_client('events')
         client.put_permission(Action='events:PutRule', Principal='000000000000')
 
@@ -866,28 +923,28 @@ class AwsSensitiveFieldsTasks(TaskSet):
 class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
-    def app_dev_block(self):
+    def noncloud_app_dev_block(self):
         resp = requests.get('https://app.dev.nonp.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
-    def app_stg_block(self):
+    def noncloud_app_stg_block(self):
         resp = requests.get('https://app.stg.nonp.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
-    def kivera_block(self):
+    def noncloud_kivera_block(self):
         resp = requests.get('https://kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
-    def download_block(self):
+    def noncloud_download_block(self):
         resp = requests.get('https://download.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
@@ -927,7 +984,7 @@ class KiveraPerf(User):
         AwsStsTasks: 3,
         AwsS3Tasks: 3,
         AwsApiGatewayTasks: 3,
-        AwsEventBridgeTasks: 3,
+        AwsEventsTasks: 3,
         AwsIamTasks: 2,
         AwsRdsTasks: 3,
         AwsCloudFrontTasks: 2,
