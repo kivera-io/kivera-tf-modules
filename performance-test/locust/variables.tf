@@ -106,13 +106,13 @@ variable "locust_run_time" {
 variable "user_wait_min" {
   description = "Max wait time between user requests (per second)"
   type        = number
-  default     = 3
+  default     = 4
 }
 
 variable "user_wait_max" {
   description = "Min wait time between user requests (per second)"
   type        = number
-  default     = 4
+  default     = 6
 }
 
 variable "proxy_public_cert" {
