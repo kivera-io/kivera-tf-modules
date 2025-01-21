@@ -18,7 +18,7 @@ class TimeoutException(Exception):
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
 MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '10'))
-DEFAULT_TEST_TIMEOUT = int(os.getenv('DEFAULT_TEST_TIMEOUT', '60'))
+TEST_TIMEOUT = int(os.getenv('TEST_TIMEOUT', '60'))
 
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
@@ -200,10 +200,10 @@ def result_decorator(method):
         try:
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 future = executor.submit(method, self)
-                future.result(timeout=DEFAULT_TEST_TIMEOUT)
+                future.result(timeout=TEST_TIMEOUT)
 
-        except concurrent.futures.TimeoutError as e:
-            raise TimeoutException(f"Timeout ({DEFAULT_TEST_TIMEOUT}s) exceeded") from e
+        except concurrent.futures.TimeoutError:
+            return failure(class_name, method_name, start_time, TimeoutException(f"Timeout ({TEST_TIMEOUT}s) exceeded"))
 
         except botocore.exceptions.ClientError as error:
             # If error code is allowed, treat as a successful request

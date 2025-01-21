@@ -25,6 +25,7 @@ resource "aws_instance" "nodes" {
     s3_bucket                 = var.s3_bucket
     s3_bucket_key             = var.s3_bucket_key
     max_client_reuse          = var.max_client_reuse
+    test_timeout              = var.test_timeout
     deployment_id             = local.deployment_id
     leader_ip                 = aws_instance.leader.private_ip
     cw_config = templatefile("${path.module}/data/cloudwatch-config.json.tpl", {

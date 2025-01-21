@@ -131,3 +131,9 @@ variable "max_client_reuse" {
   type        = number
   default     = 10
 }
+
+variable "test_timeout" {
+  description = "The maximum amount of time (in secodns) a test is allowed to run before failing"
+  type        = number
+  default     = 60
+}
