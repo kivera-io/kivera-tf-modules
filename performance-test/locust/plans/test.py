@@ -918,8 +918,25 @@ class CustomResponseTasks(TaskSet):
         client = get_client('xray')
         client.get_group(GroupName='test')
 
+class ThroughputTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow(self):
+        client = get_client("s3", "ap-southeast-2")
+        with open("/root/kivera/ubuntu.iso", "wb") as f:
+            client.download_fileobj(
+                "kivera-poc-deployment",
+                "kivera/locust-perf-test/ubuntu-22.04.4-desktop-amd64.iso",
+                f,
+            )
 
-class KiveraPerf(User):
+class Throughput(User):
+    wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
+    tasks = {
+        ThroughputTasks: 1
+    }
+
+class Standard(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
         AwsEc2Tasks: 3,

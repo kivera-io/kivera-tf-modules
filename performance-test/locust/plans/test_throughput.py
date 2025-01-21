@@ -240,7 +240,7 @@ def failure(class_name, method_name, s, e):
     )
 
 ### S3 ###
-class AwsS3Tasks(TaskSet):
+class ThroughputTask(TaskSet):
     @task(1)
     @result_decorator
     def aws_s3_get_object_allow(self):
@@ -255,5 +255,5 @@ class AwsS3Tasks(TaskSet):
 class KiveraPerf(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
-        AwsS3Tasks: 1
+        ThroughputTask: 1
     }
