@@ -115,6 +115,12 @@ variable "user_wait_max" {
   default     = 6
 }
 
+variable "locust_user_classes" {
+  description = "Which locust test classes to use"
+  type        = string
+  default     = "Standard"
+}
+
 variable "proxy_public_cert" {
   description = "Public cert used by the proxy"
   default     = ""
