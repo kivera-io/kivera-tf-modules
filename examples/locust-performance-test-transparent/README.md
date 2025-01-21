@@ -40,4 +40,4 @@ In `locust_var.tfvars` TF vars used to deploy and run the performance test are:
 | `nodes_count` | Number of total nodes/instances | - |
 | `locust_max_users` | Max number of Locust users | - |
 | `locust_spawn_rate` | Rate at which Locust users spawn (per second) | - |
-| `locust_run_time` | Duration of the Locust test (e.g. 20s, 3m, 2h, 1h23m45s) | - |
+| `locust_run_time` | Duration of the Locust test in minutes (e.g. 10m) | - |

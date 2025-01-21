@@ -98,8 +98,9 @@ variable "locust_spawn_rate" {
 }
 
 variable "locust_run_time" {
-  description = "Duration of the Locust test"
-  default     = "10m"
+  description = "Duration of the Locust test (minutes)"
+  type        = number
+  default     = 10
 }
 
 variable "user_wait_min" {
@@ -123,4 +124,10 @@ variable "locust_user_classes" {
 variable "proxy_public_cert" {
   description = "Public cert used by the proxy"
   default     = ""
+}
+
+variable "max_client_reuse" {
+  description = "The maximum amount of times a client will be re-used in tests (0-n)"
+  type        = number
+  default     = 10
 }
