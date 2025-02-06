@@ -11,6 +11,11 @@ from botocore.config import Config
 from locust import User, TaskSet, task, between, events
 from ddtrace.propagation.http import HTTPPropagator
 import requests
+import urllib3
+
+urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+
+req_session = requests.Session()
 
 class TimeoutException(Exception):
     pass
@@ -924,28 +929,28 @@ class NonCloudTasks(TaskSet):
     @task(1)
     @result_decorator
     def noncloud_app_dev_block(self):
-        resp = requests.get('https://app.dev.nonp.kivera.io')
+        resp = req_session.get('https://app.dev.nonp.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
     def noncloud_app_stg_block(self):
-        resp = requests.get('https://app.stg.nonp.kivera.io')
+        resp = req_session.get('https://app.stg.nonp.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
     def noncloud_kivera_block(self):
-        resp = requests.get('https://kivera.io')
+        resp = req_session.get('https://kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
     @task(1)
     @result_decorator
     def noncloud_download_block(self):
-        resp = requests.get('https://download.kivera.io')
+        resp = req_session.get('https://download.kivera.io')
         if resp.status_code != 200:
             raise Exception(resp.text)
 
@@ -975,22 +980,37 @@ class CustomResponseTasks(TaskSet):
         client = get_client('xray')
         client.get_group(GroupName='test')
 
-class ThroughputTasks(TaskSet):
+class ThroughputTasksCloud(TaskSet):
+
     @task(1)
     @result_decorator
     def aws_s3_get_object_allow(self):
         client = get_client("s3", "ap-southeast-2")
-        with open("/root/kivera/ubuntu.iso", "wb") as f:
+        with open("/root/kivera/ubuntu.s3.iso", "wb") as f:
             client.download_fileobj(
                 "kivera-poc-deployment",
                 "kivera/locust-perf-test/ubuntu-22.04.4-desktop-amd64.iso",
                 f,
             )
 
-class Throughput(User):
+class ThroughputTasksNonCloud(TaskSet):
+
+    @task(1)
+    @result_decorator
+    def noncloud_download_allow(self):
+        r = req_session.get("https://releases.ubuntu.com/jammy/ubuntu-22.04.5-desktop-amd64.iso", allow_redirects=True)
+        open('/root/kivera/ubuntu.iso', 'wb').write(r.content)
+
+class ThroughputCloud(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
-        ThroughputTasks: 1
+        ThroughputTasksCloud: 1
+    }
+
+class ThroughputNonCloud(User):
+    wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
+    tasks = {
+        ThroughputTasksNonCloud: 1
     }
 
 class Standard(User):
