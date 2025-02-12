@@ -123,7 +123,7 @@ variable "proxy_public_cert" {
 variable "max_client_reuse" {
   description = "The maximum amount of times a client will be re-used in tests (0-n)"
   type        = number
-  default     = 10
+  default     = 0
 }
 
 variable "test_timeout" {
