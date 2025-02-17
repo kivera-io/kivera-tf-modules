@@ -849,9 +849,9 @@ class AwsBatchTasks(TaskSet):
     # Set redis data
     @task(1)
     @result_decorator
-    def aws_batch_list_jobs_allow(self):
+    def aws_batch_delete_jobs_queue_allow(self):
         client = get_client('batch')
-        client.list_jobs(jobQueue='my-job-queue')
+        client.delete_job_queue(jobQueue='random-something')
 
     # Get redis data
     @task(1)
@@ -859,12 +859,18 @@ class AwsBatchTasks(TaskSet):
     def aws_batch_list_scheduling_policies_allow(self):
         client = get_client('batch')
         client.list_scheduling_policies()
+    
+    @task(4)
+    @result_decorator
+    def aws_batch_list_jobs_allow(self):
+        client = get_client('batch')
+        client.list_jobs(jobQueue='my-job-queue')
 
 
 
 ### ECS ###
 class AwsEcsTasks(TaskSet):
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_ecs_list_clusters_allow(self):
         client = get_client('ecs')
