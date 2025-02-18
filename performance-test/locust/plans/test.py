@@ -467,19 +467,26 @@ class AwsS3Tasks(TaskSet):
 
 ### APIGATEWAY ###
 class AwsApiGatewayTasks(TaskSet):
-    # Set redis data
+    # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_apigateway_get_apis_allow(self):
         client = get_client('apigatewayv2')
         client.get_apis()
 
-    # Get redis data
+    # get both redis data
     @task(1)
     @result_decorator
     def aws_apigateway_get_vpc_links_allow(self):
         client = get_client('apigatewayv2')
         client.get_vpc_links()
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_apigateway_get_domain_names_allow(self):
+        client = get_client('apigatewayv2')
+        client.get_domain_names()
 
     @task(4)
     @result_decorator
@@ -536,19 +543,26 @@ class AwsIamTasks(TaskSet):
         client = get_client('iam')
         client.list_users()
 
-    # Get redis data
+    # get redis data
     @task(1)
     @result_decorator
     def aws_iam_list_account_aliases_allow(self):
         client = get_client('iam')
         client.list_account_aliases()
     
-    # Set redis data
+    # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_iam_list_groups_allow(self):
         client = get_client('iam')
         client.list_groups()
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_iam_list_roles_allow(self):
+        client = get_client('iam')
+        client.list_roles()
 
     @task(2)
     @result_decorator
@@ -589,19 +603,26 @@ class AwsRdsTasks(TaskSet):
 
 ### CLOUDFRONT ###
 class AwsCloudFrontTasks(TaskSet):
-    # Set redis data
+    # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_cloudfront_list_distributions_allow(self):
         client = get_client('cloudfront')
         client.list_distributions()
 
-    # Get redis data
+    # get both redis data
     @task(1)
     @result_decorator
     def aws_cloudfront_list_functions_allow(self):
         client = get_client('cloudfront')
         client.list_functions()
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_cloudfront_list_cache_policies_allow(self):
+        client = get_client('cloudfront')
+        client.list_cache_policies()
 
     @task(2)
     @result_decorator
@@ -846,14 +867,14 @@ class AwsAutoScalingTasks(TaskSet):
 
 ### BATCH ###
 class AwsBatchTasks(TaskSet):
-    # Set redis data
+    # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_batch_delete_jobs_queue_allow(self):
         client = get_client('batch')
         client.delete_job_queue(jobQueue='random-something')
 
-    # Get redis data
+    # get both redis data
     @task(1)
     @result_decorator
     def aws_batch_list_scheduling_policies_allow(self):
@@ -865,6 +886,13 @@ class AwsBatchTasks(TaskSet):
     def aws_batch_list_jobs_allow(self):
         client = get_client('batch')
         client.list_jobs(jobQueue='my-job-queue')
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_batch_describe_jobs_allow(self):
+        client = get_client('batch')
+        client.describe_jobs(jobs=["my-job-queue"])
 
 
 
@@ -876,21 +904,26 @@ class AwsEcsTasks(TaskSet):
         client = get_client('ecs')
         client.list_clusters()
 
-    # Get redis data
+    # get both redis data
     @task(1)
     @result_decorator
     def aws_ecs_list_account_settings_allow(self):
         client = get_client('ecs')
         client.list_account_settings()
 
-    # Set redis data
+    # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_ecs_list_task_definitions_allow(self):
         client = get_client('ecs')
         client.list_task_definitions()
 
-
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_ecs_list_attributes_allow(self):
+        client = get_client('ecs')
+        client.list_attributes(targetType='container-instance')
 
 ### SNS ###
 class AwsSnsTasks(TaskSet):
