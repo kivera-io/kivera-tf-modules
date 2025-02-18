@@ -48,31 +48,31 @@ aws_regions = [
 ]
 
 allowed_errors = [
-    # 'AccessDenied',
-    # 'AccessDeniedException',
-    # 'UnauthorizedOperation',
-    # 'InvalidClientTokenId',
-    # 'UnrecognizedClientException',
-    # 'AuthFailure',
+    'AccessDenied',
+    'AccessDeniedException',
+    'UnauthorizedOperation',
+    'InvalidClientTokenId',
+    'UnrecognizedClientException',
+    'AuthFailure',
 
-    # 'AWS.SimpleQueueService.NonExistentQueue',
+    'AWS.SimpleQueueService.NonExistentQueue',
 
-    # 'Throttling',
-    # 'ThrottlingException',
-    # 'ThrottledException',
-    # 'RequestThrottledException',
-    # 'TooManyRequestsException',
-    # 'ProvisionedThroughputExceededException',
-    # 'TransactionInProgressException',
-    # 'RequestLimitExceeded',
-    # 'BandwidthLimitExceeded',
-    # 'LimitExceededException',
-    # 'RequestThrottled',
-    # 'SlowDown',
-    # 'EC2ThrottledException',
+    'Throttling',
+    'ThrottlingException',
+    'ThrottledException',
+    'RequestThrottledException',
+    'TooManyRequestsException',
+    'ProvisionedThroughputExceededException',
+    'TransactionInProgressException',
+    'RequestLimitExceeded',
+    'BandwidthLimitExceeded',
+    'LimitExceededException',
+    'RequestThrottled',
+    'SlowDown',
+    'EC2ThrottledException',
 
-    # 'KMS.NotFoundException',
-    # 'ClusterNotFoundException',
+    'KMS.NotFoundException',
+    'ClusterNotFoundException',
 ]
 
 cloudfront_dist_config = {
@@ -415,6 +415,27 @@ class AwsStsTasks(TaskSet):
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="org-dev-session",
         )
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_sts_get_access_key_info_allow(self):
+        client = get_client('sts')
+        client.get_access_key_info(AccessKeyId="somethingtokenss")
+    
+    # set_with_options redis data
+    @task(1)
+    @result_decorator
+    def aws_sts_get_federation_token_allow(self):
+        client = get_client('sts')
+        client.get_federation_token(Name="something")
+    
+    # get both redis data
+    @task(1)
+    @result_decorator
+    def aws_sts_get_session_token_allow(self):
+        client = get_client('sts')
+        client.get_session_token()
 
 
 ### S3 ###
@@ -604,27 +625,6 @@ class AwsRdsTasks(TaskSet):
 
 ### CLOUDFRONT ###
 class AwsCloudFrontTasks(TaskSet):
-    # set_with_options redis data
-    @task(1)
-    @result_decorator
-    def aws_cloudfront_list_distributions_allow(self):
-        client = get_client('cloudfront')
-        client.list_distributions()
-
-    # get both redis data
-    @task(1)
-    @result_decorator
-    def aws_cloudfront_list_functions_allow(self):
-        client = get_client('cloudfront')
-        client.list_functions()
-    
-    # set redis data
-    @task(1)
-    @result_decorator
-    def aws_cloudfront_list_cache_policies_allow(self):
-        client = get_client('cloudfront')
-        client.list_cache_policies()
-
     @task(2)
     @result_decorator
     def aws_cloudfront_create_distribution_block(self):
