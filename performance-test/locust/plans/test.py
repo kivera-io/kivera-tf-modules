@@ -17,7 +17,7 @@ class TimeoutException(Exception):
 
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
-MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '10'))
+MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '0'))
 TEST_TIMEOUT = int(os.getenv('TEST_TIMEOUT', '60'))
 
 ddtrace.patch(botocore=True)
@@ -72,6 +72,7 @@ allowed_errors = [
     'EC2ThrottledException',
 
     'KMS.NotFoundException',
+    'ClusterNotFoundException',
 ]
 
 cloudfront_dist_config = {
