@@ -24,10 +24,10 @@ ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
 
 client_config = Config(
-    connect_timeout = 10,
-    read_timeout = 30,
-    tcp_keepalive = True,
-    max_pool_connections = MAX_CLIENT_REUSE,
+    # connect_timeout = 10,
+    # read_timeout = 30,
+    # tcp_keepalive = True,
+    # max_pool_connections = MAX_CLIENT_REUSE,
     retries = {
         'max_attempts': 1,
         'mode': 'standard'
@@ -73,6 +73,7 @@ allowed_errors = [
 
     'KMS.NotFoundException',
     'ClusterNotFoundException',
+    'ValidationError',
 ]
 
 cloudfront_dist_config = {
@@ -133,28 +134,32 @@ def get_client(service, region=""):
     if region == "":
         region = secrets.choice(aws_regions)
 
-    with all_clients_lock:
-        if service not in all_clients:
-            all_clients[service] = {}
-        if region not in all_clients[service]:
-            all_clients[service][region] = {}
+    client = boto3.client(service, region_name=region, config=client_config)
+    client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+    return client
 
-        if all_clients[service][region].get('count', 0) > 0:
-            all_clients[service][region]['count'] -= 1
-            return all_clients[service][region]['client']
+    # with all_clients_lock:
+    #     if service not in all_clients:
+    #         all_clients[service] = {}
+    #     if region not in all_clients[service]:
+    #         all_clients[service][region] = {}
 
-        client = boto3.client(service, region_name=region, config=client_config)
-        client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+    #     if all_clients[service][region].get('count', 0) > 0:
+    #         all_clients[service][region]['count'] -= 1
+    #         return all_clients[service][region]['client']
 
-        reuse = MAX_CLIENT_REUSE
-        if reuse > 0:
-            reuse = random.randrange(MAX_CLIENT_REUSE)
+    #     client = boto3.client(service, region_name=region, config=client_config)
+    #     client.meta.events.register_first('before-sign.*.*', add_trace_headers)
 
-        all_clients[service][region] = {
-            'client': client,
-            'count': reuse,
-        }
-        return client
+    #     reuse = MAX_CLIENT_REUSE
+    #     if reuse > 0:
+    #         reuse = random.randrange(MAX_CLIENT_REUSE)
+
+    #     all_clients[service][region] = {
+    #         'client': client,
+    #         'count': reuse,
+    #     }
+    #     return client
 
 def action_name(parts):
     action = ""
