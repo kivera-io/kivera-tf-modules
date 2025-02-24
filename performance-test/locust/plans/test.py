@@ -133,33 +133,29 @@ all_clients_lock = threading.Lock()
 def get_client(service, region=""):
     if region == "":
         region = secrets.choice(aws_regions)
+    
+    with all_clients_lock:
+        if service not in all_clients:
+            all_clients[service] = {}
+        if region not in all_clients[service]:
+            all_clients[service][region] = {}
 
-    client = boto3.client(service, region_name=region, config=client_config)
-    client.meta.events.register_first('before-sign.*.*', add_trace_headers)
-    return client
+        if all_clients[service][region].get('count', 0) > 0:
+            all_clients[service][region]['count'] -= 1
+            return all_clients[service][region]['client']
 
-    # with all_clients_lock:
-    #     if service not in all_clients:
-    #         all_clients[service] = {}
-    #     if region not in all_clients[service]:
-    #         all_clients[service][region] = {}
+        client = boto3.client(service, region_name=region, config=client_config)
+        client.meta.events.register_first('before-sign.*.*', add_trace_headers)
 
-    #     if all_clients[service][region].get('count', 0) > 0:
-    #         all_clients[service][region]['count'] -= 1
-    #         return all_clients[service][region]['client']
+        reuse = MAX_CLIENT_REUSE
+        if reuse > 0:
+            reuse = random.randrange(MAX_CLIENT_REUSE)
 
-    #     client = boto3.client(service, region_name=region, config=client_config)
-    #     client.meta.events.register_first('before-sign.*.*', add_trace_headers)
-
-    #     reuse = MAX_CLIENT_REUSE
-    #     if reuse > 0:
-    #         reuse = random.randrange(MAX_CLIENT_REUSE)
-
-    #     all_clients[service][region] = {
-    #         'client': client,
-    #         'count': reuse,
-    #     }
-    #     return client
+        all_clients[service][region] = {
+            'client': client,
+            'count': reuse,
+        }
+        return client
 
 def action_name(parts):
     action = ""
