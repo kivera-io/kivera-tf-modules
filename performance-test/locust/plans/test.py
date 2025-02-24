@@ -1031,7 +1031,7 @@ class CustomResponseTasks(TaskSet):
         client.get_group(GroupName='test')
 
 
-class KiveraPerf(User):
+class Standard(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
         AwsEc2Tasks: 3,

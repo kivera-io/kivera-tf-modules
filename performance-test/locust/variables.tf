@@ -131,3 +131,9 @@ variable "test_timeout" {
   type        = number
   default     = 60
 }
+
+variable "locust_user_classes" {
+  description = "Which locust test classes to use"
+  type        = string
+  default     = "Standard"
+}
