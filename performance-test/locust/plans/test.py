@@ -29,7 +29,7 @@ client_config = Config(
     # tcp_keepalive = True,
     # max_pool_connections = MAX_CLIENT_REUSE,
     retries = {
-        'max_attempts': 1,
+        'total_max_attempts': 1,
         'mode': 'standard'
     }
 )
