@@ -27,11 +27,11 @@ client_config = Config(
     # connect_timeout = 10,
     # read_timeout = 30,
     # tcp_keepalive = True,
-    max_pool_connections = MAX_CLIENT_REUSE,
-    retries = {
-        'total_max_attempts': 1,
-        'mode': 'standard'
-    }
+    # max_pool_connections = MAX_CLIENT_REUSE,
+    # retries = {
+    #     'total_max_attempts': 1,
+    #     'mode': 'standard'
+    # }
 )
 
 aws_regions = [
