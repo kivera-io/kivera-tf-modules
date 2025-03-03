@@ -29,7 +29,7 @@ client_config = Config(
     # tcp_keepalive = True,
     # max_pool_connections = MAX_CLIENT_REUSE,
     retries = {
-        'total_max_attempts': 1,
+        'max_attempts': 1,
         'mode': 'standard'
     }
 )
@@ -1025,6 +1025,45 @@ class CustomResponseTasks(TaskSet):
     def aws_xray_get_group_customresponse_block(self):
         client = get_client('xray')
         client.get_group(GroupName='test')
+
+
+class TransparentProxyTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_s3_list_objects_allow(self):
+        client = get_client('s3')
+        client.get_paginator('list_objects').paginate(Bucket='kivera-poc-deployment', PaginationConfig={'MaxItems': 1})
+
+    @task(3)
+    @result_decorator
+    def aws_s3_put_object_block(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode())
+
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow_1(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-01/data.txt")
+
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow_2(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-02/data.txt")
+
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow_3(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-03/data.txt")
+
+
+class Transparent(User):
+    wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
+    tasks = {
+        TransparentProxyTasks: 1,
+    }
 
 
 class Standard(User):
