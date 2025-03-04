@@ -54,10 +54,8 @@ export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
 export LOCUST_USER_CLASSES=${locust_user_classes}
 
-test_file=$([[ ${proxy_transparent_enabled} == true ]] && echo "test_transparent.py" || echo "test.py")
-
 nohup locust \
-    -f $test_file \
+    -f test.py \
     --autostart \
     --web-port=80 \
     --web-auth ${leader_username}:${leader_password} \

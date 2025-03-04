@@ -81,9 +81,7 @@ fallocate -l 50M test.data
 export S3_TEST_BUCKET=${s3_bucket}
 export S3_TEST_PATH=${s3_bucket_key}${deployment_id}
 
-test_file=$([[ ${proxy_transparent_enabled} == true ]] && echo "test_transparent.py" || echo "test.py")
-
 nohup locust \
-    -f $test_file \
+    -f test.py \
     --worker \
     --master-host=${leader_ip} > locust-worker.out 2>&1 &
