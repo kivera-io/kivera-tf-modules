@@ -490,6 +490,13 @@ class AwsS3Tasks(TaskSet):
 
 ### APIGATEWAY ###
 class AwsApiGatewayTasks(TaskSet):
+    # delete redis data
+    @task(1)
+    @result_decorator
+    def aws_apigateway_get_sdk_types_allow(self):
+        client = get_client('apigatewayv2')
+        client.get_sdk_types()
+
     # set_with_options redis data
     @task(1)
     @result_decorator
@@ -565,6 +572,13 @@ class AwsIamTasks(TaskSet):
     def aws_iam_list_users_allow(self):
         client = get_client('iam')
         client.list_users()
+
+    # delete redis data
+    @task(1)
+    @result_decorator
+    def aws_iam_list_instance_profiles_allow(self):
+        client = get_client('iam')
+        client.list_instance_profiles()
 
     # get redis data
     @task(1)
@@ -900,6 +914,13 @@ class AwsBatchTasks(TaskSet):
 
 ### ECS ###
 class AwsEcsTasks(TaskSet):
+    # delete redis data
+    @task(1)
+    @result_decorator
+    def aws_ecs_describe_clusters_allow(self):
+        client = get_client('ecs')
+        client.describe_clusters()
+
     @task(4)
     @result_decorator
     def aws_ecs_list_clusters_allow(self):
