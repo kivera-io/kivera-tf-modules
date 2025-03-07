@@ -493,8 +493,8 @@ class AwsApiGatewayTasks(TaskSet):
     # delete redis data
     @task(1)
     @result_decorator
-    def aws_apigateway_get_sdk_types_block(self):
-        client = get_client('apigatewayv2')
+    def aws_apigateway_get_sdk_types_allow(self):
+        client = get_client('apigateway')
         client.get_sdk_types()
 
     # set_with_options redis data
@@ -576,7 +576,7 @@ class AwsIamTasks(TaskSet):
     # delete redis data
     @task(1)
     @result_decorator
-    def aws_iam_list_instance_profiles_block(self):
+    def aws_iam_list_instance_profiles_allow(self):
         client = get_client('iam')
         client.list_instance_profiles()
 
@@ -917,7 +917,7 @@ class AwsEcsTasks(TaskSet):
     # delete redis data
     @task(1)
     @result_decorator
-    def aws_ecs_describe_clusters_block(self):
+    def aws_ecs_describe_clusters_allow(self):
         client = get_client('ecs')
         client.describe_clusters()
 
