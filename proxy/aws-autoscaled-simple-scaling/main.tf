@@ -561,7 +561,7 @@ resource "aws_elasticache_user" "redis_kivera_user" {
 
   user_id       = var.cache_kivera_username
   user_name     = var.cache_kivera_username
-  access_string = "on ~kivera* -@all +ping +mget +get +set +mset +strlen +cluster|slots +cluster|shards +command"
+  access_string = "on ~kivera* -@all +ping +mget +get +set +mset +del +strlen +cluster|slots +cluster|shards +command"
   engine        = "REDIS"
   passwords     = [local.cache_kivera_pass]
 }
@@ -582,7 +582,7 @@ resource "aws_cloudwatch_dashboard" "proxy_dashbaord" {
   dashboard_name = "${var.name_prefix}-dashboard-${local.name_suffix}"
 
   dashboard_body = templatefile("${path.module}/data/proxy-cw-dashboard.json", {
-    log_group_name    = "${var.name_prefix}-proxy-${local.name_suffix}"
+    log_group_name   = "${var.name_prefix}-proxy-${local.name_suffix}"
     log_group_region = data.aws_region.current.name
   })
 }

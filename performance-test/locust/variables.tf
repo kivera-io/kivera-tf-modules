@@ -123,11 +123,17 @@ variable "proxy_public_cert" {
 variable "max_client_reuse" {
   description = "The maximum amount of times a client will be re-used in tests (0-n)"
   type        = number
-  default     = 10
+  default     = 0
 }
 
 variable "test_timeout" {
   description = "The maximum amount of time (in secodns) a test is allowed to run before failing"
   type        = number
   default     = 60
+}
+
+variable "locust_user_classes" {
+  description = "Which locust test classes to use"
+  type        = string
+  default     = "Standard"
 }

@@ -26,6 +26,7 @@ resource "aws_instance" "nodes" {
     max_client_reuse          = var.max_client_reuse
     test_timeout              = var.test_timeout
     deployment_id             = local.deployment_id
+    locust_user_classes       = var.locust_user_classes
     leader_ip                 = aws_instance.leader.private_ip
     cw_config = templatefile("${path.module}/data/cloudwatch-config.json.tpl", {
       instance_name = local.locust_node_instance_name
