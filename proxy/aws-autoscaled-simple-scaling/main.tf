@@ -561,7 +561,7 @@ resource "aws_elasticache_user" "redis_kivera_user" {
 
   user_id       = var.cache_kivera_username
   user_name     = var.cache_kivera_username
-  access_string = "on ~kivera* -@all +ping +mget +get +set +mset +del +strlen +cluster|slots +cluster|shards +command"
+  access_string = "on ~kivera* -@all +ping +mget +get +set +mset +strlen +cluster|slots +cluster|shards +command"
   engine        = "REDIS"
   passwords     = [local.cache_kivera_pass]
 }
