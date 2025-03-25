@@ -18,7 +18,6 @@ class TimeoutException(Exception):
 
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
-MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '0'))
 TEST_TIMEOUT = int(os.getenv('TEST_TIMEOUT', '60'))
 
 ddtrace.patch(botocore=True)
@@ -56,7 +55,6 @@ client_config = Config(
     # connect_timeout = 10,
     # read_timeout = 30,
     # tcp_keepalive = True,
-    # max_pool_connections = MAX_CLIENT_REUSE,
     retries = {
         'total_max_attempts': 1,
         'mode': 'standard'
