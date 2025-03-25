@@ -4,6 +4,7 @@ import time
 import random
 import threading
 import concurrent.futures
+import queue
 import boto3
 import botocore
 import ddtrace
@@ -22,35 +23,48 @@ class TimeoutException(Exception):
 
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
-MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '0'))
 TEST_TIMEOUT = int(os.getenv('TEST_TIMEOUT', '60'))
 
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
 
+class ClientPool:
+    def __init__(self):
+        self.pool = {}
+        self.lock = threading.Lock()
+
+    def new_client(self, service, region="ap-southeast-2"):
+        client = boto3.client(service, region_name=region, config=client_config)
+        client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+        return client
+
+    def get(self, service, region="ap-southeast-2"):
+        with self.lock:
+            if service not in self.pool:
+                self.pool[service] = {}
+            if region not in self.pool[service]:
+                self.pool[service][region] = queue.SimpleQueue()
+
+        try:
+            return self.pool[service][region].get_nowait()
+        except queue.Empty:
+            return self.new_client(service, region)
+
+    def put(self, obj, service, region="ap-southeast-2"):
+        self.pool[service][region].put(obj)
+
+
+client_pool = ClientPool()
+
 client_config = Config(
     # connect_timeout = 10,
     # read_timeout = 30,
     # tcp_keepalive = True,
-    # max_pool_connections = MAX_CLIENT_REUSE,
     retries = {
         'total_max_attempts': 1,
         'mode': 'standard'
     }
 )
-
-aws_regions = [
-    # "us-east-1",
-    # "us-east-2",
-    # "eu-west-1",
-    # "eu-west-2",
-    # "ap-east-1",
-    # "ap-south-1",
-    # "ap-southeast-1",
-    "ap-southeast-2",
-    # "ap-southeast-4",
-    # "ap-northeast-1"
-]
 
 allowed_errors = [
     'AccessDenied',
@@ -132,35 +146,6 @@ def add_trace_headers(request, **kwargs):
     for h, v in headers.items():
         request.headers.add_header(h, v)
 
-all_clients = {}
-all_clients_lock = threading.Lock()
-
-def get_client(service, region=""):
-    if region == "":
-        region = secrets.choice(aws_regions)
-    
-    with all_clients_lock:
-        if service not in all_clients:
-            all_clients[service] = {}
-        if region not in all_clients[service]:
-            all_clients[service][region] = {}
-
-        if all_clients[service][region].get('count', 0) > 0:
-            all_clients[service][region]['count'] -= 1
-            return all_clients[service][region]['client']
-
-        client = boto3.client(service, region_name=region, config=client_config)
-        client.meta.events.register_first('before-sign.*.*', add_trace_headers)
-
-        reuse = MAX_CLIENT_REUSE
-        if reuse > 0:
-            reuse = random.randrange(MAX_CLIENT_REUSE)
-
-        all_clients[service][region] = {
-            'client': client,
-            'count': reuse,
-        }
-        return client
 
 def action_name(parts):
     action = ""
@@ -283,20 +268,22 @@ class AwsEc2Tasks(TaskSet):
     @task(3)
     @result_decorator
     def aws_ec2_describe_instances_block(self):
-        client = get_client('ec2')
+        client = client_pool.get('ec2')
         client.describe_instances()
+        client_pool.put(client, 'ec2')
 
     @task(1)
     @result_decorator
     def aws_ec2_describe_instances_allow(self):
-        client = get_client('ec2')
+        client = client_pool.get('ec2')
         client.get_paginator('describe_instances').paginate(PaginationConfig={'MaxItems': 1})
+        client_pool.put(client, 'ec2')
 
 
     @task(3)
     @result_decorator
     def aws_ec2_authorize_security_group_ingress_block(self):
-        client = get_client('ec2')
+        client = client_pool.get('ec2')
         client.authorize_security_group_ingress(
             CidrIp='0.0.0.0/0',
             ToPort=22,
@@ -304,30 +291,35 @@ class AwsEc2Tasks(TaskSet):
             IpProtocol="TCP",
             GroupId="sg-09a320fc24c2fd3c5",
         )
+        client_pool.put(client, 'ec2')
 
     @task(2)
     @result_decorator
     def aws_ec2_create_key_pair_block(self):
-        client = get_client('ec2')
+        client = client_pool.get('ec2')
         client.create_key_pair(KeyName='test-key-pair', KeyType='rsa', KeyFormat='pem' )
+        client_pool.put(client, 'ec2')
 
     @task(2)
     @result_decorator
     def aws_ec2_create_key_pair_allow(self):
-        client = get_client('ec2')
+        client = client_pool.get('ec2')
         client.create_key_pair(KeyName='test-key-pair', KeyType='ed25519', KeyFormat='pem' )
+        client_pool.put(client, 'ec2')
 
     @task(2)
     @result_decorator
     def aws_ec2_create_volume_block(self):
-        client = get_client('ec2', 'ap-southeast-2')
+        client = client_pool.get('ec2')
         client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=False)
+        client_pool.put(client, 'ec2')
 
     @task(1)
     @result_decorator
     def aws_ec2_create_volume_allow(self):
-        client = get_client('ec2', 'ap-southeast-2')
+        client = client_pool.get('ec2')
         client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=True, KmsKeyId='alias/secure-key', Size=100)
+        client_pool.put(client, 'ec2')
 
 
 
@@ -336,13 +328,14 @@ class AwsDynamoDBTasks(TaskSet):
     @task(2)
     @result_decorator
     def aws_dynamodb_list_tables_allow(self):
-        client = get_client('dynamodb')
+        client = client_pool.get('dynamodb')
         client.list_tables()
+        client_pool.put(client, 'dynamodb')
 
     @task(3)
     @result_decorator
     def aws_dynamodb_create_table_block(self):
-        client = get_client('dynamodb')
+        client = client_pool.get('dynamodb')
         client.create_table(
             TableName='user-table',
             AttributeDefinitions=[{
@@ -361,11 +354,12 @@ class AwsDynamoDBTasks(TaskSet):
             },
             TableClass='STANDARD'
         )
+        client_pool.put(client, 'dynamodb')
 
     @task(3)
     @result_decorator
     def aws_dynamodb_create_table_allow(self):
-        client = get_client('dynamodb')
+        client = client_pool.get('dynamodb')
         client.create_table(
             TableName='user-table',
             AttributeDefinitions=[{
@@ -384,6 +378,7 @@ class AwsDynamoDBTasks(TaskSet):
             },
             TableClass='STANDARD'
         )
+        client_pool.put(client, 'dynamodb')
 
 
 
@@ -392,56 +387,63 @@ class AwsStsTasks(TaskSet):
     @task(4)
     @result_decorator
     def aws_sts_get_caller_identity_allow(self):
-        client = get_client('sts')
+        client = client_pool.get('sts')
         client.get_caller_identity()
+        client_pool.put(client, 'sts')
 
     @task(2)
     @result_decorator
     def aws_sts_assume_role_block_1(self):
-        client = get_client('sts')
+        client = client_pool.get('sts')
         client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="invalid-session-name",
         )
+        client_pool.put(client, 'sts')
 
     @task(2)
     @result_decorator
     def aws_sts_assume_role_block_2(self):
-        client = get_client('sts')
+        client = client_pool.get('sts')
         client.assume_role(
             RoleArn="arn:aws:iam::000000000000:role/test-role",
             RoleSessionName="org-dev-session",
         )
+        client_pool.put(client, 'sts')
 
     @task(4)
     @result_decorator
     def aws_sts_assume_role_allow(self):
-        client = get_client('sts')
+        client = client_pool.get('sts')
         client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="org-dev-session",
         )
-    
+        client_pool.put(client, 'sts')
+
     # set redis data
     @task(1)
     @result_decorator
     def aws_sts_get_access_key_info_allow(self):
-        client = get_client('sts')
+        client = client_pool.get('sts')
         client.get_access_key_info(AccessKeyId="somethingtokenss")
-    
+        client_pool.put(client, 'sts')
+
     # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_sts_get_federation_token_allow(self):
-        client = get_client('sts')
+        client = client_pool.get('sts')
         client.get_federation_token(Name="something")
-    
+        client_pool.put(client, 'sts')
+
     # get both redis data
     @task(1)
     @result_decorator
     def aws_sts_get_session_token_allow(self):
-        client = get_client('sts')
+        client = client_pool.get('sts')
         client.get_session_token()
+        client_pool.put(client, 'sts')
 
 
 ### S3 ###
@@ -451,45 +453,51 @@ class AwsS3Tasks(TaskSet):
     # def aws_s3_upload_file_allow(self):
     #     bucket = os.environ['S3_TEST_BUCKET']
     #     path = f"{os.environ['S3_TEST_PATH']}/data/{''.join(random.choices(string.ascii_uppercase, k=10))}"
-    #     client = get_client('s3', 'ap-southeast-2')
+    #     client = client_pool.get('s3')
     #     transfer = boto3.s3.transfer.S3Transfer(client=client)
     #     transfer.upload_file('test.data', bucket, path, extra_args={'ServerSideEncryption':'aws:kms', 'SSEKMSKeyId':'alias/secure-key'} )
 
     @task(5)
     @result_decorator
     def aws_s3_list_objects_block(self):
-        client = get_client('s3')
+        client = client_pool.get('s3')
         client.list_objects(Bucket='kivera-poc-deployment')
+        client_pool.put(client, 's3')
 
     @task(1)
     @result_decorator
     def aws_s3_list_objects_allow(self):
-        client = get_client('s3')
+        client = client_pool.get('s3')
         client.get_paginator('list_objects').paginate(Bucket='kivera-poc-deployment', PaginationConfig={'MaxItems': 1})
+        client_pool.put(client, 's3')
 
     @task(3)
     @result_decorator
     def aws_s3_put_object_block(self):
-        client = get_client('s3', 'ap-southeast-2')
+        client = client_pool.get('s3')
         client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode())
+        client_pool.put(client, 's3')
 
     @task(1)
     @result_decorator
     def aws_s3_put_object_allow(self):
-        client = get_client('s3', 'ap-southeast-2')
+        client = client_pool.get('s3')
         client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
+        client_pool.put(client, 's3')
 
     @task(3)
     @result_decorator
     def aws_s3_create_bucket_block(self):
-        client = get_client('s3', 'ap-southeast-2')
+        client = client_pool.get('s3')
         client.create_bucket(Bucket="test-bucket", ACL='public-read', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
+        client_pool.put(client, 's3')
 
     @task(1)
     @result_decorator
     def aws_s3_create_bucket_allow(self):
-        client = get_client('s3', 'ap-southeast-2')
+        client = client_pool.get('s3')
         client.create_bucket(Bucket="test-bucket", ACL='private', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
+        client_pool.put(client, 's3')
 
 
 
@@ -499,53 +507,61 @@ class AwsApiGatewayTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_apigateway_get_sdk_types_allow(self):
-        client = get_client('apigateway')
+        client = client_pool.get('apigateway')
         client.get_sdk_types()
+        client_pool.put(client, 'apigateway')
 
     # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_apigateway_get_apis_allow(self):
-        client = get_client('apigatewayv2')
+        client = client_pool.get('apigatewayv2')
         client.get_apis()
+        client_pool.put(client, 'apigatewayv2')
 
     # get both redis data
     @task(1)
     @result_decorator
     def aws_apigateway_get_vpc_links_allow(self):
-        client = get_client('apigatewayv2')
+        client = client_pool.get('apigatewayv2')
         client.get_vpc_links()
-    
+        client_pool.put(client, 'apigatewayv2')
+
     # set redis data
     @task(1)
     @result_decorator
     def aws_apigateway_get_domain_names_allow(self):
-        client = get_client('apigatewayv2')
+        client = client_pool.get('apigatewayv2')
         client.get_domain_names()
+        client_pool.put(client, 'apigatewayv2')
 
     @task(4)
     @result_decorator
     def aws_apigateway_create_api_allow(self):
-        client = get_client('apigatewayv2')
+        client = client_pool.get('apigatewayv2')
         client.create_api(Name='test-api', ProtocolType='HTTP')
+        client_pool.put(client, 'apigatewayv2')
 
     @task(4)
     @result_decorator
     def aws_apigateway_create_api_block(self):
-        client = get_client('apigatewayv2')
+        client = client_pool.get('apigatewayv2')
         client.create_api(Name='test-api', ProtocolType='WEBSOCKET')
+        client_pool.put(client, 'apigatewayv2')
 
     @task(4)
     @result_decorator
     def aws_apigateway_create_route_allow(self):
-        client = get_client('apigatewayv2')
+        client = client_pool.get('apigatewayv2')
         client.create_route(ApiId='api-123', RouteKey='/api/path', AuthorizerId='auth-123', AuthorizationType='AWS_IAM')
+        client_pool.put(client, 'apigatewayv2')
 
     @task(4)
     @result_decorator
     def aws_apigateway_create_route_block(self):
-        client = get_client('apigatewayv2')
+        client = client_pool.get('apigatewayv2')
         client.create_route(ApiId='api-123', RouteKey='/api/path', AuthorizerId='auth-123', AuthorizationType='NONE')
+        client_pool.put(client, 'apigatewayv2')
 
 
 ### EVENTBRIDGE ###
@@ -553,20 +569,23 @@ class AwsEventsTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_events_list_rules_allow(self):
-        client = get_client('events')
+        client = client_pool.get('events')
         client.list_rules()
+        client_pool.put(client, 'events')
 
     @task(3)
     @result_decorator
     def aws_events_put_permission_allow(self):
-        client = get_client('events')
+        client = client_pool.get('events')
         client.put_permission(Action='events:PutRule', Principal='326190351503')
+        client_pool.put(client, 'events')
 
     @task(3)
     @result_decorator
     def aws_events_put_permission_block(self):
-        client = get_client('events')
+        client = client_pool.get('events')
         client.put_permission(Action='events:PutRule', Principal='000000000000')
+        client_pool.put(client, 'events')
 
 
 
@@ -575,50 +594,57 @@ class AwsIamTasks(TaskSet):
     @task(4)
     @result_decorator
     def aws_iam_list_users_allow(self):
-        client = get_client('iam')
+        client = client_pool.get('iam')
         client.list_users()
+        client_pool.put(client, 'iam')
 
     # delete redis data
     @task(1)
     @result_decorator
     def aws_iam_list_instance_profiles_allow(self):
-        client = get_client('iam')
+        client = client_pool.get('iam')
         client.list_instance_profiles()
+        client_pool.put(client, 'iam')
 
     # get redis data
     @task(1)
     @result_decorator
     def aws_iam_list_account_aliases_allow(self):
-        client = get_client('iam')
+        client = client_pool.get('iam')
         client.list_account_aliases()
-    
+        client_pool.put(client, 'iam')
+
     # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_iam_list_groups_allow(self):
-        client = get_client('iam')
+        client = client_pool.get('iam')
         client.list_groups()
-    
+        client_pool.put(client, 'iam')
+
     # set redis data
     @task(1)
     @result_decorator
     def aws_iam_list_roles_allow(self):
-        client = get_client('iam')
+        client = client_pool.get('iam')
         client.list_roles()
+        client_pool.put(client, 'iam')
 
     @task(2)
     @result_decorator
     def aws_iam_create_role_allow(self):
-        client = get_client('iam')
+        client = client_pool.get('iam')
         assume_role='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":["sts:AssumeRole"]}]}'
         client.create_role(RoleName='test-role', AssumeRolePolicyDocument=assume_role)
+        client_pool.put(client, 'iam')
 
     @task(2)
     @result_decorator
     def aws_iam_create_role_block(self):
-        client = get_client('iam')
+        client = client_pool.get('iam')
         assume_role='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"000000000000"},"Action":["sts:AssumeRole"]}]}'
         client.create_role(RoleName='test-role', AssumeRolePolicyDocument=assume_role)
+        client_pool.put(client, 'iam')
 
 
 
@@ -627,20 +653,23 @@ class AwsRdsTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_rds_describe_db_instances_allow(self):
-        client = get_client('rds')
+        client = client_pool.get('rds')
         client.describe_db_instances()
+        client_pool.put(client, 'rds')
 
     @task(3)
     @result_decorator
     def aws_rds_create_db_instance_allow(self):
-        client = get_client('rds')
+        client = client_pool.get('rds')
         client.create_db_instance(DBInstanceIdentifier='test-db', DBInstanceClass='db.t3.micro', Engine='postgres', StorageEncrypted=True, KmsKeyId='alias/secure-key')
+        client_pool.put(client, 'rds')
 
     @task(3)
     @result_decorator
     def aws_rds_create_db_instance_block(self):
-        client = get_client('rds')
+        client = client_pool.get('rds')
         client.create_db_instance(DBInstanceIdentifier='test-db', DBInstanceClass='db.t3.micro', Engine='postgres')
+        client_pool.put(client, 'rds')
 
 
 ### CLOUDFRONT ###
@@ -648,30 +677,34 @@ class AwsCloudFrontTasks(TaskSet):
     @task(2)
     @result_decorator
     def aws_cloudfront_create_distribution_block(self):
-        client = get_client('cloudfront')
+        client = client_pool.get('cloudfront')
         tmp = cloudfront_dist_config.copy()
         tmp['HttpVersion'] = "http1.1"
         client.create_distribution(DistributionConfig=tmp)
+        client_pool.put(client, 'cloudfront')
 
     @task(2)
     @result_decorator
     def aws_cloudfront_create_distribution_allow(self):
-        client = get_client('cloudfront')
+        client = client_pool.get('cloudfront')
         tmp = cloudfront_dist_config.copy()
         tmp['HttpVersion'] = "http2and3"
         client.create_distribution(DistributionConfig=tmp)
+        client_pool.put(client, 'cloudfront')
 
     @task(4)
     @result_decorator
     def aws_cloudfront_associate_alias_block(self):
-        client = get_client('cloudfront')
+        client = client_pool.get('cloudfront')
         client.associate_alias(TargetDistributionId='EDFDVBD6EXAMPLE', Alias='my.website.example.com')
+        client_pool.put(client, 'cloudfront')
 
     @task(4)
     @result_decorator
     def aws_cloudfront_associate_alias_allow(self):
-        client = get_client('cloudfront')
+        client = client_pool.get('cloudfront')
         client.associate_alias(TargetDistributionId='EDFDVBD6EXAMPLE', Alias='my.website.kivera.io')
+        client_pool.put(client, 'cloudfront')
 
 
 
@@ -681,34 +714,39 @@ class AwsSqsTasks(TaskSet):
     @result_decorator
     def aws_sqs_create_queue_block_1(self):
         policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":"sqs:*","Resource":"*"}]}'
-        client = get_client('sqs')
+        client = client_pool.get('sqs')
         client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/aws/sqs', 'Policy': policy } )
+        client_pool.put(client, 'sqs')
 
     @task(2)
     @result_decorator
     def aws_sqs_create_queue_block_2(self):
         policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"000000000000"},"Action":"sqs:*","Resource":"*"}]}'
-        client = get_client('sqs')
+        client = client_pool.get('sqs')
         client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
+        client_pool.put(client, 'sqs')
 
     @task(2)
     @result_decorator
     def aws_sqs_create_queue_allow(self):
         policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":"sqs:*","Resource":"*"}]}'
-        client = get_client('sqs')
+        client = client_pool.get('sqs')
         client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
+        client_pool.put(client, 'sqs')
 
     @task(2)
     @result_decorator
     def aws_sqs_send_message_block(self):
-        client = get_client('sqs')
+        client = client_pool.get('sqs')
         client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/000000000000/test-queue', MessageBody='test-message' )
+        client_pool.put(client, 'sqs')
 
     @task(2)
     @result_decorator
     def aws_sqs_send_message_allow(self):
-        client = get_client('sqs')
+        client = client_pool.get('sqs')
         client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/326190351503/test-queue', MessageBody='test-message' )
+        client_pool.put(client, 'sqs')
 
 
 
@@ -717,7 +755,7 @@ class AwsLambdaTasks(TaskSet):
     @task(2)
     @result_decorator
     def aws_lambda_create_function_block_1(self):
-        client = get_client('lambda')
+        client = client_pool.get('lambda')
         client.create_function(
             FunctionName='test-lambda',
             Role='arn:aws:iam::326190351503:role/test-role',
@@ -729,11 +767,12 @@ class AwsLambdaTasks(TaskSet):
             },
             KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
         )
+        client_pool.put(client, 'lambda')
 
     @task(2)
     @result_decorator
     def aws_lambda_create_function_block_2(self):
-        client = get_client('lambda')
+        client = client_pool.get('lambda')
         client.create_function(
             FunctionName='test-lambda',
             Role='arn:aws:iam::326190351503:role/test-role',
@@ -745,11 +784,12 @@ class AwsLambdaTasks(TaskSet):
             },
             KMSKeyArn='arn:aws:kms:ap-southeast-2:000000000000:alias/aws/lambda',
         )
+        client_pool.put(client, 'lambda')
 
     @task(2)
     @result_decorator
     def aws_lambda_create_function_block_3(self):
-        client = get_client('lambda')
+        client = client_pool.get('lambda')
         client.create_function(
             FunctionName='test-lambda',
             Role='arn:aws:iam::326190351503:role/test-role',
@@ -757,11 +797,12 @@ class AwsLambdaTasks(TaskSet):
             Runtime='python3.12',
             KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
         )
+        client_pool.put(client, 'lambda')
 
     @task(2)
     @result_decorator
     def aws_lambda_create_function_allow(self):
-        client = get_client('lambda')
+        client = client_pool.get('lambda')
         client.create_function(
             FunctionName='test-lambda',
             Role='arn:aws:iam::326190351503:role/test-role',
@@ -773,6 +814,7 @@ class AwsLambdaTasks(TaskSet):
             },
             KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
         )
+        client_pool.put(client, 'lambda')
 
 
 ### LOGS ###
@@ -780,13 +822,14 @@ class AwsLogsTasks(TaskSet):
     @task(2)
     @result_decorator
     def aws_logs_create_log_group_block(self):
-        client = get_client('logs', 'ap-southeast-2')
+        client = client_pool.get('logs')
         client.create_log_group(logGroupName='test-log-group')
+        client_pool.put(client, 'logs')
 
     @task(2)
     @result_decorator
     def aws_logs_put_subscription_filter_block(self):
-        client = get_client('logs')
+        client = client_pool.get('logs')
         client.put_subscription_filter(
             logGroupName='test-log-group',
             filterName='test-subscription',
@@ -794,11 +837,12 @@ class AwsLogsTasks(TaskSet):
             roleArn='arn:aws:iam::326190351503:role/test-role',
             destinationArn='arn:aws:kinesis:us-east-1:000000000000:stream/test-stream',
         )
+        client_pool.put(client, 'logs')
 
     @task(2)
     @result_decorator
     def aws_logs_put_subscription_filter_allow(self):
-        client = get_client('logs')
+        client = client_pool.get('logs')
         client.put_subscription_filter(
             logGroupName='test-log-group',
             filterName='test-subscription',
@@ -806,20 +850,23 @@ class AwsLogsTasks(TaskSet):
             roleArn='arn:aws:iam::326190351503:role/test-role',
             destinationArn='arn:aws:kinesis:us-east-1:326190351503:stream/test-stream',
         )
+        client_pool.put(client, 'logs')
 
     @task(2)
     @result_decorator
     def aws_logs_put_resource_policy_block(self):
-        client = get_client('logs')
+        client = client_pool.get('logs')
         policy='{"Version": "2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"000000000000"},"Action":"logs:PutLogEvents","Resource":"*"}]}'
         client.put_resource_policy(policyName='string', policyDocument=policy)
+        client_pool.put(client, 'logs')
 
     @task(2)
     @result_decorator
     def aws_logs_put_resource_policy_allow(self):
-        client = get_client('logs')
+        client = client_pool.get('logs')
         policy='{"Version": "2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":"logs:PutLogEvents","Resource":"*"}]}'
         client.put_resource_policy(policyName='string', policyDocument=policy)
+        client_pool.put(client, 'logs')
 
 
 
@@ -828,13 +875,14 @@ class AwsAutoScalingTasks(TaskSet):
     @task(2)
     @result_decorator
     def aws_autoscaling_describe_auto_scaling_groups_allow(self):
-        client = get_client('autoscaling')
+        client = client_pool.get('autoscaling')
         client.describe_auto_scaling_groups()
+        client_pool.put(client, 'autoscaling')
 
     @task(2)
     @result_decorator
     def aws_autoscaling_create_launch_configuration_block_1(self):
-        client = get_client('autoscaling')
+        client = client_pool.get('autoscaling')
         client.create_launch_configuration(
             LaunchConfigurationName='test-launch-config',
             ImageId='ami-0361bbf2b99f46c1d',
@@ -848,11 +896,12 @@ class AwsAutoScalingTasks(TaskSet):
                 }
             }]
         )
+        client_pool.put(client, 'autoscaling')
 
     @task(2)
     @result_decorator
     def aws_autoscaling_create_launch_configuration_block_2(self):
-        client = get_client('autoscaling')
+        client = client_pool.get('autoscaling')
         client.create_launch_configuration(
             LaunchConfigurationName='test-launch-config',
             ImageId='ami-00000000000000000',
@@ -866,11 +915,12 @@ class AwsAutoScalingTasks(TaskSet):
                 }
             }]
         )
+        client_pool.put(client, 'autoscaling')
 
     @task(2)
     @result_decorator
     def aws_autoscaling_create_launch_configuration_allow(self):
-        client = get_client('autoscaling')
+        client = client_pool.get('autoscaling')
         client.create_launch_configuration(
             LaunchConfigurationName='test-launch-config',
             ImageId='ami-0361bbf2b99f46c1d',
@@ -884,6 +934,7 @@ class AwsAutoScalingTasks(TaskSet):
                 }
             }]
         )
+        client_pool.put(client, 'autoscaling')
 
 
 ### BATCH ###
@@ -892,28 +943,32 @@ class AwsBatchTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_batch_delete_jobs_queue_allow(self):
-        client = get_client('batch')
+        client = client_pool.get('batch')
         client.delete_job_queue(jobQueue='random-something')
+        client_pool.put(client, 'batch')
 
     # get both redis data
     @task(1)
     @result_decorator
     def aws_batch_list_scheduling_policies_allow(self):
-        client = get_client('batch')
+        client = client_pool.get('batch')
         client.list_scheduling_policies()
-    
+        client_pool.put(client, 'batch')
+
     @task(4)
     @result_decorator
     def aws_batch_list_jobs_allow(self):
-        client = get_client('batch')
+        client = client_pool.get('batch')
         client.list_jobs(jobQueue='my-job-queue')
-    
+        client_pool.put(client, 'batch')
+
     # set redis data
     @task(1)
     @result_decorator
     def aws_batch_describe_jobs_allow(self):
-        client = get_client('batch')
+        client = client_pool.get('batch')
         client.describe_jobs(jobs=["my-job-queue"])
+        client_pool.put(client, 'batch')
 
 
 
@@ -923,49 +978,56 @@ class AwsEcsTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_ecs_describe_clusters_allow(self):
-        client = get_client('ecs')
+        client = client_pool.get('ecs')
         client.describe_clusters()
+        client_pool.put(client, 'ecs')
 
     @task(4)
     @result_decorator
     def aws_ecs_list_clusters_allow(self):
-        client = get_client('ecs')
+        client = client_pool.get('ecs')
         client.list_clusters()
+        client_pool.put(client, 'ecs')
 
     # get both redis data
     @task(1)
     @result_decorator
     def aws_ecs_list_account_settings_allow(self):
-        client = get_client('ecs')
+        client = client_pool.get('ecs')
         client.list_account_settings()
+        client_pool.put(client, 'ecs')
 
     # set_with_options redis data
     @task(1)
     @result_decorator
     def aws_ecs_list_task_definitions_allow(self):
-        client = get_client('ecs')
+        client = client_pool.get('ecs')
         client.list_task_definitions()
+        client_pool.put(client, 'ecs')
 
     # set redis data
     @task(1)
     @result_decorator
     def aws_ecs_list_attributes_allow(self):
-        client = get_client('ecs')
+        client = client_pool.get('ecs')
         client.list_attributes(targetType='container-instance')
+        client_pool.put(client, 'ecs')
 
 ### SNS ###
 class AwsSnsTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_sns_list_subscriptions_allow(self):
-        client = get_client('sns')
+        client = client_pool.get('sns')
         client.list_subscriptions()
+        client_pool.put(client, 'sns')
 
     @task(1)
     @result_decorator
     def aws_sns_list_topics_allow(self):
-        client = get_client('sns')
+        client = client_pool.get('sns')
         client.list_topics()
+        client_pool.put(client, 'sns')
 
 
 
@@ -974,28 +1036,32 @@ class AwsCloudFormationTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_cloudformation_describe_stacks_allow(self):
-        client = get_client('cloudformation')
+        client = client_pool.get('cloudformation')
         client.describe_stacks()
+        client_pool.put(client, 'cloudformation')
 
     @task(1)
     @result_decorator
     def aws_cloudformation_describe_type_allow(self):
         type_name = secrets.choice(['AWS::EC2::VPC','AWS::Lambda::Function','AWS::EC2::Instance','AWS::S3::Bucket','AWS::KMS::Key'])
-        client = get_client('cloudformation')
+        client = client_pool.get('cloudformation')
         client.describe_type(Type='RESOURCE', TypeName=type_name)
+        client_pool.put(client, 'cloudformation')
 
 class AwsSensitiveFieldsTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_kms_update_custom_key_store_block(self):
-        client = get_client('kms')
+        client = client_pool.get('kms')
         client.update_custom_key_store(CustomKeyStoreId='cks-1234567890abcdef0', KeyStorePassword='ExamplePassword')
+        client_pool.put(client, 'kms')
 
     @task(1)
     @result_decorator
     def aws_workmail_reset_password_block(self):
-        client = get_client('workmail')
+        client = client_pool.get('workmail')
         client.reset_password(OrganizationId='m-d281d0a2fd824be5b6cd3d3ce909fd27', UserId='S-1-1-11-1111111111-2222222222-3333333333-3333', Password='examplePa$$w0rd')
+        client_pool.put(client, 'workmail')
 
 class NonCloudTasks(TaskSet):
     @task(1)
@@ -1031,26 +1097,30 @@ class CustomResponseTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_xray_create_group_customresponse_block(self):
-        client = get_client('xray')
+        client = client_pool.get('xray')
         client.create_group(GroupName='test')
+        client_pool.put(client, 'xray')
 
     @task(1)
     @result_decorator
     def aws_xray_delete_group_customresponse_block(self):
-        client = get_client('xray')
+        client = client_pool.get('xray')
         client.delete_group(GroupName='test')
+        client_pool.put(client, 'xray')
 
     @task(1)
     @result_decorator
     def aws_xray_update_group_customresponse_block(self):
-        client = get_client('xray')
+        client = client_pool.get('xray')
         client.update_group(GroupName='test')
+        client_pool.put(client, 'xray')
 
     @task(1)
     @result_decorator
     def aws_xray_get_group_customresponse_block(self):
-        client = get_client('xray')
+        client = client_pool.get('xray')
         client.get_group(GroupName='test')
+        client_pool.put(client, 'xray')
 
 class ThroughputTasksCloud(TaskSet):
 
@@ -1088,32 +1158,37 @@ class TransparentProxyTasks(TaskSet):
     @task(1)
     @result_decorator
     def aws_s3_list_objects_allow(self):
-        client = get_client('s3')
+        client = client_pool.get('s3')
         client.get_paginator('list_objects').paginate(Bucket='kivera-poc-deployment', PaginationConfig={'MaxItems': 1})
+        client_pool.put(client, 's3')
 
     @task(3)
     @result_decorator
     def aws_s3_put_object_block(self):
-        client = get_client('s3', 'ap-southeast-2')
+        client = client_pool.get('s3')
         client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode())
+        client_pool.put(client, 's3')
 
     @task(1)
     @result_decorator
     def aws_s3_get_object_allow_1(self):
-        client = get_client('s3', 'ap-southeast-2')
+        client = client_pool.get('s3')
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-01/data.txt")
+        client_pool.put(client, 's3')
 
     @task(1)
     @result_decorator
     def aws_s3_get_object_allow_2(self):
-        client = get_client('s3', 'ap-southeast-2')
+        client = client_pool.get('s3')
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-02/data.txt")
+        client_pool.put(client, 's3')
 
     @task(1)
     @result_decorator
     def aws_s3_get_object_allow_3(self):
-        client = get_client('s3', 'ap-southeast-2')
+        client = client_pool.get('s3')
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-03/data.txt")
+        client_pool.put(client, 's3')
 
 
 class Transparent(User):
