@@ -22,17 +22,17 @@ class TimeoutException(Exception):
 
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
-MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '10'))
+MAX_CLIENT_REUSE = int(os.getenv('MAX_CLIENT_REUSE', '0'))
 TEST_TIMEOUT = int(os.getenv('TEST_TIMEOUT', '60'))
 
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
 
 client_config = Config(
-    connect_timeout = 10,
-    read_timeout = 30,
-    tcp_keepalive = True,
-    max_pool_connections = MAX_CLIENT_REUSE,
+    # connect_timeout = 10,
+    # read_timeout = 30,
+    # tcp_keepalive = True,
+    # max_pool_connections = MAX_CLIENT_REUSE,
     retries = {
         'total_max_attempts': 1,
         'mode': 'standard'
@@ -77,6 +77,8 @@ allowed_errors = [
     'EC2ThrottledException',
 
     'KMS.NotFoundException',
+    'ClusterNotFoundException',
+    'ValidationError',
 ]
 
 cloudfront_dist_config = {
@@ -136,7 +138,7 @@ all_clients_lock = threading.Lock()
 def get_client(service, region=""):
     if region == "":
         region = secrets.choice(aws_regions)
-
+    
     with all_clients_lock:
         if service not in all_clients:
             all_clients[service] = {}
@@ -419,6 +421,27 @@ class AwsStsTasks(TaskSet):
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="org-dev-session",
         )
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_sts_get_access_key_info_allow(self):
+        client = get_client('sts')
+        client.get_access_key_info(AccessKeyId="somethingtokenss")
+    
+    # set_with_options redis data
+    @task(1)
+    @result_decorator
+    def aws_sts_get_federation_token_allow(self):
+        client = get_client('sts')
+        client.get_federation_token(Name="something")
+    
+    # get both redis data
+    @task(1)
+    @result_decorator
+    def aws_sts_get_session_token_allow(self):
+        client = get_client('sts')
+        client.get_session_token()
 
 
 ### S3 ###
@@ -472,19 +495,33 @@ class AwsS3Tasks(TaskSet):
 
 ### APIGATEWAY ###
 class AwsApiGatewayTasks(TaskSet):
-    ### APIGATEWAY ###
-    @task(2)
+    # delete redis data
+    @task(1)
+    @result_decorator
+    def aws_apigateway_get_sdk_types_allow(self):
+        client = get_client('apigateway')
+        client.get_sdk_types()
+
+    # set_with_options redis data
+    @task(1)
     @result_decorator
     def aws_apigateway_get_apis_allow(self):
         client = get_client('apigatewayv2')
         client.get_apis()
 
-    # Get redis data
+    # get both redis data
     @task(1)
     @result_decorator
     def aws_apigateway_get_vpc_links_allow(self):
         client = get_client('apigatewayv2')
         client.get_vpc_links()
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_apigateway_get_domain_names_allow(self):
+        client = get_client('apigatewayv2')
+        client.get_domain_names()
 
     @task(4)
     @result_decorator
@@ -541,12 +578,33 @@ class AwsIamTasks(TaskSet):
         client = get_client('iam')
         client.list_users()
 
-    # Get redis data
+    # delete redis data
+    @task(1)
+    @result_decorator
+    def aws_iam_list_instance_profiles_allow(self):
+        client = get_client('iam')
+        client.list_instance_profiles()
+
+    # get redis data
     @task(1)
     @result_decorator
     def aws_iam_list_account_aliases_allow(self):
         client = get_client('iam')
         client.list_account_aliases()
+    
+    # set_with_options redis data
+    @task(1)
+    @result_decorator
+    def aws_iam_list_groups_allow(self):
+        client = get_client('iam')
+        client.list_groups()
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_iam_list_roles_allow(self):
+        client = get_client('iam')
+        client.list_roles()
 
     @task(2)
     @result_decorator
@@ -587,19 +645,6 @@ class AwsRdsTasks(TaskSet):
 
 ### CLOUDFRONT ###
 class AwsCloudFrontTasks(TaskSet):
-    @task(4)
-    @result_decorator
-    def aws_cloudfront_list_distributions_allow(self):
-        client = get_client('cloudfront')
-        client.list_distributions()
-
-    # Get redis data
-    @task(1)
-    @result_decorator
-    def aws_cloudfront_list_functions_allow(self):
-        client = get_client('cloudfront')
-        client.list_functions()
-
     @task(2)
     @result_decorator
     def aws_cloudfront_create_distribution_block(self):
@@ -843,43 +888,70 @@ class AwsAutoScalingTasks(TaskSet):
 
 ### BATCH ###
 class AwsBatchTasks(TaskSet):
-    @task(2)
+    # set_with_options redis data
+    @task(1)
     @result_decorator
-    def aws_batch_list_jobs_allow(self):
+    def aws_batch_delete_jobs_queue_allow(self):
         client = get_client('batch')
-        client.list_jobs(jobQueue='my-job-queue')
+        client.delete_job_queue(jobQueue='random-something')
 
-    # Get redis data
+    # get both redis data
     @task(1)
     @result_decorator
     def aws_batch_list_scheduling_policies_allow(self):
         client = get_client('batch')
         client.list_scheduling_policies()
+    
+    @task(4)
+    @result_decorator
+    def aws_batch_list_jobs_allow(self):
+        client = get_client('batch')
+        client.list_jobs(jobQueue='my-job-queue')
+    
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_batch_describe_jobs_allow(self):
+        client = get_client('batch')
+        client.describe_jobs(jobs=["my-job-queue"])
 
 
 
 ### ECS ###
 class AwsEcsTasks(TaskSet):
-    @task(2)
+    # delete redis data
+    @task(1)
+    @result_decorator
+    def aws_ecs_describe_clusters_allow(self):
+        client = get_client('ecs')
+        client.describe_clusters()
+
+    @task(4)
     @result_decorator
     def aws_ecs_list_clusters_allow(self):
         client = get_client('ecs')
         client.list_clusters()
 
-    # Get redis data
+    # get both redis data
     @task(1)
     @result_decorator
     def aws_ecs_list_account_settings_allow(self):
         client = get_client('ecs')
         client.list_account_settings()
 
-    @task(2)
+    # set_with_options redis data
+    @task(1)
     @result_decorator
     def aws_ecs_list_task_definitions_allow(self):
         client = get_client('ecs')
         client.list_task_definitions()
 
-
+    # set redis data
+    @task(1)
+    @result_decorator
+    def aws_ecs_list_attributes_allow(self):
+        client = get_client('ecs')
+        client.list_attributes(targetType='container-instance')
 
 ### SNS ###
 class AwsSnsTasks(TaskSet):
@@ -1012,6 +1084,44 @@ class ThroughputNonCloud(User):
     tasks = {
         ThroughputTasksNonCloud: 1
     }
+class TransparentProxyTasks(TaskSet):
+    @task(1)
+    @result_decorator
+    def aws_s3_list_objects_allow(self):
+        client = get_client('s3')
+        client.get_paginator('list_objects').paginate(Bucket='kivera-poc-deployment', PaginationConfig={'MaxItems': 1})
+
+    @task(3)
+    @result_decorator
+    def aws_s3_put_object_block(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode())
+
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow_1(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-01/data.txt")
+
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow_2(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-02/data.txt")
+
+    @task(1)
+    @result_decorator
+    def aws_s3_get_object_allow_3(self):
+        client = get_client('s3', 'ap-southeast-2')
+        client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-03/data.txt")
+
+
+class Transparent(User):
+    wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
+    tasks = {
+        TransparentProxyTasks: 1,
+    }
+
 
 class Standard(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
