@@ -1127,13 +1127,14 @@ class ThroughputTasksCloud(TaskSet):
     @task(1)
     @result_decorator
     def aws_s3_get_object_allow(self):
-        client = get_client("s3", "ap-southeast-2")
+        client = client_pool.get('s3')
         with open("/root/kivera/ubuntu.s3.iso", "wb") as f:
             client.download_fileobj(
                 "kivera-poc-deployment",
                 "kivera/locust-perf-test/ubuntu-22.04.4-desktop-amd64.iso",
                 f,
             )
+        client_pool.put(client, 's3')
 
 class ThroughputTasksNonCloud(TaskSet):
 
