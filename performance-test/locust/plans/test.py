@@ -25,8 +25,32 @@ USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
 TEST_TIMEOUT = int(os.getenv('TEST_TIMEOUT', '60'))
 
+aws_regions = [
+    # "us-east-1",
+    # "us-east-2",
+    # "eu-west-1",
+    # "eu-west-2",
+    # "ap-east-1",
+    # "ap-south-1",
+    # "ap-southeast-1",
+    "ap-southeast-2",
+    # "ap-southeast-4",
+    # "ap-northeast-1"
+]
+
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
+
+all_clients = {}
+all_clients_lock = threading.Lock()
+
+def get_client(service, region=""):
+    if region == "":
+        region = secrets.choice(aws_regions)
+
+    client = boto3.client(service, region_name=region, config=client_config)
+    client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+    return client
 
 class ClientPool:
     def __init__(self):
@@ -1123,21 +1147,20 @@ class CustomResponseTasks(TaskSet):
         client_pool.put(client, 'xray')
 
 class ThroughputTasksCloud(TaskSet):
-
     @task(1)
     @result_decorator
     def aws_s3_get_object_allow(self):
-        client = client_pool.get('s3')
+        client = get_client("s3", "ap-southeast-2")
+        # client = client_pool.get('s3')
         with open("/root/kivera/ubuntu.s3.iso", "wb") as f:
             client.download_fileobj(
                 "kivera-poc-deployment",
                 "kivera/locust-perf-test/ubuntu-22.04.4-desktop-amd64.iso",
                 f,
             )
-        client_pool.put(client, 's3')
+        # client_pool.put(client, 's3')
 
 class ThroughputTasksNonCloud(TaskSet):
-
     @task(1)
     @result_decorator
     def noncloud_download_allow(self):
@@ -1155,6 +1178,7 @@ class ThroughputNonCloud(User):
     tasks = {
         ThroughputTasksNonCloud: 1
     }
+
 class TransparentProxyTasks(TaskSet):
     @task(1)
     @result_decorator
