@@ -7,11 +7,11 @@ import concurrent.futures
 import queue
 import boto3
 import botocore
-# import ddtrace
+import ddtrace
 from botocore.config import Config
 from boto3.s3.transfer import TransferConfig
 from locust import User, TaskSet, task, between, events
-# from ddtrace.propagation.http import HTTPPropagator
+from ddtrace.propagation.http import HTTPPropagator
 import requests
 import urllib3
 
@@ -39,8 +39,8 @@ aws_regions = [
     # "ap-northeast-1"
 ]
 
-# ddtrace.patch(botocore=True)
-# ddtrace.config.botocore['distributed_tracing'] = False
+ddtrace.patch(botocore=True)
+ddtrace.config.botocore['distributed_tracing'] = False
 
 all_clients = {}
 all_clients_lock = threading.Lock()
@@ -60,7 +60,7 @@ class ClientPool:
 
     def new_client(self, service, region="ap-southeast-2"):
         client = boto3.client(service, region_name=region, config=client_config)
-        # client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+        client.meta.events.register_first('before-sign.*.*', add_trace_headers)
         return client
 
     def get(self, service, region="ap-southeast-2"):
@@ -163,13 +163,13 @@ custom_responses = {
 
 boto3.setup_default_session(region_name='ap-southeast-2')
 
-# def add_trace_headers(request, **kwargs):
-#     span = ddtrace.tracer.current_span()
-#     span.service = "locust"
-#     headers = {}
-#     HTTPPropagator.inject(span.context, headers)
-#     for h, v in headers.items():
-#         request.headers.add_header(h, v)
+def add_trace_headers(request, **kwargs):
+    span = ddtrace.tracer.current_span()
+    span.service = "locust"
+    headers = {}
+    HTTPPropagator.inject(span.context, headers)
+    for h, v in headers.items():
+        request.headers.add_header(h, v)
 
 
 def action_name(parts):
