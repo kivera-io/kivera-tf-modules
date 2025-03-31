@@ -4,10 +4,9 @@ set -x
 ## tune box
 echo "* hard nofile 100000" >> /etc/security/limits.conf
 echo "* soft nofile 100000" >> /etc/security/limits.conf
-echo "net.core.somaxconn=32768" >> /etc/sysctl.conf
+echo "net.core.somaxconn=16384" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
-echo "net.core.netdev_max_backlog=1280" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_abort_on_overflow=1" >> /etc/sysctl.conf
+echo "net.core.netdev_max_backlog=1000" >> /etc/sysctl.conf
 sysctl -p
 
 yum update -y
