@@ -9,6 +9,7 @@ import boto3
 import botocore
 # import ddtrace
 from botocore.config import Config
+from boto3.s3.transfer import TransferConfig
 from locust import User, TaskSet, task, between, events
 # from ddtrace.propagation.http import HTTPPropagator
 import requests
@@ -1157,6 +1158,7 @@ class ThroughputTasksCloud(TaskSet):
                 "kivera-poc-deployment",
                 "kivera/locust-perf-test/ubuntu-22.04.4-desktop-amd64.iso",
                 f,
+                Config=TransferConfig(max_concurrency=8),
             )
         # client_pool.put(client, 's3')
 
