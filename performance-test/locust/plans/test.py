@@ -1158,7 +1158,7 @@ class ThroughputTasksCloud(TaskSet):
                 "kivera-poc-deployment",
                 "kivera/locust-perf-test/ubuntu-22.04.4-desktop-amd64.iso",
                 f,
-                Config=TransferConfig(max_concurrency=8),
+                Config=TransferConfig(max_concurrency=1),
             )
         # client_pool.put(client, 's3')
 
