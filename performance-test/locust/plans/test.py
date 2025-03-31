@@ -45,13 +45,13 @@ aws_regions = [
 all_clients = {}
 all_clients_lock = threading.Lock()
 
-def get_client(service, region=""):
-    if region == "":
-        region = secrets.choice(aws_regions)
+# def get_client(service, region=""):
+#     if region == "":
+#         region = secrets.choice(aws_regions)
 
-    client = boto3.client(service, region_name=region, config=client_config)
-    # client.meta.events.register_first('before-sign.*.*', add_trace_headers)
-    return client
+#     client = boto3.client(service, region_name=region, config=client_config)
+#     # client.meta.events.register_first('before-sign.*.*', add_trace_headers)
+#     return client
 
 class ClientPool:
     def __init__(self):
@@ -1151,8 +1151,8 @@ class ThroughputTasksCloud(TaskSet):
     @task(1)
     @result_decorator
     def aws_s3_get_object_allow(self):
-        client = get_client("s3", "ap-southeast-2")
-        # client = client_pool.get('s3')
+        # client = get_client("s3", "ap-southeast-2")
+        client = client_pool.get('s3')
         with open("/root/kivera/ubuntu.s3.iso", "wb") as f:
             client.download_fileobj(
                 "kivera-poc-deployment",
@@ -1160,7 +1160,7 @@ class ThroughputTasksCloud(TaskSet):
                 f,
                 # Config=TransferConfig(max_concurrency=1),
             )
-        # client_pool.put(client, 's3')
+        client_pool.put(client, 's3')
 
 class ThroughputTasksNonCloud(TaskSet):
     @task(1)
