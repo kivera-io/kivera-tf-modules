@@ -125,7 +125,22 @@ resource "aws_iam_policy" "proxy_instance" {
           local.proxy_credentials_secret_arn,
           local.proxy_private_key_secret_arn
         ]
-      },
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "proxy_instance" {
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.proxy_instance.arn
+}
+
+resource "aws_iam_policy" "proxy_instance_s3" {
+  count = var.proxy_local_path != "" ? 1 : 0
+  name  = "${var.name_prefix}-s3"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
       {
         Action = [
           "s3:GetObject",
@@ -141,9 +156,10 @@ resource "aws_iam_policy" "proxy_instance" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "proxy_instance" {
+resource "aws_iam_role_policy_attachment" "proxy_instance_s3" {
+  count      = var.proxy_local_path != "" ? 1 : 0
   role       = aws_iam_role.instance_role.name
-  policy_arn = aws_iam_policy.proxy_instance.arn
+  policy_arn = aws_iam_policy.proxy_instance_s3.arn
 }
 
 data "aws_iam_policy_document" "datadog_secret" {
@@ -459,10 +475,6 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
   comparison_operator = "LessThanThreshold"
 }
 
-data "aws_s3_bucket" "bucket" {
-  bucket = var.s3_bucket
-}
-
 data "archive_file" "proxy_binary" {
   count = var.proxy_local_path != "" ? 1 : 0
 
@@ -475,10 +487,17 @@ resource "aws_s3_object" "proxy_binary" {
   count = var.proxy_local_path != "" ? 1 : 0
 
   depends_on = [data.archive_file.proxy_binary]
-  bucket     = data.aws_s3_bucket.bucket.id
+  bucket     = var.s3_bucket
   key        = "${var.s3_bucket_key}/proxy.zip"
   source     = "${path.module}/temp/proxy.zip"
   etag       = data.archive_file.proxy_binary[count.index].output_md5
+
+  lifecycle {
+    precondition {
+      condition     = var.s3_bucket != "" && var.s3_bucket_key != ""
+      error_message = "s3_bucket and s3_bucket_key must be provided if proxy_local_path is provided"
+    }
+  }
 }
 
 resource "aws_security_group" "redis_sg" {
