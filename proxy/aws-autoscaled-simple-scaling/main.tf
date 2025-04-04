@@ -159,7 +159,7 @@ resource "aws_iam_policy" "proxy_instance_s3" {
 resource "aws_iam_role_policy_attachment" "proxy_instance_s3" {
   count      = var.proxy_local_path != "" ? 1 : 0
   role       = aws_iam_role.instance_role.name
-  policy_arn = aws_iam_policy.proxy_instance_s3.arn
+  policy_arn = aws_iam_policy.proxy_instance_s3[0].arn
 }
 
 data "aws_iam_policy_document" "datadog_secret" {
