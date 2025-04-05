@@ -75,6 +75,7 @@ variable "load_balancer_cross_zone" {
 variable "s3_bucket" {
   description = "The name of the bucket used to upload the tests/files"
   type        = string
+  default     = ""
 }
 
 variable "s3_bucket_key" {
