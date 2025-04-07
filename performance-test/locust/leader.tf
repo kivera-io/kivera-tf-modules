@@ -20,13 +20,13 @@ resource "aws_instance" "leader" {
     locust_run_time     = var.locust_run_time
     user_wait_min       = var.user_wait_min
     user_wait_max       = var.user_wait_max
+    locust_user_classes = var.locust_user_classes
     deployment_name     = var.deployment_name
     s3_bucket           = var.s3_bucket
     s3_bucket_key       = var.s3_bucket_key
     deployment_id       = local.deployment_id
     leader_username     = var.leader_username
     leader_password     = random_string.leader_password.result
-    locust_user_classes = var.locust_user_classes
     nodes_count         = var.nodes_count
     cw_config = templatefile("${path.module}/data/cloudwatch-config.json.tpl", {
       instance_name = local.locust_leader_instance_name

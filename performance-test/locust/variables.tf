@@ -115,25 +115,19 @@ variable "user_wait_max" {
   default     = 6
 }
 
+variable "locust_user_classes" {
+  description = "Which locust test classes to use"
+  type        = string
+  default     = "Standard"
+}
+
 variable "proxy_public_cert" {
   description = "Public cert used by the proxy"
   default     = ""
-}
-
-variable "max_client_reuse" {
-  description = "The maximum amount of times a client will be re-used in tests (0-n)"
-  type        = number
-  default     = 0
 }
 
 variable "test_timeout" {
   description = "The maximum amount of time (in secodns) a test is allowed to run before failing"
   type        = number
   default     = 60
-}
-
-variable "locust_user_classes" {
-  description = "Which locust test classes to use"
-  type        = string
-  default     = "Standard"
 }

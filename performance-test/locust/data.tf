@@ -14,7 +14,7 @@ data "aws_region" "current" {}
 locals {
   account_id                  = data.aws_caller_identity.current.account_id
   aws_region                  = data.aws_region.current.name
-  deployment_id               = formatdate("YYYYMMDDhh", timestamp())
+  deployment_id               = formatdate("YYYYMMDD", timestamp())
   redis_instance_name         = "${var.deployment_name}-redis"
   redis_subnet_group_name     = "${var.deployment_name}-subnets"
   locust_leader_instance_name = "${var.deployment_name}-locust-leader"
