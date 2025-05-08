@@ -137,3 +137,9 @@ variable "locust_user_classes" {
   type        = string
   default     = "Standard"
 }
+
+variable "leader_use_proxy" {
+  description = "Enable if leader is required to go through the proxy"
+  type        = bool
+  default     = false
+}

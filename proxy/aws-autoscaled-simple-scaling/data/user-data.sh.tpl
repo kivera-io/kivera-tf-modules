@@ -1,6 +1,25 @@
 #!/bin/bash -x
 STATE=0
 
+if [[ ${upstream_proxy} == true ]]; then
+  # curl -s http://${upstream_proxy_endpoint}:8090/pub.cert > ~/public.pem
+  # cp ~/public.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
+  echo '${proxy_public_cert}' > /etc/pki/ca-trust/source/anchors/ca-cert.pem
+  update-ca-trust extract
+fi
+
+if [[ "${upstream_proxy_endpoint}" != "" ]]; then
+  export HTTPS_PROXY="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+  export HTTP_PROXY="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+  export https_proxy="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+  export http_proxy="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+  export no_proxy=169.254.169.254
+  export NO_PROXY=169.254.169.254
+
+  sed -i -e 's#http://#https://#g' /etc/yum.repos.d/td.repo
+  echo "proxy=http://${upstream_proxy_endpoint}:${upstream_proxy_port}" >> /etc/yum.conf
+fi
+
 ## tune box
 echo "* hard nofile 100000" >> /etc/security/limits.conf
 echo "* soft nofile 100000" >> /etc/security/limits.conf
@@ -44,6 +63,17 @@ KIVERA_KV_STORE_CLUSTER_MODE=true
 EOF
 fi
 
+if [[ "${upstream_proxy_endpoint}" != "" ]]; then
+cat << EOF >> /opt/kivera/etc/env.txt
+HTTPS_PROXY="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+HTTP_PROXY="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+https_proxy="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+http_proxy="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+no_proxy=169.254.169.254
+NO_PROXY=169.254.169.254
+EOF
+fi
+
 groupadd -r kivera
 useradd -mrg kivera kivera
 useradd -g kivera td-agent
@@ -65,9 +95,34 @@ if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]
   DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${datadog_secret_arn}`
   export DD_API_KEY
   DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+  
+  if [[ "${upstream_proxy_endpoint}" != "" ]]; then
+    cat << EOF >> /etc/datadog-agent/environment
+      DD_PROXY_HTTPS="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+      DD_PROXY_HTTP="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+EOF
+  fi
 fi
 
-curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
+
+# add GPG key
+rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent
+
+# add treasure data repository to yum
+cat >/etc/yum.repos.d/td.repo <<'EOF';
+[treasuredata]
+name=TreasureData
+baseurl=http://packages.treasuredata.com/4/amazon/2/\$basearch
+gpgcheck=1
+gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
+EOF
+
+# update your sources
+yum check-update
+
+# install the toolbelt
+yes | yum install -y td-agent
+# curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera
 
 # Configure Kivera service
@@ -214,16 +269,16 @@ EOF
 # Enable services
 if [[ ${proxy_log_to_kivera} == true ]]; then
   systemctl enable td-agent.service
-  systemctl start td-agent.service
+  systemctl restart td-agent.service
 fi
 if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
   systemctl enable datadog-agent
-  systemctl start datadog-agent
+  systemctl restart datadog-agent
 fi
 systemctl enable amazon-cloudwatch-agent.service
-systemctl start amazon-cloudwatch-agent.service
+systemctl restart amazon-cloudwatch-agent.service
 systemctl enable kivera.service
-systemctl start kivera.service
+systemctl restart kivera.service
 
 sleep 10
 

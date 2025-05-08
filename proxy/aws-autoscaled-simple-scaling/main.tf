@@ -1,3 +1,7 @@
+provider "aws" {
+  region = var.region
+}
+
 data "aws_ami" "latest" {
   most_recent = true
   owners      = ["amazon"]
@@ -114,7 +118,7 @@ resource "aws_iam_role_policy_attachment" "read-only" {
 }
 
 resource "aws_iam_policy" "proxy_instance" {
-  name = "${var.name_prefix}-default"
+  name_prefix = "${var.name_prefix}-default-"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -179,9 +183,9 @@ data "aws_iam_policy_document" "datadog_secret" {
 }
 
 resource "aws_iam_policy" "datadog_secret" {
-  count  = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
-  name   = "${var.name_prefix}-get-datadog-secret"
-  policy = data.aws_iam_policy_document.datadog_secret[0].json
+  count       = var.enable_datadog_profiling || var.enable_datadog_tracing ? 1 : 0
+  name_prefix = "${var.name_prefix}-get-datadog-secret-"
+  policy      = data.aws_iam_policy_document.datadog_secret[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "datadog_secret" {
@@ -201,9 +205,9 @@ data "aws_iam_policy_document" "redis_conn_string_secret" {
 }
 
 resource "aws_iam_policy" "redis_conn_string_secret" {
-  count  = local.redis_enabled ? 1 : 0
-  name   = "${var.name_prefix}-get-redis-connection-secret"
-  policy = data.aws_iam_policy_document.redis_conn_string_secret[0].json
+  count       = local.redis_enabled ? 1 : 0
+  name_prefix = "${var.name_prefix}-get-redis-connection-secret-"
+  policy      = data.aws_iam_policy_document.redis_conn_string_secret[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "redis_conn_string_secret" {
@@ -308,6 +312,9 @@ resource "aws_launch_template" "launch_template" {
   key_name = var.ec2_key_pair
   user_data = base64encode(templatefile("${path.module}/data/user-data.sh.tpl", {
     instance_name                = "${var.name_prefix}-proxy"
+    upstream_proxy_endpoint      = var.upstream_proxy_endpoint
+    upstream_proxy               = var.upstream_proxy
+    upstream_proxy_port          = var.upstream_proxy_port
     proxy_version                = var.proxy_version
     proxy_s3_path                = local.proxy_s3_path
     proxy_cert_type              = var.proxy_cert_type
@@ -549,6 +556,9 @@ resource "aws_elasticache_replication_group" "redis" {
   node_type            = var.cache_instance_type
   engine_version       = 7.1
   parameter_group_name = "default.redis7.cluster.on"
+  # engine_version       = 7.2
+  # parameter_group_name = "default.valkey7.cluster.on"
+  # engine               = "valkey"
 
   port               = 6379
   subnet_group_name  = aws_elasticache_subnet_group.redis[0].name
@@ -568,7 +578,7 @@ resource "aws_elasticache_replication_group" "redis" {
 resource "aws_elasticache_user" "redis_kivera_default" {
   count = local.redis_enabled ? 1 : 0
 
-  user_id       = "new-default-user"
+  user_id       = var.cache_default_username
   user_name     = "default"
   access_string = "on -@all +ping"
   engine        = "REDIS"
@@ -589,7 +599,7 @@ resource "aws_elasticache_user_group" "redis_kivera_user_group" {
   count = local.redis_enabled ? 1 : 0
 
   engine        = "REDIS"
-  user_group_id = "kivera"
+  user_group_id = var.cache_user_group
   user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id]
 }
 

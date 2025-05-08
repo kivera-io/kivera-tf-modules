@@ -14,6 +14,7 @@ resource "aws_instance" "leader" {
 
   iam_instance_profile = aws_iam_instance_profile.locust.name
   user_data = templatefile("${path.module}/data/leader-user-data.sh.tpl", {
+    proxy_public_cert   = var.proxy_public_cert
     proxy_host          = var.proxy_endpoint
     locust_max_users    = var.locust_max_users
     locust_spawn_rate   = var.locust_spawn_rate
@@ -26,6 +27,7 @@ resource "aws_instance" "leader" {
     deployment_id       = local.deployment_id
     leader_username     = var.leader_username
     leader_password     = random_string.leader_password.result
+    leader_use_proxy    = var.leader_use_proxy
     locust_user_classes = var.locust_user_classes
     nodes_count         = var.nodes_count
     cw_config = templatefile("${path.module}/data/cloudwatch-config.json.tpl", {

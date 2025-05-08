@@ -10,6 +10,12 @@ variable "name_prefix" {
   }
 }
 
+variable "region" {
+  description = "Which region to deploy in"
+  type        = string
+  default     = "ap-southeast-2"
+}
+
 variable "vpc_id" {
   description = "Which VPC to deploy the proxy into"
   type        = string
@@ -152,6 +158,24 @@ variable "proxy_log_group_retention" {
   default     = 30
 }
 
+variable "upstream_proxy" {
+  description = "Enable to point towards upstream proxy and download it's cert"
+  type        = bool
+  default     = false
+}
+
+variable "upstream_proxy_endpoint" {
+  description = "The endpoint for the upstream proxy"
+  type        = string
+  default     = ""
+}
+
+variable "upstream_proxy_port" {
+  description = "Port for upstream proxy"
+  type        = string
+  default     = ""
+}
+
 ### Cache variables
 variable "cache_enabled" {
   description = "Whether to deploy and use a cache with the proxy"
@@ -168,6 +192,12 @@ variable "cache_type" {
     condition     = contains(["redis"], var.cache_type)
     error_message = "Allowed value(s) for cache_type: \"redis\"."
   }
+}
+
+variable "cache_default_username" {
+  description = "The username used to connect to the cache as default user"
+  type        = string
+  default     = "new-default-user"
 }
 
 variable "cache_default_password" {
@@ -188,6 +218,12 @@ variable "cache_kivera_password" {
   type        = string
   sensitive   = true
   default     = ""
+}
+
+variable "cache_user_group" {
+  description = "The user group for the cache"
+  type        = string
+  default     = "kivera"
 }
 
 variable "cache_subnet_ids" {
