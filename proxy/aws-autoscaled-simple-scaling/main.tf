@@ -127,11 +127,31 @@ resource "aws_iam_policy" "proxy_instance" {
         Effect = "Allow"
         Resource = [
           local.proxy_credentials_secret_arn,
-          local.proxy_private_key_secret_arn
         ]
       }
     ]
   })
+}
+
+data "aws_iam_policy_document" "proxy_private_key_secret" {
+  count = var.external_ca ? 0 : 1
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [local.proxy_private_key_secret_arn]
+  }
+}
+
+resource "aws_iam_policy" "proxy_private_key_secret" {
+  count       = var.external_ca ? 0 : 1
+  name_prefix = "${var.name_prefix}-get-proxy-private-key-secret-"
+  policy      = data.aws_iam_policy_document.proxy_private_key_secret[0].json
+}
+
+resource "aws_iam_role_policy_attachment" "proxy_private_key_secret" {
+  count      = var.external_ca ? 0 : 1
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.proxy_private_key_secret[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "proxy_instance" {
@@ -149,11 +169,14 @@ resource "aws_iam_policy" "proxy_instance_s3" {
         Action = [
           "s3:GetObject",
           "s3:PutObject",
-          "s3:CreateMultipartUpload"
+          "s3:CreateMultipartUpload",
+          "acm:*",
+          "acm-pca:*"
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:s3:::${var.s3_bucket}/*"
+          "arn:aws:s3:::${var.s3_bucket}/*",
+          "arn:aws:acm-pca:*"
         ]
       },
     ]
@@ -193,7 +216,6 @@ resource "aws_iam_role_policy_attachment" "datadog_secret" {
   role       = aws_iam_role.instance_role.name
   policy_arn = aws_iam_policy.datadog_secret[0].arn
 }
-
 
 data "aws_iam_policy_document" "redis_conn_string_secret" {
   count = local.redis_enabled ? 1 : 0
@@ -321,6 +343,8 @@ resource "aws_launch_template" "launch_template" {
     proxy_public_cert            = var.proxy_public_cert
     proxy_credentials_secret_arn = local.proxy_credentials_secret_arn
     proxy_private_key_secret_arn = local.proxy_private_key_secret_arn
+    external_ca                  = var.external_ca
+    pca_arn                      = var.pca_arn
     proxy_log_to_kivera          = var.proxy_log_to_kivera
     proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
     redis_connection_string_arn  = local.redis_connection_string_secret_arn
@@ -581,7 +605,7 @@ resource "aws_elasticache_user" "redis_kivera_default" {
   user_id       = var.cache_default_username
   user_name     = "default"
   access_string = "on -@all +ping"
-  engine        = "REDIS"
+  engine        = "redis"
   passwords     = [local.cache_default_pass]
 }
 
@@ -591,14 +615,14 @@ resource "aws_elasticache_user" "redis_kivera_user" {
   user_id       = var.cache_kivera_username
   user_name     = var.cache_kivera_username
   access_string = "on ~kivera* -@all +ping +mget +get +set +mset +del +strlen +cluster|slots +cluster|shards +command"
-  engine        = "REDIS"
+  engine        = "redis"
   passwords     = [local.cache_kivera_pass]
 }
 
 resource "aws_elasticache_user_group" "redis_kivera_user_group" {
   count = local.redis_enabled ? 1 : 0
 
-  engine        = "REDIS"
+  engine        = "redis"
   user_group_id = var.cache_user_group
   user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id]
 }

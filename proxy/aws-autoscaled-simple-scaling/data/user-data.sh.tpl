@@ -39,22 +39,35 @@ mkdir -p $KIVERA_BIN_PATH /opt/kivera/etc/ /opt/kivera/var/log/
 
 echo '${proxy_public_cert}' > $KIVERA_CA_CERT
 
-export KIVERA_CA_SECRET_REGION=$(echo ${proxy_private_key_secret_arn} | cut -d':' -f4)
-export KIVERA_CREDENTIALS_SECRET_REGION=$(echo ${proxy_credentials_secret_arn} | cut -d':' -f4)
-export REDIS_CONNECTION_STRING_SECRET_REGION=$(echo ${redis_connection_string_arn} | cut -d':' -f4)
+if [[ '${proxy_private_key_secret_arn}' != "" ]]; then
+  export KIVERA_CA_SECRET_REGION=$(echo ${proxy_private_key_secret_arn} | cut -d':' -f4)
+  aws secretsmanager get-secret-value --secret-id '${proxy_private_key_secret_arn}' --region $KIVERA_CA_SECRET_REGION --query SecretString --output text > $KIVERA_CA
+fi
 
-aws secretsmanager get-secret-value --secret-id '${proxy_private_key_secret_arn}' --region $KIVERA_CA_SECRET_REGION --query SecretString --output text > $KIVERA_CA
+export KIVERA_CREDENTIALS_SECRET_REGION=$(echo ${proxy_credentials_secret_arn} | cut -d':' -f4)
 aws secretsmanager get-secret-value --secret-id '${proxy_credentials_secret_arn}' --region $KIVERA_CREDENTIALS_SECRET_REGION --query SecretString --output text > $KIVERA_CREDENTIALS
+
+export REDIS_CONNECTION_STRING_SECRET_REGION=$(echo ${redis_connection_string_arn} | cut -d':' -f4)
 
 cat << EOF > /opt/kivera/etc/env.txt
 KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
-KIVERA_CA_CERT=$KIVERA_CA_CERT
-KIVERA_CA=$KIVERA_CA
-KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
 KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
 DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
 EOF
+
+if [[ ${external_ca} == true ]]; then
+cat << EOF >> /opt/kivera/etc/env.txt
+KIVERA_EXTERNAL_CA=true
+KIVERA_AWS_PCA_ARN=${pca_arn}
+EOF
+else
+cat << EOF >> /opt/kivera/etc/env.txt
+KIVERA_CA=$KIVERA_CA
+KIVERA_CA_CERT=$KIVERA_CA_CERT
+KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
+EOF
+fi
 
 if [[ ${cache_enabled} == true ]]; then
 cat << EOF >> /opt/kivera/etc/env.txt
@@ -121,7 +134,7 @@ EOF
 yum check-update
 
 # install the toolbelt
-yes | yum install -y td-agent
+yum install -y td-agent
 # curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera
 

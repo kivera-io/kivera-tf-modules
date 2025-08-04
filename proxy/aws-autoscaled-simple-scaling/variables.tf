@@ -134,6 +134,18 @@ variable "proxy_cert_type" {
   default     = "ecdsa"
 }
 
+variable "external_ca" {
+  description = "Enable to use an external CA for the proxy"
+  type        = bool
+  default     = false
+}
+
+variable "pca_arn" {
+  description = "The ARN of the PCA certificate"
+  type        = string
+  default     = ""
+}
+
 variable "proxy_log_to_kivera" {
   description = "Enable to send all logs to Kivera"
   type        = bool
