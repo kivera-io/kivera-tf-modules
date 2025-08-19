@@ -140,8 +140,26 @@ variable "external_ca" {
   default     = false
 }
 
+variable "proxy_https" {
+  description = "Enable to switch to https listener (port 8443)"
+  type        = bool
+  default     = false
+}
+
 variable "pca_arn" {
   description = "The ARN of the PCA certificate"
+  type        = string
+  default     = ""
+}
+
+variable "proxy_https_key" {
+  description = "The private key used by the proxy to establish tls"
+  type        = string
+  default     = ""
+}
+
+variable "proxy_https_cert" {
+  description = "The public certificate associated with the https private key"
   type        = string
   default     = ""
 }

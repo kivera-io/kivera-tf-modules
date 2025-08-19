@@ -15,7 +15,8 @@ resource "aws_instance" "nodes" {
 
   iam_instance_profile = aws_iam_instance_profile.locust.name
   user_data = templatefile("${path.module}/data/node-user-data.sh.tpl", {
-    proxy_host                = var.proxy_endpoint
+    proxy_endpoint            = var.proxy_endpoint
+    proxy_protocol            = var.proxy_protocol
     proxy_transparent_enabled = var.proxy_transparent_enabled
     proxy_public_cert         = var.proxy_public_cert
     user_wait_min             = var.user_wait_min

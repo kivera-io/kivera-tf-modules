@@ -28,14 +28,15 @@ echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
 echo "net.core.netdev_max_backlog=1000" >> /etc/sysctl.conf
 sysctl -p
 
-export KIVERA_BIN_PATH=/opt/kivera/bin
-export KIVERA_CREDENTIALS=/opt/kivera/etc/credentials.json
-export KIVERA_CA_CERT=/opt/kivera/etc/ca-cert.pem
-export KIVERA_CA=/opt/kivera/etc/ca.pem
+export KIVERA_DIR=/opt/kivera
+export KIVERA_BIN_PATH=$KIVERA_DIR/bin
+export KIVERA_CREDENTIALS=$KIVERA_DIR/etc/credentials.json
+export KIVERA_CA_CERT=$KIVERA_DIR/etc/ca-cert.pem
+export KIVERA_CA=$KIVERA_DIR/etc/ca.pem
 export KIVERA_CERT_TYPE=${proxy_cert_type}
-export KIVERA_LOGS_FILE=/opt/kivera/var/log/proxy.log
+export KIVERA_LOGS_FILE=$KIVERA_DIR/var/log/proxy.log
 
-mkdir -p $KIVERA_BIN_PATH /opt/kivera/etc/ /opt/kivera/var/log/
+mkdir -p $KIVERA_BIN_PATH $KIVERA_DIR/etc/ $KIVERA_DIR/var/log/
 
 echo '${proxy_public_cert}' > $KIVERA_CA_CERT
 
@@ -49,7 +50,7 @@ aws secretsmanager get-secret-value --secret-id '${proxy_credentials_secret_arn}
 
 export REDIS_CONNECTION_STRING_SECRET_REGION=$(echo ${redis_connection_string_arn} | cut -d':' -f4)
 
-cat << EOF > /opt/kivera/etc/env.txt
+cat << EOF > $KIVERA_DIR/etc/env.txt
 KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
 KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
@@ -57,12 +58,12 @@ DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
 EOF
 
 if [[ ${external_ca} == true ]]; then
-cat << EOF >> /opt/kivera/etc/env.txt
+cat << EOF >> $KIVERA_DIR/etc/env.txt
 KIVERA_EXTERNAL_CA=true
 KIVERA_AWS_PCA_ARN=${pca_arn}
 EOF
 else
-cat << EOF >> /opt/kivera/etc/env.txt
+cat << EOF >> $KIVERA_DIR/etc/env.txt
 KIVERA_CA=$KIVERA_CA
 KIVERA_CA_CERT=$KIVERA_CA_CERT
 KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
@@ -70,20 +71,30 @@ EOF
 fi
 
 if [[ ${cache_enabled} == true ]]; then
-cat << EOF >> /opt/kivera/etc/env.txt
+cat << EOF >> $KIVERA_DIR/etc/env.txt
 KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
 KIVERA_KV_STORE_CLUSTER_MODE=true
 EOF
 fi
 
 if [[ "${upstream_proxy_endpoint}" != "" ]]; then
-cat << EOF >> /opt/kivera/etc/env.txt
+cat << EOF >> $KIVERA_DIR/etc/env.txt
 HTTPS_PROXY="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
 HTTP_PROXY="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
 https_proxy="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
 http_proxy="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
 no_proxy=169.254.169.254
 NO_PROXY=169.254.169.254
+EOF
+fi
+
+if [[ ${proxy_https} == true ]]; then
+echo '${proxy_https_key}' > $KIVERA_DIR/etc/https_key.pem
+echo '${proxy_https_cert}' > $KIVERA_DIR/etc/https_cert.pem
+cat << EOF >> $KIVERA_DIR/etc/env.txt
+KIVERA_HTTPS_PORT=8080
+KIVERA_HTTPS_PRIVATE_KEY=$KIVERA_DIR/etc/https_key.pem
+KIVERA_HTTPS_PUBLIC_CERT=$KIVERA_DIR/etc/https_cert.pem
 EOF
 fi
 
@@ -96,11 +107,11 @@ if [[ "${proxy_s3_path}" != "" ]]; then
     unzip ./proxy.zip -d $KIVERA_BIN_PATH
 else
     wget https://download.kivera.io/binaries/proxy/linux/amd64/kivera-${proxy_version}.tar.gz -O proxy.tar.gz
-    tar -xvzf proxy.tar.gz -C /opt/kivera
+    tar -xvzf proxy.tar.gz -C $KIVERA_DIR
     cp $KIVERA_BIN_PATH/linux/amd64/kivera $KIVERA_BIN_PATH/kivera
 fi
 chmod 0755 $KIVERA_BIN_PATH/kivera
-chown -R kivera:kivera /opt/kivera
+chown -R kivera:kivera $KIVERA_DIR
 
 yum install amazon-cloudwatch-agent -y
 
@@ -148,7 +159,7 @@ User=kivera
 WorkingDirectory=$KIVERA_BIN_PATH
 ExecStart=/usr/bin/sh -c "$KIVERA_BIN_PATH/kivera | tee -a $KIVERA_LOGS_FILE"
 Restart=always
-EnvironmentFile=/opt/kivera/etc/env.txt
+EnvironmentFile=$KIVERA_DIR/etc/env.txt
 
 [Install]
 WantedBy=multi-user.target

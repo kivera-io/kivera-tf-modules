@@ -345,6 +345,9 @@ resource "aws_launch_template" "launch_template" {
     proxy_private_key_secret_arn = local.proxy_private_key_secret_arn
     external_ca                  = var.external_ca
     pca_arn                      = var.pca_arn
+    proxy_https                  = var.proxy_https
+    proxy_https_cert             = var.proxy_https_cert
+    proxy_https_key              = var.proxy_https_key
     proxy_log_to_kivera          = var.proxy_log_to_kivera
     proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
     redis_connection_string_arn  = local.redis_connection_string_secret_arn
@@ -356,6 +359,17 @@ resource "aws_launch_template" "launch_template" {
     datadog_secret_arn           = var.datadog_secret_arn
     datadog_trace_sampling_rate  = var.datadog_trace_sampling_rate
   }))
+}
+
+resource "aws_route53_record" "lb_record" {
+  zone_id = "Z10362551NSNL60TJBEQ1"
+  name    = "perftest.proxy"
+  type    = "A"
+  alias {
+    name                   = aws_lb.load_balancer.dns_name
+    zone_id                = aws_lb.load_balancer.zone_id
+    evaluate_target_health = true
+  }
 }
 
 resource "aws_autoscaling_group" "auto_scaling_group" {
