@@ -170,13 +170,10 @@ resource "aws_iam_policy" "proxy_instance_s3" {
           "s3:GetObject",
           "s3:PutObject",
           "s3:CreateMultipartUpload",
-          "acm:*",
-          "acm-pca:*"
         ]
         Effect = "Allow"
         Resource = [
           "arn:aws:s3:::${var.s3_bucket}/*",
-          "arn:aws:acm-pca:*"
         ]
       },
     ]
@@ -187,6 +184,32 @@ resource "aws_iam_role_policy_attachment" "proxy_instance_s3" {
   count      = var.proxy_local_path != "" ? 1 : 0
   role       = aws_iam_role.instance_role.name
   policy_arn = aws_iam_policy.proxy_instance_s3[0].arn
+}
+
+resource "aws_iam_policy" "proxy_instance_acm" {
+  count = var.external_ca ? 1 : 0
+  name  = "${var.name_prefix}-acm"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "acm:*",
+          "acm-pca:*"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:acm-pca:ap-southeast-2:*:certificate-authority/*"
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "proxy_instance_acm" {
+  count      = var.external_ca ? 1 : 0
+  role       = aws_iam_role.instance_role.name
+  policy_arn = aws_iam_policy.proxy_instance_acm[0].arn
 }
 
 data "aws_iam_policy_document" "datadog_secret" {
