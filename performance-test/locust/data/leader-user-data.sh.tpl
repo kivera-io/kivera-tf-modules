@@ -22,7 +22,8 @@ if [[ ${leader_use_proxy} == true ]]; then
             ((time-=1)); sleep 1;
         done
 
-        curl -s http://${proxy_host}:8090/pub.cert > ~/kivera/ca-cert.pem
+        echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
+        # curl -s http://${proxy_host}:8090/pub.cert > ~/kivera/ca-cert.pem
 
         echo "
         export HTTPS_PROXY=\"http://${proxy_host}:8080\"
