@@ -41,6 +41,12 @@ variable "proxy_endpoint" {
   type        = string
 }
 
+variable "proxy_protocol" {
+  description = "Protocol used to connect to the proxy"
+  type        = string
+  default     = "http"
+}
+
 variable "proxy_transparent_enabled" {
   description = "Enable if proxy is running in transparent mode"
   type        = bool
@@ -136,4 +142,10 @@ variable "locust_user_classes" {
   description = "Which locust test classes to use"
   type        = string
   default     = "Standard"
+}
+
+variable "leader_use_proxy" {
+  description = "Enable if leader is required to go through the proxy"
+  type        = bool
+  default     = false
 }

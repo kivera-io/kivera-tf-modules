@@ -13,7 +13,7 @@ data "aws_region" "current" {}
 
 locals {
   account_id                  = data.aws_caller_identity.current.account_id
-  aws_region                  = data.aws_region.current.name
+  aws_region                  = data.aws_region.current.region
   deployment_id               = formatdate("YYYYMMDDhh", timestamp())
   redis_instance_name         = "${var.deployment_name}-redis"
   redis_subnet_group_name     = "${var.deployment_name}-subnets"

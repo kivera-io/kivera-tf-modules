@@ -10,6 +10,12 @@ variable "name_prefix" {
   }
 }
 
+variable "region" {
+  description = "Which region to deploy in"
+  type        = string
+  default     = "ap-southeast-2"
+}
+
 variable "vpc_id" {
   description = "Which VPC to deploy the proxy into"
   type        = string

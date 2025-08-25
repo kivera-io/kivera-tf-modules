@@ -9,6 +9,43 @@ echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
 echo "net.core.netdev_max_backlog=1000" >> /etc/sysctl.conf
 sysctl -p
 
+mkdir -p ~/kivera
+
+if [[ ${leader_use_proxy} == true ]]; then
+    if [[ ${proxy_transparent_enabled} == true ]]; then
+        echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
+    else
+        time=180
+        echo Polling http://${proxy_host}:8090/version
+        while ! curl -s http://${proxy_host}:8090/version; do
+            [[ $time == 0 ]] && echo "Failed to get response" && exit 1
+            ((time-=1)); sleep 1;
+        done
+
+        echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
+        # curl -s http://${proxy_host}:8090/pub.cert > ~/kivera/ca-cert.pem
+
+        echo "
+        export HTTPS_PROXY=\"http://${proxy_host}:8080\"
+        export HTTP_PROXY=\"http://${proxy_host}:8080\"
+        export https_proxy=\"http://${proxy_host}:8080\"
+        export http_proxy=\"http://${proxy_host}:8080\"
+        export NO_PROXY=\"localhost,169.254.169.254,.github.com\"
+        export no_proxy=\"\$NO_PROXY\"
+        " >> ~/kivera/setenv.sh
+    fi
+
+    cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
+    update-ca-trust extract
+
+    echo "
+    export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"
+    export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"
+    " >> ~/kivera/setenv.sh
+    
+    source ~/kivera/setenv.sh
+fi
+
 yum update -y
 yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent -y
 
@@ -41,7 +78,7 @@ cd /locust
 
 sleep 60
 
-if [[ ${proxy_transparent_enabled} == false ]]; then
+if [[ ${leader_use_proxy} == false && ${proxy_transparent_enabled} == false ]]; then
     time=180
     echo Polling http://${proxy_host}:8090/version
     while ! curl -s http://${proxy_host}:8090/version; do
