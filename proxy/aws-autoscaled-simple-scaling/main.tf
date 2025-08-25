@@ -673,6 +673,6 @@ resource "aws_cloudwatch_dashboard" "proxy_dashbaord" {
 
   dashboard_body = templatefile("${path.module}/data/proxy-cw-dashboard.json", {
     log_group_name   = "${var.name_prefix}-proxy-${local.name_suffix}"
-    log_group_region = data.aws_region.current.name
+    log_group_region = data.aws_region.current.region
   })
 }
