@@ -397,7 +397,7 @@ resource "aws_launch_template" "launch_template" {
     proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
     redis_connection_string_arn  = local.redis_connection_string_secret_arn
     redis_iam_connection_string  = local.redis_kivera_iam_connection_string
-    cache_cluster_name           = aws_elasticache_replication_group.redis.id
+    cache_cluster_name           = aws_elasticache_replication_group.redis[0].id
     cache_iam_auth               = var.cache_iam_auth
     log_group_name               = "${var.name_prefix}-proxy-${local.name_suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
