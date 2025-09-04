@@ -703,7 +703,7 @@ resource "aws_elasticache_user_group" "redis_kivera_user_group" {
 
   engine        = "redis"
   user_group_id = var.cache_user_group
-  user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id]
+  user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id, aws_elasticache_user.redis_kivera_user_iam[0].user_id]
 }
 
 data "aws_region" "current" {}
