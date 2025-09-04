@@ -397,7 +397,7 @@ resource "aws_launch_template" "launch_template" {
     proxy_log_to_cloudwatch      = var.proxy_log_to_cloudwatch
     redis_connection_string_arn  = local.redis_connection_string_secret_arn
     redis_iam_connection_string  = local.redis_kivera_iam_connection_string
-    cache_cluste_name            = aws_elasticache_replication_group.redis.id
+    cache_cluster_name           = aws_elasticache_replication_group.redis.id
     cache_iam_auth               = var.cache_iam_auth
     log_group_name               = "${var.name_prefix}-proxy-${local.name_suffix}"
     log_group_retention_in_days  = var.proxy_log_group_retention
@@ -688,8 +688,8 @@ resource "aws_elasticache_user" "redis_kivera_user" {
 resource "aws_elasticache_user" "redis_kivera_user_iam" {
   count = local.redis_enabled ? 1 : 0
 
-  user_id       = var.cache_kivera_username + "-iam"
-  user_name     = var.cache_kivera_username + "-iam"
+  user_id       = "${var.cache_kivera_username}-iam"
+  user_name     = "${var.cache_kivera_username}-iam"
   access_string = "on ~kivera* -@all +ping +mget +get +set +mset +del +strlen +cluster|slots +cluster|shards +command"
   engine        = "redis"
 
