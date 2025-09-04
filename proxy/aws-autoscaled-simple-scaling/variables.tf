@@ -256,6 +256,12 @@ variable "cache_user_group" {
   default     = "kivera"
 }
 
+variable "cache_iam_auth" {
+  description = "Enable to use iam auth to connect to the cache"
+  type        = bool
+  default     = false
+}
+
 variable "cache_subnet_ids" {
   description = "Which Subnets to deploy the cache into"
   type        = list(string)

@@ -70,10 +70,17 @@ KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
 EOF
 fi
 
-if [[ ${cache_enabled} == true ]]; then
+if [[ ${cache_enabled} == true && ${cache_iam_auth} == false ]]; then
 cat << EOF >> $KIVERA_DIR/etc/env.txt
 KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
 KIVERA_KV_STORE_CLUSTER_MODE=true
+EOF
+else if [[ ${cache_enabled} == true && ${cache_iam_auth} == true ]]; then
+cat << EOF >> $KIVERA_DIR/etc/env.txt
+KIVERA_KV_STORE_CONNECT=${redis_iam_connection_string}
+KIVERA_KV_STORE_CLUSTER_MODE=true
+KIVERA_KV_STORE_AUTH_TYPE=iam
+KIVERA_KV_STORE_CLUSTER_NAME${cache_cluste_name}
 EOF
 fi
 
