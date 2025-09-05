@@ -80,7 +80,8 @@ cat << EOF >> $KIVERA_DIR/etc/env.txt
 KIVERA_KV_STORE_CONNECT=${redis_iam_connection_string}
 KIVERA_KV_STORE_CLUSTER_MODE=true
 KIVERA_KV_STORE_AUTH_TYPE=iam
-KIVERA_KV_STORE_CLUSTER_NAME${cache_cluster_name}
+KIVERA_KV_STORE_CLUSTER_NAME=${cache_cluster_name}
+KIVERA_KV_STORE_REGION=${region}
 EOF
 fi
 
