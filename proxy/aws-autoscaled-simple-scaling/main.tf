@@ -37,7 +37,7 @@ locals {
   redis_enabled                      = var.cache_enabled && var.cache_type == "redis" ? true : false
   redis_default_connection_string    = local.redis_enabled ? sensitive("rediss://default:${local.cache_default_pass}@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
   redis_kivera_connection_string     = local.redis_enabled ? sensitive("rediss://${var.cache_kivera_username}:${local.cache_kivera_pass}@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
-  redis_kivera_iam_connection_string = local.redis_enabled ? sensitive("rediss://${var.cache_kivera_username}@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
+  redis_kivera_iam_connection_string = local.redis_enabled ? sensitive("rediss://${var.cache_kivera_username}-iam@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
   redis_connection_string_secret_arn = local.redis_enabled ? aws_secretsmanager_secret_version.redis_kivera_connection_string_version[0].arn : ""
 }
 
