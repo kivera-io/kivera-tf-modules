@@ -70,10 +70,18 @@ KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
 EOF
 fi
 
-if [[ ${cache_enabled} == true ]]; then
+if [[ ${cache_enabled} == true && ${cache_iam_auth} == false ]]; then
 cat << EOF >> $KIVERA_DIR/etc/env.txt
 KIVERA_KV_STORE_CONNECT=$(aws secretsmanager get-secret-value --secret-id '${redis_connection_string_arn}' --region $REDIS_CONNECTION_STRING_SECRET_REGION --query SecretString --output text)
 KIVERA_KV_STORE_CLUSTER_MODE=true
+EOF
+elif [[ ${cache_enabled} == true && ${cache_iam_auth} == true ]]; then
+cat << EOF >> $KIVERA_DIR/etc/env.txt
+KIVERA_KV_STORE_CONNECT=${redis_iam_connection_string}
+KIVERA_KV_STORE_CLUSTER_MODE=true
+KIVERA_KV_STORE_AUTH_TYPE=iam
+KIVERA_KV_STORE_IAM_CLUSTER_NAME=${cache_cluster_name}
+KIVERA_KV_STORE_IAM_REGION=${region}
 EOF
 fi
 
@@ -89,7 +97,7 @@ EOF
 fi
 
 if [[ ${proxy_https} == true ]]; then
-echo '${proxy_https_key}' > $KIVERA_DIR/etc/https_key.pem
+aws secretsmanager get-secret-value --secret-id '${proxy_https_key_arn}' --region $KIVERA_CREDENTIALS_SECRET_REGION --query SecretString --output text > $KIVERA_DIR/etc/https_key.pem
 echo '${proxy_https_cert}' > $KIVERA_DIR/etc/https_cert.pem
 cat << EOF >> $KIVERA_DIR/etc/env.txt
 KIVERA_HTTPS_PORT=8080

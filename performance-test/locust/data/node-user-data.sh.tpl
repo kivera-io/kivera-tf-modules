@@ -15,21 +15,21 @@ if [[ ${proxy_transparent_enabled} == true ]]; then
     echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
 else
     time=180
-    echo Polling http://${proxy_endpoint}:8090/version
-    while ! curl -s http://${proxy_endpoint}:8090/version; do
+    echo Polling http://perftest.proxy.poc.kivera.io:8090/version
+    while ! curl -s http://perftest.proxy.poc.kivera.io:8090/version; do
         [[ $time == 0 ]] && echo "Failed to get response" && exit 1
         ((time-=1)); sleep 1;
     done
 
-    # curl -s http://${proxy_endpoint}:8090/pub.cert > ~/kivera/ca-cert.pem
+    # curl -s http://perftest.proxy.poc.kivera.io:8090/pub.cert > ~/kivera/ca-cert.pem
     echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
 
     echo "
-    export HTTPS_PROXY=\"${proxy_protocol}://${proxy_endpoint}:8080\"
-    export HTTP_PROXY=\"${proxy_protocol}://${proxy_endpoint}:8080\"
-    export https_proxy=\"${proxy_protocol}://${proxy_endpoint}:8080\"
-    export http_proxy=\"${proxy_protocol}://${proxy_endpoint}:8080\"
-    export NO_PROXY=\"${leader_ip},${proxy_endpoint},169.254.169.254,.github.com\"
+    export HTTPS_PROXY=\"${proxy_protocol}://perftest.proxy.poc.kivera.io:8080\"
+    export HTTP_PROXY=\"${proxy_protocol}://perftest.proxy.poc.kivera.io:8080\"
+    export https_proxy=\"${proxy_protocol}://perftest.proxy.poc.kivera.io:8080\"
+    export http_proxy=\"${proxy_protocol}://perftest.proxy.poc.kivera.io:8080\"
+    export NO_PROXY=\"${leader_ip},perftest.proxy.poc.kivera.io,169.254.169.254,.github.com\"
     export no_proxy=\"\$NO_PROXY\"
     " >> ~/kivera/setenv.sh
 fi
