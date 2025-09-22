@@ -62,7 +62,7 @@ resource "aws_elasticache_user" "redis_kivera_default" {
 }
 
 resource "aws_elasticache_user" "redis_kivera_user" {
-  count = local.redis_enabled ? 1 : 0
+  count = (local.redis_enabled && !var.cache_iam_auth) ? 1 : 0
 
   user_id       = var.cache_kivera_username
   user_name     = var.cache_kivera_username
@@ -76,10 +76,10 @@ resource "aws_elasticache_user" "redis_kivera_user" {
 }
 
 resource "aws_elasticache_user" "redis_kivera_user_iam" {
-  count = local.redis_enabled ? 1 : 0
+  count = (local.redis_enabled && var.cache_iam_auth) ? 1 : 0
 
-  user_id       = "${var.cache_kivera_username}-iam"
-  user_name     = "${var.cache_kivera_username}-iam"
+  user_id       = var.cache_kivera_username
+  user_name     = var.cache_kivera_username
   access_string = "on ~kivera* -@all +ping +mget +get +set +mset +del +strlen +cluster|slots +cluster|shards +command"
   engine        = "redis"
 
@@ -93,5 +93,12 @@ resource "aws_elasticache_user_group" "redis_kivera_user_group" {
 
   engine        = "redis"
   user_group_id = var.cache_user_group
-  user_ids      = [aws_elasticache_user.redis_kivera_default[0].user_id, aws_elasticache_user.redis_kivera_user[0].user_id, aws_elasticache_user.redis_kivera_user_iam[0].user_id]
+  user_ids = [
+    aws_elasticache_user.redis_kivera_default[0].user_id,
+    (
+      var.cache_iam_auth ?
+      aws_elasticache_user.redis_kivera_user_iam[0].user_id :
+      aws_elasticache_user.redis_kivera_user[0].user_id
+    )
+  ]
 }
