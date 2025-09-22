@@ -206,6 +206,18 @@ variable "upstream_proxy_port" {
   default     = ""
 }
 
+variable "custom_domain_prefix" {
+  description = "Route 53 record name"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_zone_id" {
+  description = "Route 53 zone id"
+  type        = string
+  default     = ""
+}
+
 ### Cache variables
 variable "cache_enabled" {
   description = "Whether to deploy and use a cache with the proxy"

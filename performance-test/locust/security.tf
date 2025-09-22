@@ -58,43 +58,23 @@ resource "aws_kms_alias" "test_key" {
   target_key_id = aws_kms_key.test_key.key_id
 }
 
+resource "aws_iam_role_policy_attachment" "ssm_managed" {
+  role       = aws_iam_role.locust.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cw_agent" {
+  role       = aws_iam_role.locust.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "read_only" {
+  role       = aws_iam_role.locust.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
 resource "aws_iam_role" "locust" {
   name = "${var.deployment_name}-locust-role"
-
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
-    "arn:aws:iam::aws:policy/ReadOnlyAccess"
-  ]
-
-  inline_policy {
-    name = "${var.deployment_name}-locust-policy"
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action = [
-            "s3:GetObject",
-            "s3:PutObject",
-            "s3:CreateMultipartUpload"
-          ]
-          Effect = "Allow"
-          Resource = [
-            "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}*"
-          ]
-        },
-        {
-          Action = [
-            "kms:*",
-          ]
-          Effect = "Allow"
-          Resource = [
-            aws_kms_key.test_key.arn
-          ]
-        },
-      ]
-    })
-  }
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -115,6 +95,42 @@ resource "aws_iam_role" "locust" {
     DeploymentId : local.deployment_id
   }
 }
+
+resource "aws_iam_policy" "locust_policy" {
+  name = "${var.deployment_name}-locust-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:CreateMultipartUpload"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}*"
+        ]
+      },
+      {
+        Action = [
+          "kms:*",
+        ]
+        Effect = "Allow"
+        Resource = [
+          aws_kms_key.test_key.arn
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "locust_attach" {
+  role       = aws_iam_role.locust.name
+  policy_arn = aws_iam_policy.locust_policy.arn
+}
+
 
 resource "aws_iam_instance_profile" "locust" {
   name = "${var.deployment_name}-locust-profile"
