@@ -1,5 +1,5 @@
 resource "aws_elasticache_subnet_group" "redis" {
-  count = local.redis_enabled ? 1 : 0
+  count = (local.redis_enabled && !var.serverless_cache) ? 1 : 0
 
   name       = "${var.name_prefix}-subnet-group-${local.name_suffix}"
   subnet_ids = var.cache_subnet_ids
@@ -13,7 +13,7 @@ resource "aws_elasticache_subnet_group" "redis" {
 }
 
 resource "aws_elasticache_replication_group" "redis" {
-  count = local.redis_enabled ? 1 : 0
+  count = (local.redis_enabled && !var.serverless_cache) ? 1 : 0
 
   replication_group_id = "${var.name_prefix}-redis-${local.name_suffix}"
   description          = "Redis Cache for Kivera proxy"
@@ -38,6 +38,17 @@ resource "aws_elasticache_replication_group" "redis" {
   user_group_ids             = [aws_elasticache_user_group.redis_kivera_user_group[0].user_group_id]
 
   apply_immediately = true
+}
+
+resource "aws_elasticache_serverless_cache" "redis" {
+  count = local.redis_enabled && var.serverless_cache ? 1 : 0
+
+  name               = "${var.name_prefix}-redis-serverless-${local.name_suffix}"
+  engine             = "redis"
+  description        = "Redis Cache for Kivera proxy"
+  subnet_ids         = var.cache_subnet_ids
+  security_group_ids = [aws_security_group.redis_sg[0].id]
+  user_group_id      = aws_elasticache_user_group.redis_kivera_user_group[0].user_group_id
 }
 
 resource "aws_elasticache_user" "redis_kivera_default" {

@@ -16,6 +16,7 @@ data "aws_region" "current" {}
 
 resource "random_string" "suffix" {
   length  = 5
+  upper   = false // aws tf provider bug with handling upper case
   special = false
 }
 
@@ -38,11 +39,12 @@ locals {
   cache_default_pass                 = var.cache_default_password != "" ? var.cache_default_password : random_password.default_pass.result
   cache_kivera_pass                  = var.cache_kivera_password != "" ? var.cache_kivera_password : random_password.kivera_pass.result
   redis_enabled                      = var.cache_enabled && var.cache_type == "redis" ? true : false
-  redis_default_connection_string    = local.redis_enabled ? sensitive("rediss://default:${local.cache_default_pass}@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
-  redis_kivera_connection_string     = local.redis_enabled ? sensitive("rediss://${var.cache_kivera_username}:${local.cache_kivera_pass}@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
-  redis_kivera_iam_connection_string = local.redis_enabled ? sensitive("rediss://${var.cache_kivera_username}-iam@${aws_elasticache_replication_group.redis[0].configuration_endpoint_address}:6379") : ""
+  redis_endpoint                     = local.redis_enabled && var.serverless_cache ? aws_elasticache_serverless_cache.redis[0].endpoint[0].address : aws_elasticache_replication_group.redis[0].configuration_endpoint_address
+  redis_default_connection_string    = local.redis_enabled ? sensitive("rediss://default:${local.cache_default_pass}@${local.redis_endpoint}:6379") : ""
+  redis_kivera_connection_string     = local.redis_enabled ? sensitive("rediss://${var.cache_kivera_username}:${local.cache_kivera_pass}@${local.redis_endpoint}:6379") : ""
+  redis_kivera_iam_connection_string = local.redis_enabled ? sensitive("rediss://${var.cache_kivera_username}-iam@${local.redis_endpoint}:6379") : ""
   redis_connection_string_secret_arn = local.redis_enabled ? aws_secretsmanager_secret_version.redis_kivera_connection_string_version[0].arn : ""
-  cache_cluster_name                 = var.cache_enabled ? aws_elasticache_replication_group.redis[0].id : ""
+  cache_cluster_name                 = var.cache_enabled && var.serverless_cache ? aws_elasticache_serverless_cache.redis[0].name : aws_elasticache_replication_group.redis[0].id
 }
 
 data "archive_file" "proxy_binary" {

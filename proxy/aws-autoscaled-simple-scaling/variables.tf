@@ -236,6 +236,12 @@ variable "cache_type" {
   }
 }
 
+variable "serverless_cache" {
+  description = "Deploy a serverless Elasticache instead of self-mananged"
+  type        = bool
+  default     = false
+}
+
 variable "cache_default_username" {
   description = "The username used to connect to the cache as default user"
   type        = string
