@@ -90,6 +90,18 @@ variable "s3_bucket_key" {
   default     = "/kivera/proxy"
 }
 
+variable "custom_domain_prefix" {
+  description = "Route 53 record name"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_zone_id" {
+  description = "Route 53 zone id"
+  type        = string
+  default     = ""
+}
+
 ### Proxy variables
 variable "proxy_version" {
   description = "The version of the proxy to deploy"
@@ -224,6 +236,12 @@ variable "cache_type" {
   }
 }
 
+variable "serverless_cache" {
+  description = "Deploy a serverless Elasticache instead of self-mananged"
+  type        = bool
+  default     = false
+}
+
 variable "cache_default_username" {
   description = "The username used to connect to the cache as default user"
   type        = string
@@ -254,6 +272,12 @@ variable "cache_user_group" {
   description = "The user group for the cache"
   type        = string
   default     = "kivera"
+}
+
+variable "cache_iam_auth" {
+  description = "Enable to use iam auth to connect to the cache"
+  type        = bool
+  default     = false
 }
 
 variable "cache_subnet_ids" {

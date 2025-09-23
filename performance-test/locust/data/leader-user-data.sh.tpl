@@ -16,20 +16,20 @@ if [[ ${leader_use_proxy} == true ]]; then
         echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
     else
         time=180
-        echo Polling http://${proxy_host}:8090/version
-        while ! curl -s http://${proxy_host}:8090/version; do
+        echo Polling http://${proxy_endpoint}:8090/version
+        while ! curl -s http://${proxy_endpoint}:8090/version; do
             [[ $time == 0 ]] && echo "Failed to get response" && exit 1
             ((time-=1)); sleep 1;
         done
 
         echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
-        # curl -s http://${proxy_host}:8090/pub.cert > ~/kivera/ca-cert.pem
+        # curl -s http://${proxy_endpoint}:8090/pub.cert > ~/kivera/ca-cert.pem
 
         echo "
-        export HTTPS_PROXY=\"http://${proxy_host}:8080\"
-        export HTTP_PROXY=\"http://${proxy_host}:8080\"
-        export https_proxy=\"http://${proxy_host}:8080\"
-        export http_proxy=\"http://${proxy_host}:8080\"
+        export HTTPS_PROXY=\"http://${proxy_endpoint}:8080\"
+        export HTTP_PROXY=\"http://${proxy_endpoint}:8080\"
+        export https_proxy=\"http://${proxy_endpoint}:8080\"
+        export http_proxy=\"http://${proxy_endpoint}:8080\"
         export NO_PROXY=\"localhost,169.254.169.254,.github.com\"
         export no_proxy=\"\$NO_PROXY\"
         " >> ~/kivera/setenv.sh
@@ -80,8 +80,8 @@ sleep 60
 
 if [[ ${leader_use_proxy} == false && ${proxy_transparent_enabled} == false ]]; then
     time=180
-    echo Polling http://${proxy_host}:8090/version
-    while ! curl -s http://${proxy_host}:8090/version; do
+    echo Polling http://${proxy_endpoint}:8090/version
+    while ! curl -s http://${proxy_endpoint}:8090/version; do
         [[ $time == 0 ]] && echo "Failed to get response" && exit 1
         ((time-=1)); sleep 1;
     done

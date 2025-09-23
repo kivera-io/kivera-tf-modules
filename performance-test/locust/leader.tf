@@ -15,7 +15,7 @@ resource "aws_instance" "leader" {
   iam_instance_profile = aws_iam_instance_profile.locust.name
   user_data = templatefile("${path.module}/data/leader-user-data.sh.tpl", {
     proxy_public_cert   = var.proxy_public_cert
-    proxy_host          = var.proxy_endpoint
+    proxy_endpoint      = var.proxy_endpoint
     locust_max_users    = var.locust_max_users
     locust_spawn_rate   = var.locust_spawn_rate
     locust_run_time     = var.locust_run_time
