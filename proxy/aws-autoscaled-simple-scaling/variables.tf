@@ -90,6 +90,18 @@ variable "s3_bucket_key" {
   default     = "/kivera/proxy"
 }
 
+variable "custom_domain_prefix" {
+  description = "Route 53 record name"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_zone_id" {
+  description = "Route 53 zone id"
+  type        = string
+  default     = ""
+}
+
 ### Proxy variables
 variable "proxy_version" {
   description = "The version of the proxy to deploy"
@@ -202,18 +214,6 @@ variable "upstream_proxy_endpoint" {
 
 variable "upstream_proxy_port" {
   description = "Port for upstream proxy"
-  type        = string
-  default     = ""
-}
-
-variable "custom_domain_prefix" {
-  description = "Route 53 record name"
-  type        = string
-  default     = ""
-}
-
-variable "custom_domain_zone_id" {
-  description = "Route 53 zone id"
   type        = string
   default     = ""
 }

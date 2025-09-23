@@ -271,10 +271,6 @@ resource "aws_iam_role_policy_attachment" "redis_conn_string_secret" {
   policy_arn = aws_iam_policy.redis_conn_string_secret[0].arn
 }
 
-#----------------------------
-# Security Groups
-#----------------------------
-
 resource "aws_security_group" "load_balancer_sg" {
   name_prefix = "${var.name_prefix}-lb-"
   vpc_id      = var.vpc_id
