@@ -218,6 +218,12 @@ variable "upstream_proxy_port" {
   default     = ""
 }
 
+variable "kivera_proxy_envs" {
+  description = "Other Kivera proxy envs"
+  type        = string
+  default     = ""
+}
+
 ### Cache variables
 variable "cache_enabled" {
   description = "Whether to deploy and use a cache with the proxy"

@@ -45,6 +45,7 @@ resource "aws_launch_template" "launch_template" {
     cache_enabled                = var.cache_enabled
     datadog_secret_arn           = var.datadog_secret_arn
     datadog_trace_sampling_rate  = var.datadog_trace_sampling_rate
+    kivera_proxy_envs            = var.kivera_proxy_envs
   }))
 }
 

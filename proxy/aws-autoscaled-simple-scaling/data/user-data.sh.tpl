@@ -55,20 +55,21 @@ KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
 KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
 DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
+${kivera_proxy_envs}
 EOF
 
-if [[ ${external_ca} == true ]]; then
-cat << EOF >> $KIVERA_DIR/etc/env.txt
-KIVERA_EXTERNAL_CA=true
-KIVERA_AWS_PCA_ARN=${pca_arn}
-EOF
-else
-cat << EOF >> $KIVERA_DIR/etc/env.txt
-KIVERA_CA=$KIVERA_CA
-KIVERA_CA_CERT=$KIVERA_CA_CERT
-KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
-EOF
-fi
+# if [[ ${external_ca} == true ]]; then
+# cat << EOF >> $KIVERA_DIR/etc/env.txt
+# KIVERA_EXTERNAL_CA=true
+# KIVERA_AWS_PCA_ARN=${pca_arn}
+# EOF
+# else
+# cat << EOF >> $KIVERA_DIR/etc/env.txt
+# KIVERA_CA=$KIVERA_CA
+# KIVERA_CA_CERT=$KIVERA_CA_CERT
+# KIVERA_CERT_TYPE=$KIVERA_CERT_TYPE
+# EOF
+# fi
 
 if [[ ${cache_enabled} == true && ${cache_iam_auth} == false ]]; then
 cat << EOF >> $KIVERA_DIR/etc/env.txt
