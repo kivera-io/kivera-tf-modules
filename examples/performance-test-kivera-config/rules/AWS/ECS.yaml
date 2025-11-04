@@ -47,11 +47,10 @@ AWS-ECS-ListTaskDefinitions-1:
     actions:
         - ListAccountSettings
     policy: |-
-        valid = true
-        # valid {
-        #     value = kivera.cache.get("kiveradata:perftest:ecs");
-        #     value == ""
-        # }
+        valid {
+            value = kivera.cache.get("kiveradata:perftest:ecs");
+            value != ""
+        }
     advanced:
         paths:
             - '*'
@@ -66,13 +65,16 @@ AWS-ECS-ListTaskDefinitions-1:
     compliance-mappings: {}
 
 AWS-ECS-ListTaskDefinitions-2:
-    description: Allow ListTaskDefinitions
+    description: kivera.cache.set_with_options allow
     provider: AWS
     service: ECS
     actions:
         - ListTaskDefinitions
-    policy: |
-        valid = true
+    policy: |-
+        valid {
+            kivera.cache.set_with_options("kiveradata:perftest:set:ecs", "maybe_important", {"kv_cache_ttl": 300});
+            true
+        }
     advanced:
         paths:
             - '*'

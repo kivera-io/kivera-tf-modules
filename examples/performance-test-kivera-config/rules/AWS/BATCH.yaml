@@ -5,12 +5,11 @@ AWS-BATCH-ListJobs-1:
     service: BATCH
     actions:
         - ListSchedulingPolicies
-    policy: |
-        valid = true
-        # valid {
-        #   value = kivera.cache.get("kiveradata:perftest:batch")
-        #   value == ""
-        # }
+    policy: |-
+        valid {
+          value = kivera.cache.get("kiveradata:perftest:batch")
+          value != ""
+        }
     advanced:
         paths:
             - '*'
@@ -25,13 +24,12 @@ AWS-BATCH-ListJobs-1:
     compliance-mappings: {}
 
 AWS-BATCH-ListJobs-2:
-    description: Allow ListJobs
+    description: allow
     provider: AWS
     service: BATCH
     actions:
         - ListJobs
-    policy: |
-        valid = true
+    policy: valid = true
     advanced:
         paths:
             - '*'

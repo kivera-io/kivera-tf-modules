@@ -41,17 +41,16 @@ AWS-IAM-ListUsers-1:
     compliance-mappings: {}
 
 AWS-IAM-ListUsers-2:
-    description: kivera.cahce.get allow
+    description: kivera.cache.get allow
     provider: AWS
     service: IAM
     actions:
         - ListAccountAliases
     policy: |-
-        valid = true
-        # valid {
-        #   value = kivera.cache.get("kiveradata:perftest:iam")
-        #   value == ""
-        # }
+        valid {
+          value = kivera.cache.get("kiveradata:perftest:iam")
+          value != ""
+        }
     advanced:
         paths:
             - '*'

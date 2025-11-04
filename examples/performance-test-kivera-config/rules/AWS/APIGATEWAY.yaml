@@ -47,14 +47,15 @@ AWS-APIGATEWAY-CreateRoute-1:
     compliance-mappings: {}
 
 AWS-APIGATEWAY-GetApis-1:
-    description: Allow GetApis
+    description: kivera.cache.set_with_options allow
     provider: AWS
     service: APIGATEWAY
     actions:
         - GetApis
     policy: |-
         valid {
-          true
+            kivera.cache.set_with_options("kiveradata:perftest:set:apigateway", "something_random", {"kv_cache_ttl": 300});
+            true
         }
     advanced:
         paths:
@@ -70,17 +71,16 @@ AWS-APIGATEWAY-GetApis-1:
     compliance-mappings: {}
 
 AWS-APIGATEWAY-GetApis-2:
-    description: kivara.cache.get allow
+    description: kivera.cache.get allow
     provider: AWS
     service: APIGATEWAY
     actions:
         - GetVpcLinks
     policy: |-
-        valid = true
-        # valid {
-        #     value = kivera.cache.get("kiveradata:perftest:apigateway");
-        #     value == ""
-        # }
+        valid {
+            value = kivera.cache.get("kiveradata:perftest:apigateway");
+            value != ""
+        }
     advanced:
         paths:
             - '*'
