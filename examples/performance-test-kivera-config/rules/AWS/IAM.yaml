@@ -19,6 +19,77 @@ AWS-IAM-CreateRole-1:
     tags: {}
     compliance-mappings: {}
 
+AWS-IAM-ListGroups-1:
+    description: kivera.cache.set_with_options allow
+    provider: AWS
+    service: IAM
+    actions:
+        - ListGroups
+    policy: |-
+        valid {
+          kivera.cache.set_with_options("kiveradata:perftest:set:iam", "another_thing", {"kv_cache_ttl": 300})
+          true
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-IAM-ListInstanceProfiles-1:
+    description: kivera.cache.delete allow
+    provider: AWS
+    service: IAM
+    actions:
+        - ListInstanceProfiles
+    policy: |-
+        valid {
+          kivera.cache.delete("kiveradata:perftest:del:iam")
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-IAM-ListRoles-1:
+    description: kivera.cache.set allow
+    provider: AWS
+    service: IAM
+    actions:
+        - ListRoles
+    policy: |-
+        valid {
+          kivera.cache.set("kiveradata:perftest:iam", "AM")
+          true
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
 AWS-IAM-ListUsers-1:
     description: Allow ListUsers
     provider: AWS
@@ -49,6 +120,30 @@ AWS-IAM-ListUsers-2:
     policy: |-
         valid {
           value = kivera.cache.get("kiveradata:perftest:iam")
+          value != ""
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-IAM-ListUsers-3:
+    description: kivera.cache.get from set allow
+    provider: AWS
+    service: IAM
+    actions:
+        - ListAccountAliases
+    policy: |-
+        valid {
+          value = kivera.cache.get_with_options("kiveradata:perftest:set:iam", {"local_cache_ttl": 20})
           value != ""
         }
     advanced:

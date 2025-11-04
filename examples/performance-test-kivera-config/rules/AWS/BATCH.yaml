@@ -1,4 +1,52 @@
 ---
+AWS-BATCH-DeleteJobQueue-1:
+    description: kivera.cache.set_with_options allow
+    provider: AWS
+    service: BATCH
+    actions:
+        - DeleteJobQueue
+    policy: |-
+        valid {
+          kivera.cache.set_with_options("kiveradata:perftest:set:batch", "something_important", {"kv_cache_ttl": 300})
+          true
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-BATCH-DescribeJobs-1:
+    description: kivera.cache.set allow
+    provider: AWS
+    service: BATCH
+    actions:
+        - DescribeJobs
+    policy: |-
+        valid {
+          kivera.cache.set("kiveradata:perftest:batch", "BATCH OF THINGS")
+          true
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
 AWS-BATCH-ListJobs-1:
     description: kivera.cache.get allow
     provider: AWS
@@ -30,6 +78,30 @@ AWS-BATCH-ListJobs-2:
     actions:
         - ListJobs
     policy: valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-BATCH-ListJobs-3:
+    description: kivera.cache.get from set_with_options allow
+    provider: AWS
+    service: BATCH
+    actions:
+        - ListSchedulingPolicies
+    policy: |-
+        valid {
+          value = kivera.cache.get_with_options("kiveradata:perftest:set:batch", {"local_cache_ttl": 20})
+          value != ""
+        }
     advanced:
         paths:
             - '*'
