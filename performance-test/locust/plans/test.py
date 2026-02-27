@@ -393,6 +393,14 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="invalid-session-name",
+            Tags=[{
+                'Key': 'kivera-providedBy',
+                'Value': 'tf-module'
+            },
+            {
+                'Key': 'kivera-depscope',
+                'Value': 'dev'
+            }]
         )
         client_pool.put(client, 'sts')
 
@@ -403,6 +411,14 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::000000000000:role/test-role",
             RoleSessionName="org-dev-session",
+            Tags=[{
+                'Key': 'kivera-providedBy',
+                'Value': 'tf-module'
+            },
+            {
+                'Key': 'kivera-depscope',
+                'Value': 'dev'
+            }]
         )
         client_pool.put(client, 'sts')
 
@@ -413,6 +429,14 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="org-dev-session",
+            Tags=[{
+                'Key': 'kivera-providedBy',
+                'Value': 'tf-module'
+            },
+            {
+                'Key': 'kivera-depscope',
+                'Value': 'dev'
+            }]
         )
         client_pool.put(client, 'sts')
 
@@ -736,12 +760,13 @@ class AwsSqsTasks(TaskSet):
         client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/000000000000/test-queue', MessageBody='test-message' )
         client_pool.put(client, 'sqs')
 
-    @task(2)
-    @result_decorator
-    def aws_sqs_send_message_allow(self):
-        client = client_pool.get('sqs')
-        client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/326190351503/test-queue', MessageBody='test-message' )
-        client_pool.put(client, 'sqs')
+    # removed due to bypass body inspection
+    # @task(2)
+    # @result_decorator
+    # def aws_sqs_send_message_allow(self):
+    #     client = client_pool.get('sqs')
+    #     client.send_message(QueueUrl='https://sqs.ap-southeast-2.amazonaws.com/326190351503/test-queue', MessageBody='test-message' )
+    #     client_pool.put(client, 'sqs')
 
 
 
