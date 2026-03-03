@@ -122,6 +122,16 @@ resource "aws_iam_policy" "locust_policy" {
           aws_kms_key.test_key.arn
         ]
       },
+      {
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:iam::326190351503:role/test-role"
+        ]
+      },
     ]
   })
 }

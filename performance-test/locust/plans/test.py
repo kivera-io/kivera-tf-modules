@@ -27,11 +27,33 @@ class ClientPool:
     def __init__(self):
         self.pool = {}
         self.lock = threading.Lock()
+        self.new_creds = None
 
     def new_client(self, service, region="ap-southeast-2"):
-        client = boto3.client(service, region_name=region, config=client_config)
+        with self.lock:
+            creds = self.new_creds
+        if creds is not None:
+            client = boto3.client(
+                service,
+                region_name=region,
+                config=client_config,
+                aws_access_key_id=creds['AccessKeyId'],
+                aws_secret_access_key=creds['SecretAccessKey'],
+                aws_session_token=creds['SessionToken'],
+            )
+        else:
+            client = boto3.client(
+                service,
+                region_name=region,
+                config=client_config
+            )
         client.meta.events.register_first('before-sign.*.*', add_trace_headers)
         return client
+
+    def set_assumed_credentials(self, credentials):
+        with self.lock:
+            self.new_creds = credentials
+            self.pool = {}
 
     def get(self, service, region="ap-southeast-2"):
         with self.lock:
@@ -39,14 +61,20 @@ class ClientPool:
                 self.pool[service] = {}
             if region not in self.pool[service]:
                 self.pool[service][region] = queue.SimpleQueue()
-
+            q = self.pool[service][region]
         try:
-            return self.pool[service][region].get_nowait()
+            return q.get_nowait()
         except queue.Empty:
             return self.new_client(service, region)
 
     def put(self, obj, service, region="ap-southeast-2"):
-        self.pool[service][region].put(obj)
+        with self.lock:
+            if service not in self.pool:
+                self.pool[service] = {}
+            if region not in self.pool[service]:
+                self.pool[service][region] = queue.SimpleQueue()
+            q = self.pool[service][region]
+        q.put(obj)
 
 
 client_pool = ClientPool()
@@ -422,11 +450,11 @@ class AwsStsTasks(TaskSet):
         )
         client_pool.put(client, 'sts')
 
-    @task(4)
+    @task(1)
     @result_decorator
     def aws_sts_assume_role_allow(self):
         client = client_pool.get('sts')
-        client.assume_role(
+        res = client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="org-dev-session",
             Tags=[{
@@ -438,7 +466,7 @@ class AwsStsTasks(TaskSet):
                 'Value': 'dev'
             }]
         )
-        client_pool.put(client, 'sts')
+        client_pool.set_assumed_credentials(res['Credentials'])
 
     # set redis data
     @task(1)
