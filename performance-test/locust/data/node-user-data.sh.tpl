@@ -46,9 +46,10 @@ source ~/kivera/setenv.sh
 dnf update -y
 dnf install -y jq pcre2-devel gcc tzdata unzip htop amazon-cloudwatch-agent python3.11 python3.11-pip
 
-# LOCUST
 export LOCUST_VERSION="2.43.3"
 python3.11 -m pip install locust==$LOCUST_VERSION
+export BOTO3_VERSION="1.42.68" 
+python3.11 -m pip install boto3==$BOTO3_VERSION
 
 cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/config.json
 ${cw_config}
