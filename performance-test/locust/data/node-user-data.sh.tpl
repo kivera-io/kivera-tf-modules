@@ -46,11 +46,6 @@ source ~/kivera/setenv.sh
 dnf update -y
 dnf install -y jq pcre2-devel gcc tzdata unzip htop amazon-cloudwatch-agent python3.11 python3.11-pip
 
-export LOCUST_VERSION="2.43.3"
-python3.11 -m pip install locust==$LOCUST_VERSION
-export BOTO3_VERSION="1.42.68" 
-python3.11 -m pip install boto3==$BOTO3_VERSION
-
 cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/config.json
 ${cw_config}
 EOF
@@ -63,7 +58,7 @@ unzip ./tests.zip -d /locust
 
 cd /locust
 
-[[ -e requirements.txt ]] && python3.11 -m pip install -r requirements.txt
+[[ -f requirements.txt ]] && python3.11 -m pip install -r requirements.txt
 
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
