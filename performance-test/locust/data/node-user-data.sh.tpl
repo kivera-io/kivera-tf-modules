@@ -43,13 +43,8 @@ echo "export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.
 echo "export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
 source ~/kivera/setenv.sh
 
-yum update -y
-yum install -y jq pcre2-devel.x86_64 gcc tzdata curl unzip bash htop amazon-cloudwatch-agent python3.11 python3.11-pip
-
-sudo yum remove awscli
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+dnf update -y
+dnf install -y jq pcre2-devel gcc tzdata curl unzip bash htop amazon-cloudwatch-agent python3.11 python3.11-pip
 
 # LOCUST
 export LOCUST_VERSION="2.43.3"
