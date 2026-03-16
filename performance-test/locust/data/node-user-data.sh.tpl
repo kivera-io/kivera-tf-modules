@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -ex
 
 ## tune box
 echo "* hard nofile 100000" >> /etc/security/limits.conf
@@ -21,7 +21,6 @@ else
         ((time-=1)); sleep 1;
     done
 
-    # curl -s http://${proxy_endpoint}:8090/pub.cert > ~/kivera/ca-cert.pem
     echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
 
     echo "
@@ -37,27 +36,19 @@ fi
 if [[ -s ~/kivera/ca-cert.pem ]]; then
     cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
     update-ca-trust extract
+
+    echo "export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
+    echo "export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
 fi
 
-echo "export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
-echo "export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
 source ~/kivera/setenv.sh
 
 dnf update -y
-dnf install -y jq pcre2-devel gcc tzdata curl unzip bash htop amazon-cloudwatch-agent python3.11 python3.11-pip
+dnf install -y jq pcre2-devel gcc tzdata unzip htop amazon-cloudwatch-agent python3.11 python3.11-pip
 
 # LOCUST
 export LOCUST_VERSION="2.43.3"
 python3.11 -m pip install locust==$LOCUST_VERSION
-
-export PRIVATE_IP=$(hostname -I | awk '{print $1}')
-echo "PRIVATE_IP=$PRIVATE_IP" >> /etc/environment
-
-source ~/.bashrc
-
-mkdir -p ~/.ssh
-echo 'Host *' > ~/.ssh/config
-echo 'StrictHostKeyChecking no' >> ~/.ssh/config
 
 cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/config.json
 ${cw_config}

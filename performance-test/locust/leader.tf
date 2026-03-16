@@ -16,6 +16,7 @@ resource "aws_instance" "leader" {
   user_data = templatefile("${path.module}/data/leader-user-data.sh.tpl", {
     proxy_public_cert   = var.proxy_public_cert
     proxy_endpoint      = var.proxy_endpoint
+    proxy_protocol      = var.proxy_protocol
     locust_max_users    = var.locust_max_users
     locust_spawn_rate   = var.locust_spawn_rate
     locust_run_time     = var.locust_run_time

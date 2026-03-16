@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -ex
 
 ## tune box
 echo "* hard nofile 100000" >> /etc/security/limits.conf
@@ -23,13 +23,12 @@ if [[ ${leader_use_proxy} == true ]]; then
         done
 
         echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
-        # curl -s http://${proxy_endpoint}:8090/pub.cert > ~/kivera/ca-cert.pem
 
         echo "
-        export HTTPS_PROXY=\"http://${proxy_endpoint}:8080\"
-        export HTTP_PROXY=\"http://${proxy_endpoint}:8080\"
-        export https_proxy=\"http://${proxy_endpoint}:8080\"
-        export http_proxy=\"http://${proxy_endpoint}:8080\"
+        export HTTPS_PROXY=\"${proxy_protocol}://${proxy_endpoint}:8080\"
+        export HTTP_PROXY=\"${proxy_protocol}://${proxy_endpoint}:8080\"
+        export https_proxy=\"${proxy_protocol}://${proxy_endpoint}:8080\"
+        export http_proxy=\"${proxy_protocol}://${proxy_endpoint}:8080\"
         export NO_PROXY=\"localhost,169.254.169.254,.github.com\"
         export no_proxy=\"\$NO_PROXY\"
         " >> ~/kivera/setenv.sh
@@ -42,25 +41,16 @@ if [[ ${leader_use_proxy} == true ]]; then
     export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"
     export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"
     " >> ~/kivera/setenv.sh
-    
+
     source ~/kivera/setenv.sh
 fi
 
 dnf update -y
-dnf install -y jq pcre2-devel gcc tzdata curl unzip bash htop amazon-cloudwatch-agent python3.11 python3.11-pip
+dnf install -y jq pcre2-devel gcc tzdata unzip htop amazon-cloudwatch-agent python3.11 python3.11-pip
 
 # LOCUST
 export LOCUST_VERSION="2.43.3"
 python3.11 -m pip install locust==$LOCUST_VERSION
-
-export PRIVATE_IP=$(hostname -I | awk '{print $1}')
-echo "PRIVATE_IP=$PRIVATE_IP" >> /etc/environment
-
-source ~/.bashrc
-
-mkdir -p ~/.ssh
-echo 'Host *' > ~/.ssh/config
-echo 'StrictHostKeyChecking no' >> ~/.ssh/config
 
 cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/config.json
 ${cw_config}
@@ -75,8 +65,6 @@ unzip ./tests.zip -d /locust
 cd /locust
 
 [[ -e requirements.txt ]] && python3.11 -m pip install -r requirements.txt
-
-sleep 60
 
 if [[ ${leader_use_proxy} == false && ${proxy_transparent_enabled} == false ]]; then
     time=180
