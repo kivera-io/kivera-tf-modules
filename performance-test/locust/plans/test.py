@@ -29,7 +29,17 @@ class ClientPool:
         self.lock = threading.Lock()
 
     def new_client(self, service, region="ap-southeast-2"):
-        client = boto3.client(service, region_name=region, config=client_config)
+        if assumed_role_credentials is not None:
+            client = boto3.client(
+                service,
+                region_name=region,
+                config=client_config,
+                aws_access_key_id=assumed_role_credentials['AccessKeyId'],
+                aws_secret_access_key=assumed_role_credentials['SecretAccessKey'],
+                aws_session_token=assumed_role_credentials['SessionToken'],
+            )
+        else:
+            client = boto3.client(service, region_name=region, config=client_config)
         client.meta.events.register_first('before-sign.*.*', add_trace_headers)
         return client
 
@@ -132,6 +142,21 @@ custom_responses = {
 }
 
 boto3.setup_default_session(region_name='ap-southeast-2')
+
+assumed_role_credentials = None
+
+def assume_role():
+    global assumed_role_credentials
+    sts_client = boto3.client('sts', region_name='ap-southeast-2')
+    response = sts_client.assume_role(
+        RoleArn='arn:aws:iam::326190351503:role/test-session-tagging',
+        RoleSessionName='locust-performance-test',
+        Tags=[
+            {'Key': 'kivera-providedby', 'Value': 'tf-module'},
+            {'Key': 'kivera-depscope', 'Value': 'dev'},
+        ],
+    )
+    assumed_role_credentials = response['Credentials']
 
 def add_trace_headers(request, **kwargs):
     span = ddtrace.tracer.current_span()
@@ -393,14 +418,6 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="invalid-session-name",
-            Tags=[{
-                'Key': 'kivera-providedBy',
-                'Value': 'tf-module'
-            },
-            {
-                'Key': 'kivera-depscope',
-                'Value': 'dev'
-            }]
         )
         client_pool.put(client, 'sts')
 
@@ -411,14 +428,6 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::000000000000:role/test-role",
             RoleSessionName="org-dev-session",
-            Tags=[{
-                'Key': 'kivera-providedBy',
-                'Value': 'tf-module'
-            },
-            {
-                'Key': 'kivera-depscope',
-                'Value': 'dev'
-            }]
         )
         client_pool.put(client, 'sts')
 
@@ -429,14 +438,6 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="org-dev-session",
-            Tags=[{
-                'Key': 'kivera-providedBy',
-                'Value': 'tf-module'
-            },
-            {
-                'Key': 'kivera-depscope',
-                'Value': 'dev'
-            }]
         )
         client_pool.put(client, 'sts')
 
@@ -1186,6 +1187,8 @@ class Transparent(User):
         TransparentProxyTasks: 1,
     }
 
+    def on_start(self):
+        assume_role()
 
 class Standard(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
@@ -1211,3 +1214,6 @@ class Standard(User):
         NonCloudTasks: 1,
         CustomResponseTasks: 1,
     }
+
+    def on_start(self):
+        assume_role()

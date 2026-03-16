@@ -50,7 +50,7 @@ yum update -y
 yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent -y
 
 # LOCUST
-export LOCUST_VERSION="2.16.0"
+export LOCUST_VERSION="2.43.3"
 pip3 install locust==$LOCUST_VERSION
 
 export PRIVATE_IP=$(hostname -I | awk '{print $1}')
