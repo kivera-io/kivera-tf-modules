@@ -27,6 +27,7 @@ resource "aws_instance" "leader" {
     deployment_id       = local.deployment_id
     leader_username     = var.leader_username
     leader_password     = random_string.leader_password.result
+    leader_secret_key   = random_string.leader_secret_key.result
     leader_use_proxy    = var.leader_use_proxy
     locust_user_classes = var.locust_user_classes
     nodes_count         = var.nodes_count
@@ -48,5 +49,10 @@ resource "aws_instance" "leader" {
 
 resource "random_string" "leader_password" {
   length  = 24
+  special = false
+}
+
+resource "random_string" "leader_secret_key" {
+  length  = 32
   special = false
 }
