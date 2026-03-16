@@ -21,7 +21,6 @@ resource "aws_instance" "leader" {
     locust_run_time     = var.locust_run_time
     user_wait_min       = var.user_wait_min
     user_wait_max       = var.user_wait_max
-    deployment_name     = var.deployment_name
     s3_bucket           = var.s3_bucket
     s3_bucket_key       = var.s3_bucket_key
     deployment_id       = local.deployment_id

@@ -21,7 +21,6 @@ resource "aws_instance" "nodes" {
     proxy_public_cert         = var.proxy_public_cert
     user_wait_min             = var.user_wait_min
     user_wait_max             = var.user_wait_max
-    deployment_name           = var.deployment_name
     s3_bucket                 = var.s3_bucket
     s3_bucket_key             = var.s3_bucket_key
     test_timeout              = var.test_timeout
