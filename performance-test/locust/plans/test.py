@@ -338,7 +338,7 @@ class AwsEc2Tasks(TaskSet):
     @result_decorator
     def aws_ec2_create_volume_allow(self):
         client = client_pool.get('ec2')
-        client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=True, KmsKeyId='alias/secure-key', Size=100)
+        client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=True, KmsKeyId='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000', Size=100)
         client_pool.put(client, 'ec2')
 
 
@@ -394,7 +394,7 @@ class AwsDynamoDBTasks(TaskSet):
             SSESpecification={
                 'Enabled': True,
                 'SSEType': 'KMS',
-                'KMSMasterKeyId': 'alias/secure-key'
+                'KMSMasterKeyId': 'arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000'
             },
             TableClass='STANDARD'
         )
@@ -475,7 +475,7 @@ class AwsS3Tasks(TaskSet):
     #     path = f"{os.environ['S3_TEST_PATH']}/data/{''.join(random.choices(string.ascii_uppercase, k=10))}"
     #     client = client_pool.get('s3')
     #     transfer = boto3.s3.transfer.S3Transfer(client=client)
-    #     transfer.upload_file('test.data', bucket, path, extra_args={'ServerSideEncryption':'aws:kms', 'SSEKMSKeyId':'alias/secure-key'} )
+    #     transfer.upload_file('test.data', bucket, path, extra_args={'ServerSideEncryption':'aws:kms', 'SSEKMSKeyId':'arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000'} )
 
     @task(5)
     @result_decorator
@@ -502,7 +502,7 @@ class AwsS3Tasks(TaskSet):
     @result_decorator
     def aws_s3_put_object_allow(self):
         client = client_pool.get('s3')
-        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
+        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000')
         client_pool.put(client, 's3')
 
     @task(3)
@@ -681,7 +681,7 @@ class AwsRdsTasks(TaskSet):
     @result_decorator
     def aws_rds_create_db_instance_allow(self):
         client = client_pool.get('rds')
-        client.create_db_instance(DBInstanceIdentifier='test-db', DBInstanceClass='db.t3.micro', Engine='postgres', StorageEncrypted=True, KmsKeyId='alias/secure-key')
+        client.create_db_instance(DBInstanceIdentifier='test-db', DBInstanceClass='db.t3.micro', Engine='postgres', StorageEncrypted=True, KmsKeyId='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000')
         client_pool.put(client, 'rds')
 
     @task(3)
@@ -743,7 +743,7 @@ class AwsSqsTasks(TaskSet):
     def aws_sqs_create_queue_block_2(self):
         policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"000000000000"},"Action":"sqs:*","Resource":"*"}]}'
         client = client_pool.get('sqs')
-        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
+        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000', 'Policy': policy } )
         client_pool.put(client, 'sqs')
 
     @task(2)
@@ -751,7 +751,7 @@ class AwsSqsTasks(TaskSet):
     def aws_sqs_create_queue_allow(self):
         policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":"sqs:*","Resource":"*"}]}'
         client = client_pool.get('sqs')
-        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
+        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000', 'Policy': policy } )
         client_pool.put(client, 'sqs')
 
     @task(2)
@@ -786,7 +786,7 @@ class AwsLambdaTasks(TaskSet):
                 'SubnetIds': ['subnet-08ce806b357e7a444'],
                 'SecurityGroupIds': ['sg-0ad587d38f88c4799']
             },
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
+            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000',
         )
         client_pool.put(client, 'lambda')
 
@@ -816,7 +816,7 @@ class AwsLambdaTasks(TaskSet):
             Role='arn:aws:iam::326190351503:role/test-role',
             Code={ 'S3Bucket': 'test-bucket', 'S3Key': 'function-code'},
             Runtime='python3.12',
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
+            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000',
         )
         client_pool.put(client, 'lambda')
 
@@ -833,7 +833,7 @@ class AwsLambdaTasks(TaskSet):
                 'SubnetIds': ['subnet-08ce806b357e7a444'],
                 'SecurityGroupIds': ['sg-0ad587d38f88c4799']
             },
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
+            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000',
         )
         client_pool.put(client, 'lambda')
 
