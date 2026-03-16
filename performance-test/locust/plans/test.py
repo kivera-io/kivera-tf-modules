@@ -32,6 +32,8 @@ def on_locust_init(environment, **kwargs):
 
     from flask_login import UserMixin
 
+    environment.web_ui.app.secret_key = os.urandom(24)
+
     class WebUser(UserMixin):
         def __init__(self, user_id):
             self.id = user_id

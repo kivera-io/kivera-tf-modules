@@ -76,7 +76,6 @@ export USER_WAIT_MAX=${user_wait_max}
 export LOCUST_USER_CLASSES=${locust_user_classes}
 export LOCUST_WEB_USERNAME=${leader_username}
 export LOCUST_WEB_PASSWORD=${leader_password}
-export LOCUST_WEB_SECRET_KEY=${leader_secret_key}
 
 nohup locust \
     -f test.py \
