@@ -10,7 +10,10 @@ import botocore
 import ddtrace
 from botocore.config import Config
 from locust import User, TaskSet, task, between, events
+from locust.runners import MasterRunner
 from ddtrace.propagation.http import HTTPPropagator
+from flask_login import login_user
+from flask import request, session
 import requests
 
 class TimeoutException(Exception):
@@ -19,6 +22,35 @@ class TimeoutException(Exception):
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
 TEST_TIMEOUT = int(os.getenv('TEST_TIMEOUT', '60'))
+LOCUST_WEB_USERNAME = os.getenv('LOCUST_WEB_USERNAME', '')
+LOCUST_WEB_PASSWORD = os.getenv('LOCUST_WEB_PASSWORD', '')
+
+@events.init.add_listener
+def on_locust_init(environment, **kwargs):
+    if not isinstance(environment.runner, MasterRunner):
+        return
+
+    from locust.web import User as WebUser
+
+    @environment.web_ui.login_manager.user_loader
+    def load_user(user_id):
+        if user_id == LOCUST_WEB_USERNAME:
+            return WebUser(user_id)
+        return None
+
+    environment.web_ui.auth_args = {
+        "username_password_callback": "/login-submit",
+    }
+
+    @environment.web_ui.app.route("/login-submit", methods=["POST"])
+    def login_submit():
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if username == LOCUST_WEB_USERNAME and password == LOCUST_WEB_PASSWORD:
+            login_user(WebUser(username))
+            return "", 200
+        session["auth_error"] = "Invalid username or password"
+        return "", 401
 
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
@@ -1179,7 +1211,6 @@ class TransparentProxyTasks(TaskSet):
         client = client_pool.get('s3')
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-03/data.txt")
         client_pool.put(client, 's3')
-
 
 class Transparent(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
