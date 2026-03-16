@@ -30,7 +30,11 @@ def on_locust_init(environment, **kwargs):
     if not isinstance(environment.runner, MasterRunner):
         return
 
-    from locust.web import User as WebUser
+    from flask_login import UserMixin
+
+    class WebUser(UserMixin):
+        def __init__(self, user_id):
+            self.id = user_id
 
     @environment.web_ui.login_manager.user_loader
     def load_user(user_id):
