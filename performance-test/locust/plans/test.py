@@ -10,7 +10,10 @@ import botocore
 import ddtrace
 from botocore.config import Config
 from locust import User, TaskSet, task, between, events
+from locust.runners import MasterRunner
 from ddtrace.propagation.http import HTTPPropagator
+from flask_login import login_user
+from flask import request, session
 import requests
 
 class TimeoutException(Exception):
@@ -19,6 +22,41 @@ class TimeoutException(Exception):
 USER_WAIT_MIN = int(os.getenv('USER_WAIT_MIN', '4'))
 USER_WAIT_MAX = int(os.getenv('USER_WAIT_MAX', '6'))
 TEST_TIMEOUT = int(os.getenv('TEST_TIMEOUT', '60'))
+LOCUST_WEB_USERNAME = os.getenv('LOCUST_WEB_USERNAME', '')
+LOCUST_WEB_PASSWORD = os.getenv('LOCUST_WEB_PASSWORD', '')
+
+@events.init.add_listener
+def on_locust_init(environment, **kwargs):
+    if not isinstance(environment.runner, MasterRunner):
+        return
+
+    from flask_login import UserMixin
+
+    environment.web_ui.app.secret_key = os.urandom(24)
+
+    class WebUser(UserMixin):
+        def __init__(self, user_id):
+            self.id = user_id
+
+    @environment.web_ui.login_manager.user_loader
+    def load_user(user_id):
+        if user_id == LOCUST_WEB_USERNAME:
+            return WebUser(user_id)
+        return None
+
+    environment.web_ui.auth_args = {
+        "username_password_callback": "/login-submit",
+    }
+
+    @environment.web_ui.app.route("/login-submit", methods=["POST"])
+    def login_submit():
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if username == LOCUST_WEB_USERNAME and password == LOCUST_WEB_PASSWORD:
+            login_user(WebUser(username))
+            return "", 200
+        session["auth_error"] = "Invalid username or password"
+        return "", 401
 
 ddtrace.patch(botocore=True)
 ddtrace.config.botocore['distributed_tracing'] = False
@@ -29,7 +67,17 @@ class ClientPool:
         self.lock = threading.Lock()
 
     def new_client(self, service, region="ap-southeast-2"):
-        client = boto3.client(service, region_name=region, config=client_config)
+        if assumed_role_credentials is not None:
+            client = boto3.client(
+                service,
+                region_name=region,
+                config=client_config,
+                aws_access_key_id=assumed_role_credentials['AccessKeyId'],
+                aws_secret_access_key=assumed_role_credentials['SecretAccessKey'],
+                aws_session_token=assumed_role_credentials['SessionToken'],
+            )
+        else:
+            client = boto3.client(service, region_name=region, config=client_config)
         client.meta.events.register_first('before-sign.*.*', add_trace_headers)
         return client
 
@@ -132,6 +180,21 @@ custom_responses = {
 }
 
 boto3.setup_default_session(region_name='ap-southeast-2')
+
+assumed_role_credentials = None
+
+def assume_role():
+    global assumed_role_credentials
+    sts_client = boto3.client('sts', region_name='ap-southeast-2')
+    response = sts_client.assume_role(
+        RoleArn='arn:aws:iam::326190351503:role/test-session-tagging',
+        RoleSessionName='loc-dev-perftest',
+        Tags=[
+            {'Key': 'kivera-providedby', 'Value': 'tf-module'},
+            {'Key': 'kivera-depscope', 'Value': 'dev'},
+        ],
+    )
+    assumed_role_credentials = response['Credentials']
 
 def add_trace_headers(request, **kwargs):
     span = ddtrace.tracer.current_span()
@@ -313,7 +376,7 @@ class AwsEc2Tasks(TaskSet):
     @result_decorator
     def aws_ec2_create_volume_allow(self):
         client = client_pool.get('ec2')
-        client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=True, KmsKeyId='alias/secure-key', Size=100)
+        client.create_volume(AvailabilityZone="ap-southeast-2a", Encrypted=True, KmsKeyId='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000', Size=100)
         client_pool.put(client, 'ec2')
 
 
@@ -369,7 +432,7 @@ class AwsDynamoDBTasks(TaskSet):
             SSESpecification={
                 'Enabled': True,
                 'SSEType': 'KMS',
-                'KMSMasterKeyId': 'alias/secure-key'
+                'KMSMasterKeyId': 'arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000'
             },
             TableClass='STANDARD'
         )
@@ -393,14 +456,6 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="invalid-session-name",
-            Tags=[{
-                'Key': 'kivera-providedBy',
-                'Value': 'tf-module'
-            },
-            {
-                'Key': 'kivera-depscope',
-                'Value': 'dev'
-            }]
         )
         client_pool.put(client, 'sts')
 
@@ -411,14 +466,6 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::000000000000:role/test-role",
             RoleSessionName="org-dev-session",
-            Tags=[{
-                'Key': 'kivera-providedBy',
-                'Value': 'tf-module'
-            },
-            {
-                'Key': 'kivera-depscope',
-                'Value': 'dev'
-            }]
         )
         client_pool.put(client, 'sts')
 
@@ -429,14 +476,6 @@ class AwsStsTasks(TaskSet):
         client.assume_role(
             RoleArn="arn:aws:iam::326190351503:role/test-role",
             RoleSessionName="org-dev-session",
-            Tags=[{
-                'Key': 'kivera-providedBy',
-                'Value': 'tf-module'
-            },
-            {
-                'Key': 'kivera-depscope',
-                'Value': 'dev'
-            }]
         )
         client_pool.put(client, 'sts')
 
@@ -474,7 +513,7 @@ class AwsS3Tasks(TaskSet):
     #     path = f"{os.environ['S3_TEST_PATH']}/data/{''.join(random.choices(string.ascii_uppercase, k=10))}"
     #     client = client_pool.get('s3')
     #     transfer = boto3.s3.transfer.S3Transfer(client=client)
-    #     transfer.upload_file('test.data', bucket, path, extra_args={'ServerSideEncryption':'aws:kms', 'SSEKMSKeyId':'alias/secure-key'} )
+    #     transfer.upload_file('test.data', bucket, path, extra_args={'ServerSideEncryption':'aws:kms', 'SSEKMSKeyId':'arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000'} )
 
     @task(5)
     @result_decorator
@@ -501,7 +540,7 @@ class AwsS3Tasks(TaskSet):
     @result_decorator
     def aws_s3_put_object_allow(self):
         client = client_pool.get('s3')
-        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
+        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000')
         client_pool.put(client, 's3')
 
     @task(3)
@@ -680,7 +719,7 @@ class AwsRdsTasks(TaskSet):
     @result_decorator
     def aws_rds_create_db_instance_allow(self):
         client = client_pool.get('rds')
-        client.create_db_instance(DBInstanceIdentifier='test-db', DBInstanceClass='db.t3.micro', Engine='postgres', StorageEncrypted=True, KmsKeyId='alias/secure-key')
+        client.create_db_instance(DBInstanceIdentifier='test-db', DBInstanceClass='db.t3.micro', Engine='postgres', StorageEncrypted=True, KmsKeyId='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000')
         client_pool.put(client, 'rds')
 
     @task(3)
@@ -742,7 +781,7 @@ class AwsSqsTasks(TaskSet):
     def aws_sqs_create_queue_block_2(self):
         policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"000000000000"},"Action":"sqs:*","Resource":"*"}]}'
         client = client_pool.get('sqs')
-        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
+        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000', 'Policy': policy } )
         client_pool.put(client, 'sqs')
 
     @task(2)
@@ -750,7 +789,7 @@ class AwsSqsTasks(TaskSet):
     def aws_sqs_create_queue_allow(self):
         policy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"326190351503"},"Action":"sqs:*","Resource":"*"}]}'
         client = client_pool.get('sqs')
-        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'alias/secure-key', 'Policy': policy } )
+        client.create_queue(QueueName='test-queue', Attributes={ 'VisibilityTimeout ': '120', 'KmsMasterKeyId': 'arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000', 'Policy': policy } )
         client_pool.put(client, 'sqs')
 
     @task(2)
@@ -785,7 +824,7 @@ class AwsLambdaTasks(TaskSet):
                 'SubnetIds': ['subnet-08ce806b357e7a444'],
                 'SecurityGroupIds': ['sg-0ad587d38f88c4799']
             },
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
+            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000',
         )
         client_pool.put(client, 'lambda')
 
@@ -815,7 +854,7 @@ class AwsLambdaTasks(TaskSet):
             Role='arn:aws:iam::326190351503:role/test-role',
             Code={ 'S3Bucket': 'test-bucket', 'S3Key': 'function-code'},
             Runtime='python3.12',
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
+            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000',
         )
         client_pool.put(client, 'lambda')
 
@@ -832,7 +871,7 @@ class AwsLambdaTasks(TaskSet):
                 'SubnetIds': ['subnet-08ce806b357e7a444'],
                 'SecurityGroupIds': ['sg-0ad587d38f88c4799']
             },
-            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
+            KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:key/00000000-0000-0000-0000-000000000000',
         )
         client_pool.put(client, 'lambda')
 
@@ -1179,13 +1218,14 @@ class TransparentProxyTasks(TaskSet):
         client.get_object(Bucket="kivera-poc-deployment", Key="kivera/locust-perf-test/file-03/data.txt")
         client_pool.put(client, 's3')
 
-
 class Transparent(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
         TransparentProxyTasks: 1,
     }
 
+    def on_start(self):
+        assume_role()
 
 class Standard(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
@@ -1211,3 +1251,6 @@ class Standard(User):
         NonCloudTasks: 1,
         CustomResponseTasks: 1,
     }
+
+    def on_start(self):
+        assume_role()

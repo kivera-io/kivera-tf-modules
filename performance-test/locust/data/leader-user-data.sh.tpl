@@ -23,13 +23,12 @@ if [[ ${leader_use_proxy} == true ]]; then
         done
 
         echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
-        # curl -s http://${proxy_endpoint}:8090/pub.cert > ~/kivera/ca-cert.pem
 
         echo "
-        export HTTPS_PROXY=\"http://${proxy_endpoint}:8080\"
-        export HTTP_PROXY=\"http://${proxy_endpoint}:8080\"
-        export https_proxy=\"http://${proxy_endpoint}:8080\"
-        export http_proxy=\"http://${proxy_endpoint}:8080\"
+        export HTTPS_PROXY=\"${proxy_protocol}://${proxy_endpoint}:8080\"
+        export HTTP_PROXY=\"${proxy_protocol}://${proxy_endpoint}:8080\"
+        export https_proxy=\"${proxy_protocol}://${proxy_endpoint}:8080\"
+        export http_proxy=\"${proxy_protocol}://${proxy_endpoint}:8080\"
         export NO_PROXY=\"localhost,169.254.169.254,.github.com\"
         export no_proxy=\"\$NO_PROXY\"
         " >> ~/kivera/setenv.sh
@@ -42,25 +41,12 @@ if [[ ${leader_use_proxy} == true ]]; then
     export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"
     export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"
     " >> ~/kivera/setenv.sh
-    
+
     source ~/kivera/setenv.sh
 fi
 
-yum update -y
-yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent -y
-
-# LOCUST
-export LOCUST_VERSION="2.16.0"
-pip3 install locust==$LOCUST_VERSION
-
-export PRIVATE_IP=$(hostname -I | awk '{print $1}')
-echo "PRIVATE_IP=$PRIVATE_IP" >> /etc/environment
-
-source ~/.bashrc
-
-mkdir -p ~/.ssh
-echo 'Host *' > ~/.ssh/config
-echo 'StrictHostKeyChecking no' >> ~/.ssh/config
+dnf update -y
+dnf install -y jq pcre2-devel gcc tzdata unzip htop amazon-cloudwatch-agent python3.11 python3.11-pip
 
 cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/config.json
 ${cw_config}
@@ -74,9 +60,7 @@ unzip ./tests.zip -d /locust
 
 cd /locust
 
-[[ -e requirements.txt ]] && pip3 install -r requirements.txt
-
-sleep 60
+[[ -f requirements.txt ]] && python3.11 -m pip install -r requirements.txt
 
 if [[ ${leader_use_proxy} == false && ${proxy_transparent_enabled} == false ]]; then
     time=180
@@ -90,12 +74,14 @@ fi
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
 export LOCUST_USER_CLASSES=${locust_user_classes}
+export LOCUST_WEB_USERNAME=${leader_username}
+export LOCUST_WEB_PASSWORD=${leader_password}
 
 nohup locust \
     -f test.py \
     --autostart \
     --web-port=80 \
-    --web-auth ${leader_username}:${leader_password} \
+    --web-login \
     --users=${locust_max_users} \
     --spawn-rate=${locust_spawn_rate} \
     --run-time=${locust_run_time}m \

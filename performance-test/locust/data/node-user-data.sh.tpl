@@ -21,7 +21,6 @@ else
         ((time-=1)); sleep 1;
     done
 
-    # curl -s http://${proxy_endpoint}:8090/pub.cert > ~/kivera/ca-cert.pem
     echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
 
     echo "
@@ -34,34 +33,18 @@ else
     " >> ~/kivera/setenv.sh
 fi
 
-cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
-update-ca-trust extract
+if [[ -s ~/kivera/ca-cert.pem ]]; then
+    cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
+    update-ca-trust extract
 
-echo "export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
-echo "export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
+    echo "export AWS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
+    echo "export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\"" >> ~/kivera/setenv.sh
+fi
+
 source ~/kivera/setenv.sh
 
-sudo yum remove awscli
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
-
-yum update -y
-yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent -y
-sudo -H pip3 install --upgrade pip
-
-# LOCUST
-export LOCUST_VERSION="2.16.0"
-pip3 install locust==$LOCUST_VERSION
-
-export PRIVATE_IP=$(hostname -I | awk '{print $1}')
-echo "PRIVATE_IP=$PRIVATE_IP" >> /etc/environment
-
-source ~/.bashrc
-
-mkdir -p ~/.ssh
-echo 'Host *' > ~/.ssh/config
-echo 'StrictHostKeyChecking no' >> ~/.ssh/config
+dnf update -y
+dnf install -y jq pcre2-devel gcc tzdata unzip htop amazon-cloudwatch-agent python3.11 python3.11-pip
 
 cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/config.json
 ${cw_config}
@@ -75,7 +58,7 @@ unzip ./tests.zip -d /locust
 
 cd /locust
 
-[[ -e requirements.txt ]] && pip3 install -r requirements.txt
+[[ -f requirements.txt ]] && python3.11 -m pip install -r requirements.txt
 
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
