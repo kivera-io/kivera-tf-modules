@@ -14,7 +14,7 @@ if [[ "${upstream_proxy_endpoint}" != "" ]]; then
   export no_proxy=169.254.169.254
   export NO_PROXY=169.254.169.254
 
-  echo "proxy=http://${upstream_proxy_endpoint}:${upstream_proxy_port}" >> /etc/yum.conf
+  echo "proxy=http://${upstream_proxy_endpoint}:${upstream_proxy_port}" >> /etc/dnf/dnf.conf
 fi
 
 ## tune box
@@ -69,25 +69,26 @@ endpoints:
         ca_private_key: /opt/koxy/ca-key.pem
 PROXYCFG
 
+dnf install amazon-cloudwatch-agent unzip -y
+
 groupadd -r koxy
-useradd -mrg koxy koxy
+useradd -Mrg koxy koxy
 
 aws s3 cp ${proxy_s3_path} ./proxy.zip
 unzip ./proxy.zip -d $PROXY_DIR
 chmod 0755 $PROXY_DIR/koxy
 chown -R koxy:koxy $PROXY_DIR
 
-yum install amazon-cloudwatch-agent -y
-
 if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
-  DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${datadog_secret_arn}`
+  DD_SECRET_REGION=$(echo ${datadog_secret_arn} | cut -d':' -f4)
+  DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region $DD_SECRET_REGION --secret-id ${datadog_secret_arn}`
   export DD_API_KEY
   DD_SITE="datadoghq.com" DD_APM_INSTRUMENTATION_ENABLED=host bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
   if [[ "${upstream_proxy_endpoint}" != "" ]]; then
     cat << EOF >> /etc/datadog-agent/environment
-      DD_PROXY_HTTPS="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
-      DD_PROXY_HTTP="http://${upstream_proxy_endpoint}:${upstream_proxy_port}"
+DD_PROXY_HTTPS=http://${upstream_proxy_endpoint}:${upstream_proxy_port}
+DD_PROXY_HTTP=http://${upstream_proxy_endpoint}:${upstream_proxy_port}
 EOF
   fi
 fi
@@ -108,16 +109,26 @@ WantedBy=multi-user.target
 EOF
 
 # Configure log file rotation
-cat << EOF | tee /etc/cron.hourly/koxy-logrotate
-#!/bin/sh
-/usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
-EXITVALUE=\$?
-if [ \$EXITVALUE != 0 ]; then
-    /usr/bin/logger -t logrotate "ALERT exited abnormally with [\$EXITVALUE]"
-fi
-exit 0
+cat << EOF | tee /etc/systemd/system/koxy-logrotate.service
+[Unit]
+Description=Koxy log rotation
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/logrotate -s /var/lib/logrotate/klogrotate.status /etc/klogrotate.conf
 EOF
-chmod +x /etc/cron.hourly/koxy-logrotate
+
+cat << EOF | tee /etc/systemd/system/koxy-logrotate.timer
+[Unit]
+Description=Hourly koxy log rotation
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
 
 cat << EOF | tee /etc/klogrotate.conf
 $PROXY_LOGS_FILE {
@@ -180,6 +191,7 @@ cat << EOF | tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.js
 EOF
 
 # Enable services
+systemctl daemon-reload
 if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
   systemctl enable datadog-agent
   systemctl restart datadog-agent
@@ -188,6 +200,8 @@ systemctl enable amazon-cloudwatch-agent.service
 systemctl restart amazon-cloudwatch-agent.service
 systemctl enable koxy.service
 systemctl restart koxy.service
+systemctl enable koxy-logrotate.timer
+systemctl start koxy-logrotate.timer
 
 sleep 10
 
