@@ -188,7 +188,7 @@ def assume_role():
     sts_client = boto3.client('sts', region_name='ap-southeast-2')
     response = sts_client.assume_role(
         RoleArn='arn:aws:iam::326190351503:role/test-session-tagging',
-        RoleSessionName='locust-performance-test',
+        RoleSessionName='loc-dev-perftest',
         Tags=[
             {'Key': 'kivera-providedby', 'Value': 'tf-module'},
             {'Key': 'kivera-depscope', 'Value': 'dev'},
