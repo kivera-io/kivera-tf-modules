@@ -103,83 +103,22 @@ variable "custom_domain_zone_id" {
 }
 
 ### Proxy variables
-variable "proxy_version" {
-  description = "The version of the proxy to deploy"
-  type        = string
-  default     = "latest"
-}
-
-variable "proxy_credentials" {
-  description = "The proxy credentials as a json string (required if proxy_credentials_secret_arn is not provided)"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "proxy_credentials_secret_arn" {
-  description = "The ARN of the proxy credentials secret (required if proxy_credentials is not provided)"
-  type        = string
-  default     = ""
-}
-
 variable "proxy_private_key" {
-  description = "The private key to be used by the proxy (required if proxy_private_key_secret_arn is not provided)"
+  description = "The CA private key used by the proxy for TLS interception (required if proxy_private_key_secret_arn is not provided)"
   type        = string
   sensitive   = true
   default     = ""
 }
 
 variable "proxy_private_key_secret_arn" {
-  description = "The ARN of the proxy private key secret (required if proxy_private_key is not provided)"
+  description = "The ARN of the CA private key secret (required if proxy_private_key is not provided)"
   type        = string
   default     = ""
 }
 
 variable "proxy_public_cert" {
-  description = "The public certificate associated with the proxies private key"
+  description = "The CA public certificate used by the proxy for TLS interception"
   type        = string
-}
-
-variable "proxy_cert_type" {
-  description = "The type of public certificate provided"
-  type        = string
-  default     = "ecdsa"
-}
-
-variable "external_ca" {
-  description = "Enable to use an external CA for the proxy"
-  type        = bool
-  default     = false
-}
-
-variable "proxy_https" {
-  description = "Enable to switch to https listener (port 8443)"
-  type        = bool
-  default     = false
-}
-
-variable "pca_arn" {
-  description = "The ARN of the PCA certificate"
-  type        = string
-  default     = ""
-}
-
-variable "proxy_https_key" {
-  description = "The private key used by the proxy to establish tls"
-  type        = string
-  default     = ""
-}
-
-variable "proxy_https_cert" {
-  description = "The public certificate associated with the https private key"
-  type        = string
-  default     = ""
-}
-
-variable "proxy_log_to_kivera" {
-  description = "Enable to send all logs to Kivera"
-  type        = bool
-  default     = true
 }
 
 variable "proxy_log_to_cloudwatch" {
@@ -189,7 +128,7 @@ variable "proxy_log_to_cloudwatch" {
 }
 
 variable "proxy_local_path" {
-  description = "Path to a local proxy binary (takes precedence over proxy_version)"
+  description = "Path to a local proxy binary to upload to S3 and deploy"
   type        = string
   default     = ""
 }

@@ -1,16 +1,3 @@
-resource "aws_secretsmanager_secret" "proxy_credentials" {
-  count = var.proxy_credentials != "" ? 1 : 0
-
-  name_prefix = "${var.name_prefix}-credentials-"
-}
-
-resource "aws_secretsmanager_secret_version" "proxy_credentials_version" {
-  count = var.proxy_credentials != "" ? 1 : 0
-
-  secret_id     = aws_secretsmanager_secret.proxy_credentials[0].id
-  secret_string = var.proxy_credentials
-}
-
 resource "aws_secretsmanager_secret" "proxy_private_key" {
   count = var.proxy_private_key != "" ? 1 : 0
 
@@ -22,19 +9,6 @@ resource "aws_secretsmanager_secret_version" "proxy_private_key_version" {
 
   secret_id     = aws_secretsmanager_secret.proxy_private_key[0].id
   secret_string = var.proxy_private_key
-}
-
-resource "aws_secretsmanager_secret" "proxy_https_private_key" {
-  count = var.proxy_https_key != "" ? 1 : 0
-
-  name_prefix = "${var.name_prefix}-https-private-key-"
-}
-
-resource "aws_secretsmanager_secret_version" "proxy_https_private_key_version" {
-  count = var.proxy_https_key != "" ? 1 : 0
-
-  secret_id     = aws_secretsmanager_secret.proxy_https_private_key[0].id
-  secret_string = var.proxy_https_key
 }
 
 resource "aws_secretsmanager_secret" "redis_default_connection_string" {
@@ -99,26 +73,7 @@ resource "aws_iam_role_policy_attachment" "read_only" {
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
-resource "aws_iam_policy" "proxy_instance" {
-  name_prefix = "${var.name_prefix}-default-"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = "secretsmanager:GetSecretValue"
-      Resource = [local.proxy_credentials_secret_arn]
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "proxy_instance" {
-  role       = aws_iam_role.instance_role.name
-  policy_arn = aws_iam_policy.proxy_instance.arn
-}
-
 resource "aws_iam_policy" "proxy_private_key_secret" {
-  count       = var.external_ca ? 0 : 1
   name_prefix = "${var.name_prefix}-get-proxy-private-key-secret-"
 
   policy = jsonencode({
@@ -132,29 +87,8 @@ resource "aws_iam_policy" "proxy_private_key_secret" {
 }
 
 resource "aws_iam_role_policy_attachment" "proxy_private_key_secret" {
-  count      = var.external_ca ? 0 : 1
   role       = aws_iam_role.instance_role.name
-  policy_arn = aws_iam_policy.proxy_private_key_secret[0].arn
-}
-
-resource "aws_iam_policy" "proxy_https_private_key_secret" {
-  count       = var.proxy_https_key != "" ? 1 : 0
-  name_prefix = "${var.name_prefix}-get-proxy-https-private-key-secret-"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = "secretsmanager:GetSecretValue"
-      Resource = [local.proxy_https_private_key_secret_arn]
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "proxy_https_private_key_secret" {
-  count      = var.proxy_https_key != "" ? 1 : 0
-  role       = aws_iam_role.instance_role.name
-  policy_arn = aws_iam_policy.proxy_https_private_key_secret[0].arn
+  policy_arn = aws_iam_policy.proxy_private_key_secret.arn
 }
 
 resource "aws_iam_policy" "proxy_instance_s3" {
@@ -179,29 +113,6 @@ resource "aws_iam_role_policy_attachment" "proxy_instance_s3" {
   count      = var.proxy_local_path != "" ? 1 : 0
   role       = aws_iam_role.instance_role.name
   policy_arn = aws_iam_policy.proxy_instance_s3[0].arn
-}
-
-resource "aws_iam_policy" "proxy_instance_acm" {
-  count = var.external_ca ? 1 : 0
-  name  = "${var.name_prefix}-acm"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "acm:*",
-        "acm-pca:*"
-      ]
-      Resource = ["arn:aws:acm-pca:${var.region}:*:certificate-authority/*"]
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "proxy_instance_acm" {
-  count      = var.external_ca ? 1 : 0
-  role       = aws_iam_role.instance_role.name
-  policy_arn = aws_iam_policy.proxy_instance_acm[0].arn
 }
 
 resource "aws_iam_policy" "datadog_secret" {
