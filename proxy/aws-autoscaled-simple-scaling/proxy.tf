@@ -96,10 +96,7 @@ resource "aws_lb_target_group" "management_target_group" {
     interval            = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
-    port                = 8090
-    protocol            = "HTTP"
-    path                = "/version"
-    matcher             = 200
+    protocol            = "TCP"
   }
   port                 = 8090
   protocol             = "TCP"
