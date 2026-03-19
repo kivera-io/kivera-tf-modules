@@ -355,19 +355,7 @@ class AwsS3Tasks(TaskSet):
         client.get_paginator('list_objects').paginate(Bucket='kivera-poc-deployment', PaginationConfig={'MaxItems': 1})
         client_pool.put(client, 's3')
 
-    @task(1)
-    @result_decorator
-    def aws_s3_put_object_allow(self):
-        client = client_pool.get('s3')
-        client.put_object(Bucket="test-bucket", Key="test/key", Body="test-object".encode(), ServerSideEncryption='aws:kms', SSEKMSKeyId='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key')
-        client_pool.put(client, 's3')
 
-    @task(1)
-    @result_decorator
-    def aws_s3_create_bucket_allow(self):
-        client = client_pool.get('s3')
-        client.create_bucket(Bucket="test-bucket", ACL='private', CreateBucketConfiguration={'LocationConstraint': "ap-southeast-2"})
-        client_pool.put(client, 's3')
 
 
 
