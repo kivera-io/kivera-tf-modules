@@ -45,8 +45,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   health_check_grace_period = 180
   vpc_zone_identifier       = var.proxy_subnet_ids
   target_group_arns = [
-    aws_lb_target_group.traffic_target_group.arn,
-    aws_lb_target_group.management_target_group.arn
+    aws_lb_target_group.traffic_target_group.arn
   ]
   instance_refresh {
     strategy = "Rolling"
@@ -89,31 +88,6 @@ resource "aws_lb_listener" "traffic_listener" {
   protocol          = "TCP"
 }
 
-resource "aws_lb_target_group" "management_target_group" {
-  name = "${var.name_prefix}-mgmt-${local.name_suffix}"
-  health_check {
-    enabled             = true
-    interval            = 10
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    protocol            = "TCP"
-  }
-  port                 = 8090
-  protocol             = "TCP"
-  vpc_id               = var.vpc_id
-  deregistration_delay = 5
-  target_type          = "instance"
-}
-
-resource "aws_lb_listener" "management_listener" {
-  default_action {
-    target_group_arn = aws_lb_target_group.management_target_group.arn
-    type             = "forward"
-  }
-  load_balancer_arn = aws_lb.load_balancer.arn
-  port              = 8090
-  protocol          = "TCP"
-}
 
 resource "aws_lb" "load_balancer" {
   name               = "${var.name_prefix}-lb-${local.name_suffix}"
