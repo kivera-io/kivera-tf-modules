@@ -15,15 +15,7 @@ if [[ ${leader_use_proxy} == true ]]; then
     if [[ ${proxy_transparent_enabled} == true ]]; then
         echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
     else
-        time=180
-        echo Polling http://${proxy_endpoint}:8090/version
-        while ! curl -s http://${proxy_endpoint}:8090/version; do
-            [[ $time == 0 ]] && echo "Failed to get response" && exit 1
-            ((time-=1)); sleep 1;
-        done
-
         echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
-        # curl -s http://${proxy_endpoint}:8090/pub.cert > ~/kivera/ca-cert.pem
 
         echo "
         export HTTPS_PROXY=\"http://${proxy_endpoint}:8080\"
@@ -76,16 +68,7 @@ cd /locust
 
 [[ -e requirements.txt ]] && pip3 install -r requirements.txt
 
-sleep 60
-
-if [[ ${leader_use_proxy} == false && ${proxy_transparent_enabled} == false ]]; then
-    time=180
-    echo Polling http://${proxy_endpoint}:8090/version
-    while ! curl -s http://${proxy_endpoint}:8090/version; do
-        [[ $time == 0 ]] && echo "Failed to get response" && exit 1
-        ((time-=1)); sleep 1;
-    done
-fi
+sleep 10
 
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
