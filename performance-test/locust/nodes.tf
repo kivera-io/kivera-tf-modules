@@ -4,7 +4,7 @@ resource "aws_instance" "nodes" {
 
   count = var.nodes_count
 
-  ami           = data.aws_ami.amazon_linux_2.id
+  ami           = data.aws_ami.amazon_linux_2023.id
   instance_type = var.nodes_instance_type
 
   associate_public_ip_address = var.nodes_associate_public_ip_address

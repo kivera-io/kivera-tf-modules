@@ -2,7 +2,7 @@ resource "aws_instance" "leader" {
 
   depends_on = [aws_s3_object.tests]
 
-  ami = data.aws_ami.amazon_linux_2.id
+  ami = data.aws_ami.amazon_linux_2023.id
 
   instance_type = var.leader_instance_type
 

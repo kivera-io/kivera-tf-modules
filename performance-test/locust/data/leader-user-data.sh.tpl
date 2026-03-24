@@ -46,8 +46,8 @@ if [[ ${leader_use_proxy} == true ]]; then
     source ~/kivera/setenv.sh
 fi
 
-yum update -y
-yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent -y
+dnf update -y
+dnf install -y jq pcre2-devel python3 python3-pip gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent
 
 # LOCUST
 export LOCUST_VERSION="2.16.0"
