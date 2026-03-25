@@ -74,7 +74,7 @@ export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
 export LOCUST_USER_CLASSES=${locust_user_classes}
 
-nohup locust \
+locust \
     -f test.py \
     --autostart \
     --web-port=80 \
@@ -87,4 +87,6 @@ nohup locust \
     --csv=/locust/results \
     --html=/locust/results.html \
     --autoquit 10 \
-    --master > locust-leader.out 2>&1 &
+    --master > locust-leader.out 2>&1
+
+aws s3 cp /locust/results.html s3://${s3_bucket}${s3_bucket_key}${deployment_id}/results.html
