@@ -86,4 +86,5 @@ nohup locust \
     --expect-workers-max-wait 500 \
     --csv=/locust/results \
     --html=/locust/results.html \
+    --autoquit 10 \
     --master > locust-leader.out 2>&1 &
