@@ -63,6 +63,7 @@ export S3_TEST_PATH=${s3_bucket_key}${deployment_id}
 
 echo "${proxy_public_cert}" > ~/kivera/ca-cert.pem
 
+if [[ ${proxy_transparent_enabled} == false ]]; then
 echo "
 export HTTPS_PROXY=\"${proxy_protocol}://${proxy_endpoint}:8080\"
 export HTTP_PROXY=\"${proxy_protocol}://${proxy_endpoint}:8080\"
@@ -71,6 +72,7 @@ export http_proxy=\"${proxy_protocol}://${proxy_endpoint}:8080\"
 export NO_PROXY=\"${leader_ip},${proxy_endpoint},169.254.169.254,.github.com\"
 export no_proxy=\"\$NO_PROXY\"
 " >> ~/kivera/setenv.sh
+fi
 
 cp ~/kivera/ca-cert.pem /etc/pki/ca-trust/source/anchors/ca-cert.pem
 update-ca-trust extract
