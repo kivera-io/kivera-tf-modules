@@ -84,4 +84,6 @@ nohup locust \
     --run-time=${locust_run_time}m \
     --expect-workers=${nodes_count} \
     --expect-workers-max-wait 500 \
+    --csv=/locust/results \
+    --html=/locust/results.html \
     --master > locust-leader.out 2>&1 &
