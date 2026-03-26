@@ -43,6 +43,7 @@ yum install -y jq pcre2-devel.x86_64 python3 pip3 gcc python3-devel tzdata curl 
 
 # LOCUST
 export LOCUST_VERSION="2.16.0"
+pip3 install "urllib3<2.0"
 pip3 install locust==$LOCUST_VERSION
 
 export PRIVATE_IP=$(hostname -I | awk '{print $1}')

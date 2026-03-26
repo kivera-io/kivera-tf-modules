@@ -26,6 +26,7 @@ sudo -H pip3 install --upgrade pip
 
 # LOCUST
 export LOCUST_VERSION="2.16.0"
+pip3 install "urllib3<2.0"
 pip3 install locust==$LOCUST_VERSION
 
 export PRIVATE_IP=$(hostname -I | awk '{print $1}')
