@@ -45,6 +45,30 @@ AWS-STS-AssumeRole-2:
     tags: {}
     compliance-mappings: {}
 
+AWS-STS-GetAccessKeyInfo-1:
+    description: kivera.cache.set allow
+    provider: AWS
+    service: STS
+    actions:
+        - GetAccessKeyInfo
+    policy: |-
+        valid {
+            kivera.cache.set("kiveradata:perftest:sts", "random other thing");
+            true
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
 AWS-STS-GetCallerIdentity-2:
     description: Allow GetCallerIdentity
     provider: AWS
@@ -53,6 +77,54 @@ AWS-STS-GetCallerIdentity-2:
         - GetCallerIdentity
     policy: |
         valid = true
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-STS-GetFederationToken-1:
+    description: kivera.cache.set_with_options allow
+    provider: AWS
+    service: STS
+    actions:
+        - GetFederationToken
+    policy: |-
+        valid {
+            kivera.cache.set_with_options("kiveradata:perftest:set:sts", "random_thing", {"kv_cache_ttl": 300});
+            true
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-STS-GetSessionToken-1:
+    description: kivera.cache.get from set_with_options allow
+    provider: AWS
+    service: STS
+    actions:
+        - GetSessionToken
+    policy: |-
+        valid {
+            value = kivera.cache.get_with_options("kiveradata:perftest:set:sts", {"local_cache_ttl": 20});
+            value != ""
+        }
     advanced:
         paths:
             - '*'

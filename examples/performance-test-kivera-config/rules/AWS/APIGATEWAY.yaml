@@ -47,14 +47,15 @@ AWS-APIGATEWAY-CreateRoute-1:
     compliance-mappings: {}
 
 AWS-APIGATEWAY-GetApis-1:
-    description: Allow GetApis
+    description: kivera.cache.set_with_options allow
     provider: AWS
     service: APIGATEWAY
     actions:
         - GetApis
     policy: |-
         valid {
-          true
+            kivera.cache.set_with_options("kiveradata:perftest:set:apigateway", "something_random", {"kv_cache_ttl": 300});
+            true
         }
     advanced:
         paths:
@@ -70,17 +71,87 @@ AWS-APIGATEWAY-GetApis-1:
     compliance-mappings: {}
 
 AWS-APIGATEWAY-GetApis-2:
-    description: kivara.cache.get allow
+    description: kivera.cache.get allow
     provider: AWS
     service: APIGATEWAY
     actions:
         - GetVpcLinks
     policy: |-
-        valid = true
-        # valid {
-        #     value = kivera.cache.get("kiveradata:perftest:apigateway");
-        #     value == ""
-        # }
+        valid {
+            value = kivera.cache.get("kiveradata:perftest:apigateway");
+            value != ""
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-APIGATEWAY-GetApis-3:
+    description: kivera.cache.get from set_with_options allow
+    provider: AWS
+    service: APIGATEWAY
+    actions:
+        - GetVpcLinks
+    policy: |-
+        valid {
+            value = kivera.cache.get_with_options("kiveradata:perftest:set:apigateway", {"local_cache_ttl": 20});
+            value != ""
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-APIGATEWAY-GetDomainNames-1:
+    description: kivera.cache.get allow
+    provider: AWS
+    service: APIGATEWAY
+    actions:
+        - GetDomainNames
+    policy: |-
+        valid {
+            kivera.cache.set("kiveradata:perftest:apigateway", "some thing");
+            true
+        }
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags: {}
+    compliance-mappings: {}
+
+AWS-APIGATEWAY-GetSdkTypes-1:
+    description: kivera.cache.delete allow
+    provider: AWS
+    service: APIGATEWAY
+    actions:
+        - GetSdkTypes
+    policy: |-
+        valid {
+            kivera.cache.delete("kiveradata:perftest:del:apigateway")
+        }
     advanced:
         paths:
             - '*'

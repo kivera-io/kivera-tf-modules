@@ -12,6 +12,7 @@ Proxy-Load-Tests:
         domain-acl: perf-test-acls
         rego-raise-error: true
         on-error-action: use-default-mode
+        config-update-frequency: 30
     providers:
         - AWS
     tags: {}

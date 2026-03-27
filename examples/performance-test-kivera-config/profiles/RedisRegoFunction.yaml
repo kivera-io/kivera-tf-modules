@@ -3,10 +3,28 @@ RedisRegoFunction:
     name: RedisRegoFunction
     description: Rules that use rego function with redis
     rules:
+        - AWS-APIGATEWAY-GetApis-1
         - AWS-APIGATEWAY-GetApis-2
+        - AWS-APIGATEWAY-GetApis-3
+        - AWS-APIGATEWAY-GetDomainNames-1
+        - AWS-APIGATEWAY-GetSdkTypes-1
+        - AWS-BATCH-DeleteJobQueue-1
+        - AWS-BATCH-DescribeJobs-1
         - AWS-BATCH-ListJobs-1
-        - AWS-CLOUDFRONT-ListDistributions-2
+        - AWS-BATCH-ListJobs-2
+        - AWS-BATCH-ListJobs-3
+        - AWS-ECS-DescribeClusters-1
+        - AWS-ECS-ListAttributes-1
         - AWS-ECS-ListTaskDefinitions-1
+        - AWS-ECS-ListTaskDefinitions-2
+        - AWS-ECS-ListTaskDefinitions-3
+        - AWS-IAM-ListGroups-1
+        - AWS-IAM-ListInstanceProfiles-1
+        - AWS-IAM-ListRoles-1
         - AWS-IAM-ListUsers-2
+        - AWS-IAM-ListUsers-3
+        - AWS-STS-GetAccessKeyInfo-1
+        - AWS-STS-GetFederationToken-1
+        - AWS-STS-GetSessionToken-1
     tags: {}
 

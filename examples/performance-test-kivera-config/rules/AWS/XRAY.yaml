@@ -10,11 +10,11 @@ AWS-XRAY-CreateGroup-CustomResp:
         block_response := data.ctx.rule.tags.cust_resp
     advanced:
         paths:
-            - "*"
+            - '*'
         methods:
-            - "*"
+            - '*'
         endpoints:
-            - "*"
+            - '*'
     enforce: true
     log-request-body: true
     enable-cfn-scan: false
@@ -23,7 +23,7 @@ AWS-XRAY-CreateGroup-CustomResp:
     compliance-mappings: {}
 
 AWS-XRAY-DeleteGroup-CustomResp:
-    description: Block DeleteGroup Custom Response
+    description: Allow DeleteGroup Custom Response
     provider: AWS
     service: XRAY
     actions:
@@ -33,11 +33,11 @@ AWS-XRAY-DeleteGroup-CustomResp:
         block_response := data.ctx.rule.tags.cust_resp
     advanced:
         paths:
-            - "*"
+            - '*'
         methods:
-            - "*"
+            - '*'
         endpoints:
-            - "*"
+            - '*'
     enforce: true
     log-request-body: true
     enable-cfn-scan: false
@@ -45,31 +45,8 @@ AWS-XRAY-DeleteGroup-CustomResp:
         cust_resp: aws_xray_delete_group
     compliance-mappings: {}
 
-AWS-XRAY-UpdateGroup-CustomResp:
-    description: Block UpdateGroup Custom Response
-    provider: AWS
-    service: XRAY
-    actions:
-        - UpdateGroup
-    policy: |
-        valid = false
-        block_response := data.ctx.rule.tags.cust_resp
-    advanced:
-        paths:
-            - "*"
-        methods:
-            - "*"
-        endpoints:
-            - "*"
-    enforce: true
-    log-request-body: true
-    enable-cfn-scan: false
-    tags:
-        cust_resp: aws_xray_update_group
-    compliance-mappings: {}
-
 AWS-XRAY-GetGroup-CustomResp:
-    description: Block GetGroup Custom Response
+    description: Allow GetGroup Custom Response
     provider: AWS
     service: XRAY
     actions:
@@ -79,14 +56,38 @@ AWS-XRAY-GetGroup-CustomResp:
         block_response := data.ctx.rule.tags.cust_resp
     advanced:
         paths:
-            - "*"
+            - '*'
         methods:
-            - "*"
+            - '*'
         endpoints:
-            - "*"
+            - '*'
     enforce: true
     log-request-body: true
     enable-cfn-scan: false
     tags:
         cust_resp: aws_xray_get_group
     compliance-mappings: {}
+
+AWS-XRAY-UpdateGroup-CustomResp:
+    description: Allow UpdateGroup Custom Response
+    provider: AWS
+    service: XRAY
+    actions:
+        - UpdateGroup
+    policy: |
+        valid = false
+        block_response := data.ctx.rule.tags.cust_resp
+    advanced:
+        paths:
+            - '*'
+        methods:
+            - '*'
+        endpoints:
+            - '*'
+    enforce: true
+    log-request-body: true
+    enable-cfn-scan: false
+    tags:
+        cust_resp: aws_xray_update_group
+    compliance-mappings: {}
+
