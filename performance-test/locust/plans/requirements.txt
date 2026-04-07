@@ -1,3 +1,4 @@
 boto3==1.33.6
 pyzmq==22.3.0
+locust==2.16.0
 ddtrace

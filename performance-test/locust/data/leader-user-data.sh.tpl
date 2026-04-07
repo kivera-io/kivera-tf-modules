@@ -49,9 +49,9 @@ fi
 dnf update -y
 dnf install -y jq pcre2-devel python3 python3-pip gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent
 
-# LOCUST
-export LOCUST_VERSION="2.16.0"
-pip3 install locust==$LOCUST_VERSION
+# Sync time to avoid SSL certificate validation issues
+systemctl start chronyd 2>/dev/null || true
+sleep 3
 
 export PRIVATE_IP=$(hostname -I | awk '{print $1}')
 echo "PRIVATE_IP=$PRIVATE_IP" >> /etc/environment
@@ -76,7 +76,7 @@ cd /locust
 
 [[ -e requirements.txt ]] && pip3 install -r requirements.txt
 
-sleep 60
+sleep 30
 
 if [[ ${leader_use_proxy} == false && ${proxy_transparent_enabled} == false ]]; then
     time=180
