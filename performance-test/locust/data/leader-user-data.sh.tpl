@@ -46,12 +46,12 @@ if [[ ${leader_use_proxy} == true ]]; then
     source ~/kivera/setenv.sh
 fi
 
-dnf update -y
-dnf install -y jq pcre2-devel python3 python3-pip gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent
-
-# Sync time to avoid SSL certificate validation issues
+# Sync time first to avoid SSL certificate validation issues
 systemctl start chronyd 2>/dev/null || true
 sleep 3
+
+dnf update -y
+dnf install -y jq pcre2-devel python3 python3-pip gcc python3-devel tzdata curl unzip bash htop amazon-cloudwatch-agent
 
 export PRIVATE_IP=$(hostname -I | awk '{print $1}')
 echo "PRIVATE_IP=$PRIVATE_IP" >> /etc/environment
