@@ -46,7 +46,11 @@ systemctl start chronyd 2>/dev/null || true
 sleep 3
 
 dnf update -y
-dnf install -y jq pcre2-devel python3 python3-pip gcc python3-devel tzdata unzip bash htop amazon-cloudwatch-agent
+dnf install -y jq pcre2-devel python3.11 python3.11-pip gcc python3.11-devel tzdata unzip bash htop amazon-cloudwatch-agent
+
+# Create symlinks to use python3.11 as default
+alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.11 1
 
 export PRIVATE_IP=$(hostname -I | awk '{print $1}')
 echo "PRIVATE_IP=$PRIVATE_IP" >> /etc/environment
