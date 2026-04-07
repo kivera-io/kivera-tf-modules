@@ -90,12 +90,14 @@ fi
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}
 export LOCUST_USER_CLASSES=${locust_user_classes}
+export LOCUST_WEB_USERNAME=${leader_username}
+export LOCUST_WEB_PASSWORD=${leader_password}
 
 nohup locust \
     -f test.py \
     --autostart \
     --web-port=80 \
-    --web-auth ${leader_username}:${leader_password} \
+    --web-login \
     --users=${locust_max_users} \
     --spawn-rate=${locust_spawn_rate} \
     --run-time=${locust_run_time}m \
