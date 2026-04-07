@@ -16,10 +16,14 @@ from flask import request, session, redirect, url_for
 from flask_login import UserMixin, login_user
 
 # Simple Web UI Authentication
+class WebUser(UserMixin):
+    def get_id(self):
+        return "user"
+
 @events.init.add_listener
 def on_locust_init(environment, **kwargs):
     if environment.web_ui:
-        environment.web_ui.login_manager.user_loader(lambda u: UserMixin())
+        environment.web_ui.login_manager.user_loader(lambda u: WebUser())
         environment.web_ui.app.config["SECRET_KEY"] = os.getenv("LOCUST_SECRET_KEY", "locust-secret-key")
         environment.web_ui.auth_args = {"username_password_callback": "/login_submit"}
 
@@ -27,7 +31,7 @@ def on_locust_init(environment, **kwargs):
         def login_submit():
             if request.form.get("username") == os.getenv("LOCUST_WEB_USERNAME", "admin") and \
                request.form.get("password") == os.getenv("LOCUST_WEB_PASSWORD", "admin"):
-                login_user(UserMixin())
+                login_user(WebUser())
                 return redirect(url_for("locust.index"))
             session["auth_error"] = "Invalid username or password"
             return redirect(url_for("locust.login"))
