@@ -69,7 +69,7 @@ unzip ./tests.zip -d /locust
 
 cd /locust
 
-[[ -e requirements.txt ]] && pip3 install -r requirements.txt
+[[ -e requirements.txt ]] && pip3 install --ignore-installed -r requirements.txt
 
 export USER_WAIT_MIN=${user_wait_min}
 export USER_WAIT_MAX=${user_wait_max}

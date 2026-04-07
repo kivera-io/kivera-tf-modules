@@ -74,7 +74,7 @@ unzip ./tests.zip -d /locust
 
 cd /locust
 
-[[ -e requirements.txt ]] && pip3 install -r requirements.txt
+[[ -e requirements.txt ]] && pip3 install --ignore-installed -r requirements.txt
 
 sleep 30
 
