@@ -122,6 +122,17 @@ resource "aws_iam_policy" "locust_policy" {
           aws_kms_key.test_key.arn
         ]
       },
+      {
+        Action = [
+          "lambda:PublishLayerVersion"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-small-*",
+          "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-medium-*",
+          "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-large-*"
+        ]
+      },
     ]
   })
 }

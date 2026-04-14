@@ -8,6 +8,9 @@ import queue
 import boto3
 import botocore
 import ddtrace
+import uuid
+import io
+import zipfile
 from botocore.config import Config
 from locust import User, TaskSet, task, between, events
 from ddtrace.propagation.http import HTTPPropagator
@@ -772,7 +775,7 @@ class AwsSqsTasks(TaskSet):
 
 ### LAMBDA ###
 class AwsLambdaTasks(TaskSet):
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_lambda_create_function_block_1(self):
         client = client_pool.get('lambda')
@@ -789,7 +792,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_lambda_create_function_block_2(self):
         client = client_pool.get('lambda')
@@ -806,7 +809,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_lambda_create_function_block_3(self):
         client = client_pool.get('lambda')
@@ -819,7 +822,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(2)
+    @task(4)
     @result_decorator
     def aws_lambda_create_function_allow(self):
         client = client_pool.get('lambda')
@@ -835,6 +838,71 @@ class AwsLambdaTasks(TaskSet):
             KMSKeyArn='arn:aws:kms:ap-southeast-2:326190351503:alias/secure-key',
         )
         client_pool.put(client, 'lambda')
+
+    @task(1)
+    @result_decorator
+    def aws_lambda_publish_layer_version_small_allow(self):
+        client = client_pool.get("lambda")
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            content = "x" * (1024 * 1024)  # 1 MB of 'x' characters
+            zip_file.writestr("layer_content.txt", content)
+        zip_buffer.seek(0)
+
+        unique_suffix = str(uuid.uuid4())[:8]
+        client.publish_layer_version(
+            LayerName=f"test-layer-small-{unique_suffix}",
+            Description="Small test layer (1 MB)",
+            Content={"ZipFile": zip_buffer.read()},
+            CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
+            CompatibleArchitectures=["x86_64", "arm64"],
+        )
+        client_pool.put(client, "lambda")
+
+    @task(1)
+    @result_decorator
+    def aws_lambda_publish_layer_version_medium_allow(self):
+        client = client_pool.get("lambda")
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for i in range(10):
+                content = "y" * (1024 * 1024)  # 1 MB per file
+                zip_file.writestr(f"layer_content_{i}.txt", content)
+        zip_buffer.seek(0)
+
+        unique_suffix = str(uuid.uuid4())[:8]
+        client.publish_layer_version(
+            LayerName=f"test-layer-medium-{unique_suffix}",
+            Description="Medium test layer (10 MB)",
+            Content={"ZipFile": zip_buffer.read()},
+            CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
+            CompatibleArchitectures=["x86_64", "arm64"],
+        )
+        client_pool.put(client, "lambda")
+
+    @task(1)
+    @result_decorator
+    def aws_lambda_publish_layer_version_large_allow(self):
+        client = client_pool.get("lambda")
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for i in range(50):
+                content = "z" * (1024 * 1024)  # 1 MB per file
+                zip_file.writestr(f"layer_content_{i}.txt", content)
+        zip_buffer.seek(0)
+
+        unique_suffix = str(uuid.uuid4())[:8]
+        client.publish_layer_version(
+            LayerName=f"test-layer-large-{unique_suffix}",
+            Description="Large test layer (50 MB)",
+            Content={"ZipFile": zip_buffer.read()},
+            CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
+            CompatibleArchitectures=["x86_64", "arm64"],
+        )
+        client_pool.put(client, "lambda")
 
 
 ### LOGS ###
