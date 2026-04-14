@@ -217,7 +217,7 @@ def check_err_message(should_block, should_contain, custom_resp, class_name, met
         return failure(class_name, method_name, start_time, error)
 
     if "Kivera.Error" not in str(error) and "Oops, your request has been blocked." not in str(error):
-        return failure(class_name, method_name, start_time, Exception("Request Not Blocked: got" + str(error)))
+        return failure(class_name, method_name, start_time, Exception("Request Not Blocked: got " + str(error)))
 
     if should_contain.lower() not in str(error).lower():
         return failure(class_name, method_name, start_time, Exception(f"Incorrect Response: {should_contain}: got {str(error)}"))
@@ -847,7 +847,7 @@ class AwsLambdaTasks(TaskSet):
             Description="Large test layer from S3",
             Content={
                 'S3Bucket': 'marcus-ap-southeast-2-test-bucket',
-                'S3Key': '/layers/layer-big.zip',
+                'S3Key': 'layers/layer-big.zip',
             },
             CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
             CompatibleArchitectures=["x86_64", "arm64"],
@@ -860,17 +860,21 @@ class AwsLambdaTasks(TaskSet):
         client = client_pool.get("lambda")
 
         unique_suffix = str(uuid.uuid4())[:8]
-        with open('layer-small.zip', 'r') as zip_file:
-            client.publish_layer_version(
-                LayerName=f"test-layer-local-{unique_suffix}",
-                Description="Large test layer from local zip",
-                Content={
-                    "ZipFile": zip_file.read()
-                },
-                CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
-                CompatibleArchitectures=["x86_64", "arm64"],
-            )
-            client_pool.put(client, "lambda")
+
+        # Read the local zip file as binary
+        with open('layer-small.zip', 'rb') as f:
+            zip_file = f.read()
+
+        client.publish_layer_version(
+            LayerName=f"test-layer-local-{unique_suffix}",
+            Description="Large test layer from local zip",
+            Content={
+                "ZipFile": zip_file
+            },
+            CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
+            CompatibleArchitectures=["x86_64", "arm64"],
+        )
+        client_pool.put(client, "lambda")
 
 ### LOGS ###
 class AwsLogsTasks(TaskSet):
@@ -1225,24 +1229,24 @@ class Transparent(User):
 class Standard(User):
     wait_time = between(USER_WAIT_MIN, USER_WAIT_MAX)
     tasks = {
-        # AwsEc2Tasks: 3,
-        # AwsDynamoDBTasks: 3,
-        # AwsStsTasks: 3,
-        # AwsS3Tasks: 3,
-        # AwsApiGatewayTasks: 3,
-        # AwsEventsTasks: 3,
-        # AwsIamTasks: 2,
-        # AwsRdsTasks: 3,
-        # AwsCloudFrontTasks: 2,
-        # AwsSqsTasks: 3,
+        AwsEc2Tasks: 3,
+        AwsDynamoDBTasks: 3,
+        AwsStsTasks: 3,
+        AwsS3Tasks: 3,
+        AwsApiGatewayTasks: 3,
+        AwsEventsTasks: 3,
+        AwsIamTasks: 2,
+        AwsRdsTasks: 3,
+        AwsCloudFrontTasks: 2,
+        AwsSqsTasks: 3,
         AwsLambdaTasks: 1,
-        # AwsLogsTasks: 3,
-        # AwsAutoScalingTasks: 3,
-        # AwsBatchTasks: 3,
-        # AwsEcsTasks: 3,
-        # AwsSnsTasks: 3,
-        # AwsCloudFormationTasks: 3,
-        # AwsSensitiveFieldsTasks: 3,
-        # NonCloudTasks: 1,
-        # CustomResponseTasks: 1,
+        AwsLogsTasks: 3,
+        AwsAutoScalingTasks: 3,
+        AwsBatchTasks: 3,
+        AwsEcsTasks: 3,
+        AwsSnsTasks: 3,
+        AwsCloudFormationTasks: 3,
+        AwsSensitiveFieldsTasks: 3,
+        NonCloudTasks: 1,
+        CustomResponseTasks: 1,
     }
