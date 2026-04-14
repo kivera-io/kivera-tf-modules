@@ -772,7 +772,7 @@ class AwsSqsTasks(TaskSet):
 
 ### LAMBDA ###
 class AwsLambdaTasks(TaskSet):
-    @task(8)
+    @task(2)
     @result_decorator
     def aws_lambda_create_function_block_1(self):
         client = client_pool.get('lambda')
@@ -789,7 +789,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(8)
+    @task(2)
     @result_decorator
     def aws_lambda_create_function_block_2(self):
         client = client_pool.get('lambda')
@@ -806,7 +806,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(8)
+    @task(2)
     @result_decorator
     def aws_lambda_create_function_block_3(self):
         client = client_pool.get('lambda')
@@ -819,7 +819,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(8)
+    @task(2)
     @result_decorator
     def aws_lambda_create_function_allow(self):
         client = client_pool.get('lambda')
