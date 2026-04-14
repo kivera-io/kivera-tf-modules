@@ -129,7 +129,7 @@ resource "aws_iam_policy" "locust_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          "*"
+          "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-*"
         ]
       },
     ]

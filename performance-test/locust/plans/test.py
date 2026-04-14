@@ -772,7 +772,7 @@ class AwsSqsTasks(TaskSet):
 
 ### LAMBDA ###
 class AwsLambdaTasks(TaskSet):
-    @task(2)
+    @task(8)
     @result_decorator
     def aws_lambda_create_function_block_1(self):
         client = client_pool.get('lambda')
@@ -789,7 +789,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(2)
+    @task(8)
     @result_decorator
     def aws_lambda_create_function_block_2(self):
         client = client_pool.get('lambda')
@@ -806,7 +806,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(2)
+    @task(8)
     @result_decorator
     def aws_lambda_create_function_block_3(self):
         client = client_pool.get('lambda')
@@ -819,7 +819,7 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
-    @task(2)
+    @task(8)
     @result_decorator
     def aws_lambda_create_function_allow(self):
         client = client_pool.get('lambda')
@@ -838,7 +838,7 @@ class AwsLambdaTasks(TaskSet):
 
     @task(1)
     @result_decorator
-    def aws_lambda_publish_layer_version_s3_allow(self):
+    def aws_lambda_publish_layer_version_allow_1(self):
         client = client_pool.get("lambda")
 
         unique_suffix = str(uuid.uuid4())[:8]
@@ -856,7 +856,7 @@ class AwsLambdaTasks(TaskSet):
 
     @task(1)
     @result_decorator
-    def aws_lambda_publish_layer_version_local_allow(self):
+    def aws_lambda_publish_layer_version_allow_2(self):
         client = client_pool.get("lambda")
 
         unique_suffix = str(uuid.uuid4())[:8]
@@ -1235,7 +1235,7 @@ class Standard(User):
         AwsRdsTasks: 3,
         AwsCloudFrontTasks: 2,
         AwsSqsTasks: 3,
-        AwsLambdaTasks: 3,
+        AwsLambdaTasks: 1,
         AwsLogsTasks: 3,
         AwsAutoScalingTasks: 3,
         AwsBatchTasks: 3,
