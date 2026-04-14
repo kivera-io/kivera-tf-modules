@@ -126,6 +126,7 @@ resource "aws_iam_policy" "locust_policy" {
       {
         Action = [
           "lambda:PublishLayerVersion",
+          "lambda:DeleteLayerVersion",
         ]
         Effect = "Allow"
         Resource = [

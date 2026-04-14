@@ -842,8 +842,9 @@ class AwsLambdaTasks(TaskSet):
         client = client_pool.get("lambda")
 
         unique_suffix = str(uuid.uuid4())[:8]
-        client.publish_layer_version(
-            LayerName=f"test-layer-s3-{unique_suffix}",
+        layer_name = f"test-layer-s3-{unique_suffix}"
+        response = client.publish_layer_version(
+            LayerName=layer_name,
             Description="Large test layer from S3",
             Content={
                 'S3Bucket': 'marcus-ap-southeast-2-test-bucket',
@@ -851,6 +852,10 @@ class AwsLambdaTasks(TaskSet):
             },
             CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
             CompatibleArchitectures=["x86_64", "arm64"],
+        )
+        client.delete_layer_version(
+            LayerName=layer_name,
+            VersionNumber=response['Version'],
         )
         client_pool.put(client, "lambda")
 
@@ -860,19 +865,24 @@ class AwsLambdaTasks(TaskSet):
         client = client_pool.get("lambda")
 
         unique_suffix = str(uuid.uuid4())[:8]
+        layer_name = f"test-layer-local-{unique_suffix}"
 
         # Read the local zip file as binary
         with open('layer-small.zip', 'rb') as f:
             zip_file = f.read()
 
-        client.publish_layer_version(
-            LayerName=f"test-layer-local-{unique_suffix}",
+        response = client.publish_layer_version(
+            LayerName=layer_name,
             Description="Large test layer from local zip",
             Content={
                 "ZipFile": zip_file
             },
             CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
             CompatibleArchitectures=["x86_64", "arm64"],
+        )
+        client.delete_layer_version(
+            LayerName=layer_name,
+            VersionNumber=response['Version'],
         )
         client_pool.put(client, "lambda")
 
