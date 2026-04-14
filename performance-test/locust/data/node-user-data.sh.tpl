@@ -73,6 +73,8 @@ mkdir -p /locust
 aws s3 cp s3://${s3_bucket}${s3_bucket_key}${deployment_id}/tests.zip ./tests.zip
 unzip ./tests.zip -d /locust
 
+aws s3 cp s3://marcus-ap-southeast-2-test-bucket/layers/layer-small.zip ./layer-small.zip
+
 cd /locust
 
 [[ -e requirements.txt ]] && pip3 install -r requirements.txt

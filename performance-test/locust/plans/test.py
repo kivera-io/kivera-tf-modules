@@ -1,7 +1,7 @@
 import secrets
 import os
 import time
-import random
+import uuid
 import threading
 import concurrent.futures
 import queue
@@ -836,6 +836,41 @@ class AwsLambdaTasks(TaskSet):
         )
         client_pool.put(client, 'lambda')
 
+    @task(1)
+    @result_decorator
+    def aws_lambda_publish_layer_version_s3_allow(self):
+        client = client_pool.get("lambda")
+
+        unique_suffix = str(uuid.uuid4())[:8]
+        client.publish_layer_version(
+            LayerName=f"test-layer-s3-{unique_suffix}",
+            Description="Large test layer from S3",
+            Content={
+                'S3Bucket': 'marcus-ap-southeast-2-test-bucket',
+                'S3Key': '/layers/layer-big.zip',
+            },
+            CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
+            CompatibleArchitectures=["x86_64", "arm64"],
+        )
+        client_pool.put(client, "lambda")
+
+    @task(1)
+    @result_decorator
+    def aws_lambda_publish_layer_version_local_allow(self):
+        client = client_pool.get("lambda")
+
+        unique_suffix = str(uuid.uuid4())[:8]
+        with open('layer-small.zip', 'r') as zip_file:
+            client.publish_layer_version(
+                LayerName=f"test-layer-local-{unique_suffix}",
+                Description="Large test layer from local zip",
+                Content={
+                    "ZipFile": zip_file.read()
+                },
+                CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
+                CompatibleArchitectures=["x86_64", "arm64"],
+            )
+            client_pool.put(client, "lambda")
 
 ### LOGS ###
 class AwsLogsTasks(TaskSet):

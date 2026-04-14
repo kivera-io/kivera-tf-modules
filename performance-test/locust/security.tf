@@ -110,7 +110,8 @@ resource "aws_iam_policy" "locust_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}*"
+          "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}*",
+          "arn:aws:s3:::marcus-ap-southeast-2-test-bucket/*"
         ]
       },
       {
@@ -120,6 +121,15 @@ resource "aws_iam_policy" "locust_policy" {
         Effect = "Allow"
         Resource = [
           aws_kms_key.test_key.arn
+        ]
+      },
+      {
+        Action = [
+          "lambda:PublishLayerVersion",
+        ]
+        Effect = "Allow"
+        Resource = [
+          "*"
         ]
       },
     ]
