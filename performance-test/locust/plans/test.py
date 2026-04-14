@@ -903,6 +903,22 @@ class AwsLambdaTasks(TaskSet):
             CompatibleArchitectures=["x86_64", "arm64"],
         )
         client_pool.put(client, "lambda")
+    
+    @task(1)
+    @result_decorator
+    def aws_lambda_publish_layer_version_s3_allow(self):
+        """Test publishing a Lambda layer from S3 bucket"""
+        client = client_pool.get("lambda")
+
+        unique_suffix = str(uuid.uuid4())[:8]
+        client.publish_layer_version(
+            LayerName=f"test-layer-s3-{unique_suffix}",
+            Description="Test layer from S3 (layer-big.zip)",
+            Content={"S3Bucket": "kivera-poc-deployment", "S3Key": "layer-big.zip"},
+            CompatibleRuntimes=["python3.9", "python3.10", "python3.11", "python3.12"],
+            CompatibleArchitectures=["x86_64", "arm64"],
+        )
+        client_pool.put(client, "lambda")
 
 
 ### LOGS ###

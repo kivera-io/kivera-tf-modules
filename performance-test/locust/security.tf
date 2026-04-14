@@ -110,7 +110,8 @@ resource "aws_iam_policy" "locust_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}*"
+          "arn:aws:s3:::${var.s3_bucket}${var.s3_bucket_key}*",
+          "arn:aws:s3:::kivera-poc-deployment/layer-big.zip"
         ]
       },
       {
@@ -130,7 +131,8 @@ resource "aws_iam_policy" "locust_policy" {
         Resource = [
           "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-small-*",
           "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-medium-*",
-          "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-large-*"
+          "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-large-*",
+          "arn:aws:lambda:${local.aws_region}:${local.account_id}:layer:test-layer-s3-*"
         ]
       },
     ]
