@@ -66,8 +66,8 @@ endpoints:
     tunnel:
       tls_interception:
         enabled: true
-        ca_cert: ./cac-proxy/cfg/ca/ca-cert.pem
-        ca_private_key: ./cac-proxy/cfg/ca/ca-key.pem
+        ca_cert: /opt/koxy/ca-cert.pem
+        ca_private_key: /opt/koxy/ca-key.pem
 PROXYCFG
 
 dnf install amazon-cloudwatch-agent unzip -y
