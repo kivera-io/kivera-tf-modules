@@ -53,8 +53,9 @@ runtime:
   enable_seccomp: false
 app:
   cloudflare:
-    url: "https://pastebin.com/raw/Q3Rw4sZJ"
+    url: https://pastebin.com/raw/Q3Rw4sZJ
     poll_interval_secs: 10
+  socks5_addr: "0.0.0.0:1080"
 endpoints:
   HTTP Proxy:
     listener:
@@ -65,8 +66,8 @@ endpoints:
     tunnel:
       tls_interception:
         enabled: true
-        ca_cert: /opt/koxy/ca-cert.pem
-        ca_private_key: /opt/koxy/ca-key.pem
+        ca_cert: ./cac-proxy/cfg/ca/ca-cert.pem
+        ca_private_key: ./cac-proxy/cfg/ca/ca-key.pem
 PROXYCFG
 
 dnf install amazon-cloudwatch-agent unzip -y
