@@ -104,6 +104,7 @@ export REDIS_CONNECTION_STRING_SECRET_REGION=$(echo ${redis_connection_string_ar
 
 cat << EOF > $KIVERA_DIR/etc/env.txt
 KIVERA_CREDENTIALS=$KIVERA_CREDENTIALS
+KIVERA_CACHE_CERT=false
 KIVERA_TRACING_ENABLED=${enable_datadog_tracing}
 KIVERA_PROFILING_ENABLED=${enable_datadog_profiling}
 DD_TRACE_SAMPLE_RATE=${datadog_trace_sampling_rate}
