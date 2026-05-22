@@ -38,11 +38,63 @@ export KIVERA_LOGS_FILE=$KIVERA_DIR/var/log/proxy.log
 
 mkdir -p $KIVERA_BIN_PATH $KIVERA_DIR/etc/ $KIVERA_DIR/var/log/
 
-echo '${proxy_public_cert}' > $KIVERA_CA_CERT
+# Generate a per-instance intermediate CA signed by the root CA provided via Terraform.
+# The proxy will use this intermediate (instead of the root) as its CA, so each instance
+# in the ASG has a unique signing CA. The root key is fetched from Secrets Manager,
+# used only to sign the intermediate, and then removed from the instance.
+if [[ ${external_ca} != true ]]; then
+  ROOT_CA_CERT=$KIVERA_DIR/etc/root-ca-cert.pem
+  ROOT_CA_KEY=$KIVERA_DIR/etc/root-ca.pem
 
-if [[ '${proxy_private_key_secret_arn}' != "" ]]; then
-  export KIVERA_CA_SECRET_REGION=$(echo ${proxy_private_key_secret_arn} | cut -d':' -f4)
-  aws secretsmanager get-secret-value --secret-id '${proxy_private_key_secret_arn}' --region $KIVERA_CA_SECRET_REGION --query SecretString --output text > $KIVERA_CA
+  echo '${proxy_public_cert}' > $ROOT_CA_CERT
+
+  if [[ '${proxy_private_key_secret_arn}' != "" ]]; then
+    export KIVERA_CA_SECRET_REGION=$(echo ${proxy_private_key_secret_arn} | cut -d':' -f4)
+    aws secretsmanager get-secret-value --secret-id '${proxy_private_key_secret_arn}' --region $KIVERA_CA_SECRET_REGION --query SecretString --output text > $ROOT_CA_KEY
+  fi
+  chmod 600 $ROOT_CA_KEY
+
+  # Generate the intermediate CA private key matching the root key type.
+  case "${proxy_cert_type}" in
+    rsa)
+      openssl genrsa -out $KIVERA_CA 4096
+      ;;
+    ecdsa|*)
+      openssl ecparam -name prime256v1 -genkey -noout -out $KIVERA_CA
+      ;;
+  esac
+  chmod 600 $KIVERA_CA
+
+  # Build a CSR for the intermediate, including the basicConstraints CA:TRUE extension.
+  INSTANCE_ID=$(curl -s -m 5 http://169.254.169.254/latest/meta-data/instance-id || echo "unknown")
+  INTERMEDIATE_CSR=$KIVERA_DIR/etc/intermediate.csr
+  INTERMEDIATE_EXT=$KIVERA_DIR/etc/intermediate.ext
+
+  cat << EOF > $INTERMEDIATE_EXT
+basicConstraints = critical, CA:TRUE, pathlen:0
+keyUsage = critical, digitalSignature, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+EOF
+
+  openssl req -new -key $KIVERA_CA \
+    -subj "/CN=Kivera Proxy Intermediate CA $INSTANCE_ID/O=Kivera" \
+    -out $INTERMEDIATE_CSR
+
+  # Sign the CSR with the root CA. 365-day validity.
+  openssl x509 -req \
+    -in $INTERMEDIATE_CSR \
+    -CA $ROOT_CA_CERT \
+    -CAkey $ROOT_CA_KEY \
+    -CAcreateserial \
+    -out $KIVERA_CA_CERT \
+    -days 365 \
+    -sha256 \
+    -extfile $INTERMEDIATE_EXT
+
+  # Scrub the root CA private key from disk; only the intermediate is needed from here on.
+  shred -u $ROOT_CA_KEY 2>/dev/null || rm -f $ROOT_CA_KEY
+  rm -f $INTERMEDIATE_CSR $INTERMEDIATE_EXT $ROOT_CA_CERT $KIVERA_DIR/etc/*.srl
 fi
 
 export KIVERA_CREDENTIALS_SECRET_REGION=$(echo ${proxy_credentials_secret_arn} | cut -d':' -f4)
