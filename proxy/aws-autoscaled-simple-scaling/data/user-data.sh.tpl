@@ -20,6 +20,9 @@ if [[ "${upstream_proxy_endpoint}" != "" ]]; then
   echo "proxy=http://${upstream_proxy_endpoint}:${upstream_proxy_port}" >> /etc/yum.conf
 fi
 
+## install base packages required by user-data (not in AL2023 minimal by default)
+dnf install -y wget unzip lsof
+
 ## tune box
 echo "* hard nofile 100000" >> /etc/security/limits.conf
 echo "* soft nofile 100000" >> /etc/security/limits.conf
@@ -121,7 +124,10 @@ fi
 chmod 0755 $KIVERA_BIN_PATH/kivera
 chown -R kivera:kivera $KIVERA_DIR
 
-yum install amazon-cloudwatch-agent -y
+# Install CloudWatch agent from the official S3 RPM (works without enabling extra repos).
+# Alternatively on AL2023: `dnf install -y amazon-cloudwatch-agent`.
+wget -q https://amazoncloudwatch-agent-${region}.s3.${region}.amazonaws.com/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm -O /tmp/amazon-cloudwatch-agent.rpm
+rpm -U /tmp/amazon-cloudwatch-agent.rpm
 
 if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
   DD_API_KEY=`aws secretsmanager get-secret-value --query SecretString --output text --region ap-southeast-2 --secret-id ${datadog_secret_arn}`
@@ -140,7 +146,10 @@ fi
 # add GPG key
 rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent
 
-# add treasure data repository to yum
+# add treasure data repository to dnf
+# NOTE: td-agent v4 has no AL2023 repo; we pin to the amazon/2 path. Binaries are
+# linked against AL2 libraries (glibc 2.26, openssl 1.0.2) and may be unreliable
+# on AL2023 (glibc 2.34, openssl 3). Migrate to fluent-package (fluentd v5) when feasible.
 cat >/etc/yum.repos.d/td.repo <<'EOF';
 [treasuredata]
 name=TreasureData
@@ -150,10 +159,10 @@ gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
 EOF
 
 # update your sources
-yum check-update
+dnf check-update || true
 
 # install the toolbelt
-yum install -y td-agent
+dnf install -y td-agent
 # curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
 td-agent-gem install -N fluent-plugin-out-kivera
 
