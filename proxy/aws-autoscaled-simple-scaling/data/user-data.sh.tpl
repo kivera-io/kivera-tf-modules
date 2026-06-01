@@ -16,8 +16,9 @@ if [[ "${upstream_proxy_endpoint}" != "" ]]; then
   export no_proxy=169.254.169.254
   export NO_PROXY=169.254.169.254
 
-  sed -i -e 's#http://#https://#g' /etc/yum.repos.d/td.repo
-  echo "proxy=http://${upstream_proxy_endpoint}:${upstream_proxy_port}" >> /etc/yum.conf
+  # Make dnf go through the upstream proxy. The fluent-package installer is
+  # invoked later via curl which honours $https_proxy / $http_proxy set above.
+  echo "proxy=http://${upstream_proxy_endpoint}:${upstream_proxy_port}" >> /etc/dnf/dnf.conf
 fi
 
 ## install base packages required by user-data (not in AL2023 minimal by default)
@@ -111,7 +112,9 @@ fi
 
 groupadd -r kivera
 useradd -mrg kivera kivera
-useradd -g kivera td-agent
+# The `fluentd` user is created by the fluent-package RPM (installed later in
+# this script). We add it to the kivera group below, after the package install,
+# so it can read $KIVERA_LOGS_FILE.
 
 if [[ "${proxy_s3_path}" != "" ]]; then
     aws s3 cp ${proxy_s3_path} ./proxy.zip
@@ -143,28 +146,17 @@ EOF
 fi
 
 
-# add GPG key
-rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent
+# Install fluent-package v6 LTS (successor to td-agent v4) using the official
+# upstream installer for Amazon Linux 2023. This registers
+# /etc/yum.repos.d/fluent-package-lts.repo and installs the `fluent-package`
+# RPM, which provides the `fluentd.service` systemd unit and the `fluent-gem`
+# command. See:
+#   https://docs.fluentd.org/installation/install-fluent-package
+#   https://docs.fluentd.org/installation/install-fluent-package/install-by-rpm-fluent-package
+curl -fsSL https://fluentd.cdn.cncf.io/sh/install-amazon2023-fluent-package6-lts.sh | sh
 
-# add treasure data repository to dnf
-# NOTE: td-agent v4 has no AL2023 repo; we pin to the amazon/2 path. Binaries are
-# linked against AL2 libraries (glibc 2.26, openssl 1.0.2) and may be unreliable
-# on AL2023 (glibc 2.34, openssl 3). Migrate to fluent-package (fluentd v5) when feasible.
-cat >/etc/yum.repos.d/td.repo <<'EOF';
-[treasuredata]
-name=TreasureData
-baseurl=http://packages.treasuredata.com/4/amazon/2/\$basearch
-gpgcheck=1
-gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
-EOF
-
-# update your sources
-dnf check-update || true
-
-# install the toolbelt
-dnf install -y td-agent
-# curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent4.sh | sh
-td-agent-gem install -N fluent-plugin-out-kivera
+# Install the Kivera output plugin into the fluent-package ruby env.
+fluent-gem install -N fluent-plugin-out-kivera
 
 # Configure Kivera service
 cat << EOF | tee /etc/systemd/system/kivera.service
@@ -182,20 +174,23 @@ EnvironmentFile=$KIVERA_DIR/etc/env.txt
 WantedBy=multi-user.target
 EOF
 
-# Configure remote logging
-mkdir -p /etc/systemd/system/td-agent.service.d/
+# Add the fluent-package user to the kivera group so it can read the proxy log.
+usermod -aG kivera fluentd
 
-cat << EOF | tee /etc/systemd/system/td-agent.service.d/override.conf
+# Configure remote logging
+mkdir -p /etc/systemd/system/fluentd.service.d/
+
+cat << EOF | tee /etc/systemd/system/fluentd.service.d/override.conf
 [Service]
 Group=kivera
 EOF
 
-cat << EOF | tee /etc/td-agent/td-agent.conf
+cat << EOF | tee /etc/fluent/fluentd.conf
 <source>
   @type tail
   tag kivera
   path $KIVERA_LOGS_FILE
-  pos_file /var/log/td-agent/kivera.log.pos
+  pos_file /var/log/fluent/kivera.log.pos
   <parse>
     @type json
   </parse>
@@ -309,8 +304,8 @@ EOF
 
 # Enable services
 if [[ ${proxy_log_to_kivera} == true ]]; then
-  systemctl enable td-agent.service
-  systemctl restart td-agent.service
+  systemctl enable fluentd.service
+  systemctl restart fluentd.service
 fi
 if [[ ${enable_datadog_tracing} == true || ${enable_datadog_profiling} == true ]]; then
   systemctl enable datadog-agent
@@ -324,8 +319,8 @@ systemctl restart kivera.service
 sleep 10
 
 if [[ ${proxy_log_to_kivera} == true ]]; then
-FLUENTD_PROCESS=$(systemctl is-active td-agent.service)
-  [[ $FLUENTD_PROCESS -eq "active" ]] \
+FLUENTD_PROCESS=$(systemctl is-active fluentd.service)
+  [[ $FLUENTD_PROCESS == "active" ]] \
     && echo "Fluentd service is running" \
     || (echo "Fluentd service is not running" && STATE=1)
 fi
